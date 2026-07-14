@@ -1,135 +1,90 @@
 "use client";
 
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
-type NumberTile = {
-  id: number;
-  value: number;
-};
+type Player = "A" | "B";
+type Owner = Player | null;
 
-type Equation = {
-  first: number;
-  second: number;
-  result: number;
-};
+const MAX_TARGET = 200;
 
-const MAX_TILE_COUNT = 100;
-
-function makeTiles(start: number, end: number): NumberTile[] {
-  return Array.from({ length: end - start + 1 }, (_, index) => ({
-    id: index + 1,
-    value: start + index,
-  }));
+function otherPlayer(player: Player): Player {
+  return player === "A" ? "B" : "A";
 }
 
 export default function Home() {
-  const [startInput, setStartInput] = useState("1");
-  const [endInput, setEndInput] = useState("8");
-  const [roundStart, setRoundStart] = useState(1);
-  const [roundEnd, setRoundEnd] = useState(8);
-  const [tiles, setTiles] = useState<NumberTile[]>(() => makeTiles(1, 8));
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [history, setHistory] = useState<NumberTile[][]>([]);
-  const [equation, setEquation] = useState<Equation | null>(null);
+  const [targetInput, setTargetInput] = useState("30");
+  const [firstPlayer, setFirstPlayer] = useState<Player>("A");
+  const [target, setTarget] = useState(30);
+  const [owners, setOwners] = useState<Owner[]>(() => Array(30).fill(null));
+  const [currentPlayer, setCurrentPlayer] = useState<Player>("A");
+  const [pending, setPending] = useState<number[]>([]);
+  const [winner, setWinner] = useState<Player | null>(null);
+  const [round, setRound] = useState(1);
   const [error, setError] = useState("");
-  const nextId = useRef(9);
 
-  const roundCount = roundEnd - roundStart + 1;
-  const totalMoves = roundCount - 1;
-  const movesMade = roundCount - tiles.length;
-  const isComplete = tiles.length === 1;
-  const selectedTile = tiles.find((tile) => tile.id === selectedId);
-  const expectedResult = useMemo(
-    () => ((roundStart + roundEnd) * roundCount) / 2 - totalMoves,
-    [roundStart, roundEnd, roundCount, totalMoves],
+  const claimedA = useMemo(
+    () => owners.filter((owner) => owner === "A").length,
+    [owners],
   );
+  const claimedB = useMemo(
+    () => owners.filter((owner) => owner === "B").length,
+    [owners],
+  );
+  const claimedTotal = claimedA + claimedB;
 
-  function beginRound(event?: FormEvent) {
+  function startGame(event?: FormEvent) {
     event?.preventDefault();
-    const start = Number(startInput);
-    const end = Number(endInput);
+    const nextTarget = Number(targetInput);
 
-    if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < 1) {
-      setError("起点和终点都要是正整数");
+    if (!Number.isInteger(nextTarget) || nextTarget <= 3) {
+      setError("终点数字必须是大于 3 的整数");
       return;
     }
 
-    if (end <= start) {
-      setError("终点要大于起点，这样才有数字可以合并");
-      return;
-    }
-
-    if (end - start + 1 > MAX_TILE_COUNT) {
-      setError(`一次最多生成 ${MAX_TILE_COUNT} 个数，请缩小范围`);
+    if (nextTarget > MAX_TARGET) {
+      setError(`为了让数字清晰可点，终点数字请不要超过 ${MAX_TARGET}`);
       return;
     }
 
     setError("");
-    setRoundStart(start);
-    setRoundEnd(end);
-    setTiles(makeTiles(start, end));
-    setSelectedId(null);
-    setHistory([]);
-    setEquation(null);
-    nextId.current = end - start + 2;
+    setTarget(nextTarget);
+    setOwners(Array(nextTarget).fill(null));
+    setCurrentPlayer(firstPlayer);
+    setPending([]);
+    setWinner(null);
+    setRound(1);
   }
 
-  function chooseTile(tile: NumberTile) {
-    if (isComplete) return;
+  function toggleNumber(number: number) {
+    if (winner || owners[number - 1]) return;
 
-    if (selectedId === null) {
-      setSelectedId(tile.id);
-      setEquation(null);
+    if (pending.includes(number)) {
+      setPending((numbers) => numbers.filter((item) => item !== number));
       return;
     }
 
-    if (selectedId === tile.id) {
-      setSelectedId(null);
-      return;
-    }
+    if (pending.length === 2) return;
+    setPending((numbers) => [...numbers, number]);
+  }
 
-    const firstIndex = tiles.findIndex((item) => item.id === selectedId);
-    const secondIndex = tiles.findIndex((item) => item.id === tile.id);
-    const firstTile = tiles[firstIndex];
-    if (!firstTile) return;
+  function confirmTurn() {
+    if (winner || pending.length < 1 || pending.length > 2) return;
 
-    const result = firstTile.value + tile.value - 1;
-    const insertAt = Math.min(firstIndex, secondIndex);
-    const remaining = tiles.filter(
-      (item) => item.id !== firstTile.id && item.id !== tile.id,
-    );
-    const newTile = { id: nextId.current++, value: result };
-    const nextTiles = [
-      ...remaining.slice(0, insertAt),
-      newTile,
-      ...remaining.slice(insertAt),
-    ];
-
-    setHistory((current) => [...current, tiles]);
-    setTiles(nextTiles);
-    setSelectedId(null);
-    setEquation({
-      first: firstTile.value,
-      second: tile.value,
-      result,
+    const nextOwners = [...owners];
+    pending.forEach((number) => {
+      nextOwners[number - 1] = currentPlayer;
     });
-  }
 
-  function undoMove() {
-    if (history.length === 0) return;
-    const previous = history[history.length - 1];
-    setTiles(previous);
-    setHistory((current) => current.slice(0, -1));
-    setSelectedId(null);
-    setEquation(null);
-  }
+    setOwners(nextOwners);
+    setPending([]);
 
-  function restartRound() {
-    setTiles(makeTiles(roundStart, roundEnd));
-    setSelectedId(null);
-    setHistory([]);
-    setEquation(null);
-    nextId.current = roundCount + 1;
+    if (pending.includes(target)) {
+      setWinner(currentPlayer);
+      return;
+    }
+
+    setCurrentPlayer(otherPlayer(currentPlayer));
+    setRound((value) => value + 1);
   }
 
   return (
@@ -141,195 +96,224 @@ export default function Home() {
           </span>
           <span>魔法数学</span>
         </a>
-        <span className="header-tag">数学思维小游戏</span>
+        <span className="header-tag">双人数学策略小游戏</span>
       </header>
 
       <section className="hero" id="top">
-        <div className="game-name" aria-label="数字消消乐">
-          <span aria-hidden="true">数</span>
-          <span aria-hidden="true">字</span>
-          <span aria-hidden="true">消</span>
-          <span aria-hidden="true">消</span>
-          <span aria-hidden="true">乐</span>
+        <div className="eyebrow"><span /> TWO PLAYER GAME <span /></div>
+        <div className="game-name" aria-label="数字抢位战">
+          {"数字抢位战".split("").map((character) => (
+            <span key={character} aria-hidden="true">{character}</span>
+          ))}
         </div>
         <h1>
-          两个数碰一碰，
+          每次抢走一格或两格，
           <br />
-          <em>最后会留下谁？</em>
+          <em>谁会先碰到终点？</em>
         </h1>
         <p>
-          让一段连续的数字排好队，每次选两个数，用“相加再减 1”的规则把它们合成一个新数。
+          设定一个大于 3 的终点数字，选好先手，然后轮流抢位。
+          每一轮必须拿下 1–2 个数字，率先抢到终点数字的人获胜。
         </p>
       </section>
 
-      <section className="workspace" aria-label="数字消消乐游戏区">
+      <section className="workspace" aria-label="数字抢位战游戏区">
         <div className="game-card">
-          <form className="number-form" onSubmit={beginRound}>
-            <label htmlFor="range-start">我想从某个数玩到某个数</label>
-            <div className="input-row">
-              <div className="range-inputs">
-                <div className={`range-field ${error ? "has-error" : ""}`}>
-                  <span>从</span>
-                  <input
-                    id="range-start"
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputMode="numeric"
-                    value={startInput}
-                    onChange={(event) => {
-                      setStartInput(event.target.value);
-                      setError("");
-                    }}
-                    aria-label="起点数字"
-                    aria-describedby={error ? "input-error" : "input-hint"}
-                  />
+          <form className="setup-panel" onSubmit={startGame}>
+            <div className="setup-copy">
+              <span className="section-kicker">开局设置</span>
+              <h2>这一局，要抢到几号？</h2>
+              <p>终点需大于 3，游戏会生成从 1 到终点的所有数字。</p>
+            </div>
+
+            <div className="setup-controls">
+              <label className={`target-field ${error ? "has-error" : ""}`} htmlFor="target-number">
+                <span>终点</span>
+                <input
+                  id="target-number"
+                  type="number"
+                  min="4"
+                  max={MAX_TARGET}
+                  step="1"
+                  inputMode="numeric"
+                  value={targetInput}
+                  onChange={(event) => {
+                    setTargetInput(event.target.value);
+                    setError("");
+                  }}
+                  aria-describedby={error ? "input-error" : "target-hint"}
+                />
+              </label>
+
+              <fieldset className="first-player-picker">
+                <legend>谁先开始？</legend>
+                <div>
+                  {(["A", "B"] as Player[]).map((player) => (
+                    <button
+                      className={`player-pick player-${player.toLowerCase()} ${firstPlayer === player ? "selected" : ""}`}
+                      key={player}
+                      type="button"
+                      onClick={() => setFirstPlayer(player)}
+                      aria-pressed={firstPlayer === player}
+                    >
+                      <span>{player}</span> 选手
+                    </button>
+                  ))}
                 </div>
-                <span className="range-arrow" aria-hidden="true">→</span>
-                <div className={`range-field ${error ? "has-error" : ""}`}>
-                  <span>到</span>
-                  <input
-                    id="range-end"
-                    type="number"
-                    min="2"
-                    step="1"
-                    inputMode="numeric"
-                    value={endInput}
-                    onChange={(event) => {
-                      setEndInput(event.target.value);
-                      setError("");
-                    }}
-                    aria-label="终点数字"
-                    aria-describedby={error ? "input-error" : "input-hint"}
-                  />
-                </div>
-              </div>
+              </fieldset>
+
               <button className="primary-button" type="submit">
-                开始新挑战 <span aria-hidden="true">→</span>
+                开始新对局 <span aria-hidden="true">→</span>
               </button>
             </div>
+
             <div className="input-meta">
-              <span id="input-hint">请输入正整数，终点需大于起点，最多生成 {MAX_TILE_COUNT} 个数</span>
+              <span id="target-hint">支持 4–{MAX_TARGET}，默认终点为 30</span>
               {error && <span id="input-error" className="error-text">{error}</span>}
             </div>
           </form>
 
           <div className="round-divider" />
 
-          <div className="round-head">
-            <div>
-              <span className="round-label">本轮挑战</span>
-              <h2>从 {roundStart} 到 {roundEnd}</h2>
+          <div className="battle-head">
+            <div className={`turn-badge player-${currentPlayer.toLowerCase()}`}>
+              <span className="turn-dot" />
+              {winner ? "对局结束" : `轮到 ${currentPlayer} 选手`}
             </div>
-            <div className="move-count" aria-label={`已完成 ${movesMade} 步，共 ${totalMoves} 步`}>
-              <strong>{movesMade}</strong> / {totalMoves} 步
+            <div className="round-count">第 <strong>{round}</strong> 轮</div>
+          </div>
+
+          <div className="scoreboard" aria-label="双方抢位数量">
+            <div className="score-player score-a">
+              <span className="player-avatar">A</span>
+              <div><small>A 选手</small><strong>{claimedA}</strong></div>
+            </div>
+            <div className="battle-progress">
+              <div>
+                <span className="fill-a" style={{ width: `${target ? (claimedA / target) * 100 : 0}%` }} />
+                <span className="fill-b" style={{ width: `${target ? (claimedB / target) * 100 : 0}%` }} />
+              </div>
+              <small>已抢 {claimedTotal} / {target} 格</small>
+            </div>
+            <div className="score-player score-b">
+              <div><small>B 选手</small><strong>{claimedB}</strong></div>
+              <span className="player-avatar">B</span>
             </div>
           </div>
 
-          <div className="progress-track" aria-hidden="true">
-            <span style={{ width: `${totalMoves ? (movesMade / totalMoves) * 100 : 0}%` }} />
-          </div>
-
-          <div className="equation-strip" aria-live="polite">
-            {isComplete ? (
-              <span className="equation-complete">挑战完成！你把所有数字合成了一个。</span>
-            ) : selectedTile ? (
+          <div className={`turn-instruction ${winner ? "is-winner" : ""}`} aria-live="polite">
+            {winner ? (
               <>
-                已选择 <strong>{selectedTile.value}</strong>
-                <span className="equation-tip">再选一个数字</span>
-              </>
-            ) : equation ? (
-              <>
-                <strong>{equation.first}</strong>
-                <span>＋</span>
-                <strong>{equation.second}</strong>
-                <span>－ 1 ＝</span>
-                <strong className="equation-result">{equation.result}</strong>
+                <span className={`winner-medal player-${winner.toLowerCase()}`}>★</span>
+                <div>
+                  <small>抢位成功</small>
+                  <strong>{winner} 选手先抢到 {target} 号，赢得本局！</strong>
+                </div>
               </>
             ) : (
-              <span>请任意选择两个数字开始合并</span>
+              <>
+                <span className="choice-count">{pending.length}<i>/2</i></span>
+                <div>
+                  <small>本轮已选</small>
+                  <strong>
+                    {pending.length === 0
+                      ? `请 ${currentPlayer} 选手选择 1–2 个数字`
+                      : `已选择 ${[...pending].sort((a, b) => a - b).join("、")}，可以确认或再选一个`}
+                  </strong>
+                </div>
+              </>
             )}
           </div>
 
-          <div className={`tile-field ${isComplete ? "is-complete" : ""}`}>
-            <div className="field-dots dots-one" aria-hidden="true" />
-            <div className="field-dots dots-two" aria-hidden="true" />
-            {isComplete ? (
-              <div className="success-panel" aria-live="polite">
-                <span className="success-kicker">最终留下的数字</span>
-                <strong>{tiles[0]?.value}</strong>
-                <p>
-                  漂亮！从 {roundStart} 到 {roundEnd}，无论先合并哪两个，最后都会得到 {expectedResult}。
-                </p>
-                <button className="secondary-button" type="button" onClick={restartRound}>
-                  再玩一次
-                </button>
-              </div>
-            ) : (
-              <div className="tiles" role="group" aria-label="可以选择的数字">
-                {tiles.map((tile) => (
+          <div className="number-board" role="group" aria-label={`从 1 到 ${target} 的抢位数字`}>
+            <div className="board-corner corner-one" aria-hidden="true" />
+            <div className="board-corner corner-two" aria-hidden="true" />
+            <div className="numbers-grid">
+              {owners.map((owner, index) => {
+                const number = index + 1;
+                const isPending = pending.includes(number);
+                const isTarget = number === target;
+                return (
                   <button
-                    className={`number-tile ${selectedId === tile.id ? "selected" : ""}`}
-                    key={tile.id}
+                    className={`number-tile ${owner ? `owned owned-${owner.toLowerCase()}` : ""} ${isPending ? `pending pending-${currentPlayer.toLowerCase()}` : ""} ${isTarget ? "target-tile" : ""}`}
+                    key={number}
                     type="button"
-                    onClick={() => chooseTile(tile)}
-                    aria-pressed={selectedId === tile.id}
-                    aria-label={`数字 ${tile.value}${selectedId === tile.id ? "，已选择" : ""}`}
+                    onClick={() => toggleNumber(number)}
+                    disabled={Boolean(owner) || Boolean(winner)}
+                    aria-pressed={isPending}
+                    aria-label={`${number}号${isTarget ? "，终点" : ""}${owner ? `，已被${owner}选手占领` : isPending ? "，本轮已选择" : "，可选择"}`}
                   >
-                    {tile.value}
+                    {isTarget && <small>终点</small>}
+                    <span>{number}</span>
+                    {owner && <b>{owner}</b>}
                   </button>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </div>
 
           <div className="game-actions">
-            <button type="button" onClick={undoMove} disabled={history.length === 0}>
-              <span aria-hidden="true">↶</span> 撤销上一步
+            <button
+              className="clear-button"
+              type="button"
+              onClick={() => setPending([])}
+              disabled={pending.length === 0 || Boolean(winner)}
+            >
+              清空本轮选择
             </button>
-            <button type="button" onClick={restartRound}>
-              <span aria-hidden="true">↻</span> 重新开始
-            </button>
+            {winner ? (
+              <button className="confirm-button replay-button" type="button" onClick={() => startGame()}>
+                再来一局 <span aria-hidden="true">↻</span>
+              </button>
+            ) : (
+              <button className={`confirm-button player-${currentPlayer.toLowerCase()}`} type="button" onClick={confirmTurn} disabled={pending.length === 0}>
+                确认抢位 · 交给 {otherPlayer(currentPlayer)} <span aria-hidden="true">→</span>
+              </button>
+            )}
           </div>
         </div>
 
         <aside className="rules-card">
           <div className="rules-title-row">
             <span className="rules-icon" aria-hidden="true">?</span>
-            <h2>怎么玩</h2>
+            <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
           </div>
           <ol>
             <li>
               <span>1</span>
-              <div><strong>选两个数</strong><p>先点一个，再点另一个。</p></div>
+              <div><strong>设定终点</strong><p>输入一个大于 3 的数字，生成从 1 到终点的抢位棋盘。</p></div>
             </li>
             <li>
               <span>2</span>
-              <div><strong>合成新数</strong><p>把它们相加，然后减 1。</p></div>
+              <div><strong>决定先手</strong><p>A、B 两位选手商量好谁先开始，再开启对局。</p></div>
             </li>
             <li>
               <span>3</span>
-              <div><strong>继续挑战</strong><p>重复操作，直到只剩一个数。</p></div>
+              <div><strong>轮流抢位</strong><p>每轮必须选择 1 或 2 个空位，确认后才会交换选手。</p></div>
+            </li>
+            <li>
+              <span>4</span>
+              <div><strong>抢到终点</strong><p>谁先把终点数字收入自己的颜色，谁就立即获胜。</p></div>
             </li>
           </ol>
 
-          <div className="example-box">
-            <span>举个例子</span>
-            <div className="example-equation">
-              <b>2</b><i>＋</i><b>4</b><i>－ 1 ＝</i><b className="answer">5</b>
-            </div>
+          <div className="legend-box">
+            <span>颜色图例</span>
+            <div><i className="legend-a" /> A 选手</div>
+            <div><i className="legend-b" /> B 选手</div>
+            <div><i className="legend-target" /> 终点数字</div>
           </div>
 
           <div className="think-note">
             <span aria-hidden="true">✦</span>
-            <p><strong>想一想</strong>换一种合并顺序，最后的数字会变吗？</p>
+            <p><strong>想一想</strong>如果终点是 30，你会选择先手，还是后手？每轮拿 1 个还是 2 个更有利？</p>
           </div>
         </aside>
       </section>
 
       <footer>
         <span>魔法数学</span>
-        <p>让每一次点击，都离答案更近一点。</p>
+        <p>动动手指，也动动脑筋。</p>
       </footer>
     </main>
   );

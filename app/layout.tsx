@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const baseUrl = `${protocol}://${host}`;
-  const title = "数字消消乐｜魔法数学";
-  const description = "自定义一段连续数字，用相加再减一的规则不断合并，看看最后会留下谁。";
+  const title = "数字抢位战｜魔法数学";
+  const description = "两位选手轮流抢占 1–2 个数字，谁先抢到设定的终点数字，谁就获胜。";
 
   return {
     title,
@@ -32,11 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN">
       <body>{children}</body>

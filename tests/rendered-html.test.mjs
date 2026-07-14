@@ -7,34 +7,24 @@ async function render() {
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the number merge game", async () => {
+test("server-renders the number position battle", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>数字消消乐｜魔法数学<\/title>/i);
-  assert.match(html, /两个数碰一碰/);
-  assert.match(html, /我想从某个数玩到某个数/);
-  assert.match(html, /起点数字/);
-  assert.match(html, /终点数字/);
-  assert.match(html, /开始新挑战/);
-  assert.match(html, /相加，然后减 1/);
+  assert.match(html, /<title>数字抢位战｜魔法数学<\/title>/i);
+  assert.match(html, /每次抢走一格或两格/);
+  assert.match(html, /这一局，要抢到几号/);
+  assert.match(html, /谁先开始/);
+  assert.match(html, /确认抢位/);
+  assert.match(html, /抢到终点/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });
