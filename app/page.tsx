@@ -291,7 +291,7 @@ export default function Home() {
                     {pile.count === 0
                       ? "这一堆空了"
                       : isSelected
-                        ? `本回合选择 ${takeCount} 朵`
+                        ? "已选中"
                         : "选择这一堆"}
                   </span>
                 </button>
@@ -306,7 +306,11 @@ export default function Home() {
                         disabled={takeCount === 1}
                         aria-label="少拿一朵"
                       >−</button>
-                      <strong>{takeCount}</strong>
+                      <strong>
+                        <small>本回合选择</small>
+                        <b>{takeCount}</b>
+                        <small>朵</small>
+                      </strong>
                       <button
                         type="button"
                         onClick={() => setTakeCount((value) => Math.min(activePile.count, value + 1))}
