@@ -29,8 +29,11 @@ test("server-renders the number merge game", async () => {
 
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>数字合并挑战｜数合实验室<\/title>/i);
+  assert.match(html, /<title>数字消消乐｜魔法数学<\/title>/i);
   assert.match(html, /两个数碰一碰/);
+  assert.match(html, /我想从某个数玩到某个数/);
+  assert.match(html, /起点数字/);
+  assert.match(html, /终点数字/);
   assert.match(html, /开始新挑战/);
   assert.match(html, /相加，然后减 1/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);

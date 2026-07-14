@@ -13,56 +13,65 @@ type Equation = {
   result: number;
 };
 
-const MIN_NUMBER = 2;
-const MAX_NUMBER = 100;
+const MAX_TILE_COUNT = 100;
 
-function makeTiles(count: number): NumberTile[] {
-  return Array.from({ length: count }, (_, index) => ({
+function makeTiles(start: number, end: number): NumberTile[] {
+  return Array.from({ length: end - start + 1 }, (_, index) => ({
     id: index + 1,
-    value: index + 1,
+    value: start + index,
   }));
 }
 
 export default function Home() {
-  const [inputValue, setInputValue] = useState("4");
-  const [roundSize, setRoundSize] = useState(4);
-  const [tiles, setTiles] = useState<NumberTile[]>(() => makeTiles(4));
+  const [startInput, setStartInput] = useState("1");
+  const [endInput, setEndInput] = useState("8");
+  const [roundStart, setRoundStart] = useState(1);
+  const [roundEnd, setRoundEnd] = useState(8);
+  const [tiles, setTiles] = useState<NumberTile[]>(() => makeTiles(1, 8));
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [history, setHistory] = useState<NumberTile[][]>([]);
   const [equation, setEquation] = useState<Equation | null>(null);
   const [error, setError] = useState("");
-  const nextId = useRef(5);
+  const nextId = useRef(9);
 
-  const totalMoves = roundSize - 1;
-  const movesMade = roundSize - tiles.length;
+  const roundCount = roundEnd - roundStart + 1;
+  const totalMoves = roundCount - 1;
+  const movesMade = roundCount - tiles.length;
   const isComplete = tiles.length === 1;
   const selectedTile = tiles.find((tile) => tile.id === selectedId);
   const expectedResult = useMemo(
-    () => (roundSize * (roundSize + 1)) / 2 - (roundSize - 1),
-    [roundSize],
+    () => ((roundStart + roundEnd) * roundCount) / 2 - totalMoves,
+    [roundStart, roundEnd, roundCount, totalMoves],
   );
 
   function beginRound(event?: FormEvent) {
     event?.preventDefault();
-    const parsed = Number(inputValue);
+    const start = Number(startInput);
+    const end = Number(endInput);
 
-    if (!Number.isInteger(parsed) || parsed < MIN_NUMBER) {
-      setError("请输入一个大于 1 的正整数");
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < 1) {
+      setError("起点和终点都要是正整数");
       return;
     }
 
-    if (parsed > MAX_NUMBER) {
-      setError(`为了方便点击，请先输入 ${MAX_NUMBER} 以内的数字`);
+    if (end <= start) {
+      setError("终点要大于起点，这样才有数字可以合并");
+      return;
+    }
+
+    if (end - start + 1 > MAX_TILE_COUNT) {
+      setError(`一次最多生成 ${MAX_TILE_COUNT} 个数，请缩小范围`);
       return;
     }
 
     setError("");
-    setRoundSize(parsed);
-    setTiles(makeTiles(parsed));
+    setRoundStart(start);
+    setRoundEnd(end);
+    setTiles(makeTiles(start, end));
     setSelectedId(null);
     setHistory([]);
     setEquation(null);
-    nextId.current = parsed + 1;
+    nextId.current = end - start + 2;
   }
 
   function chooseTile(tile: NumberTile) {
@@ -116,65 +125,85 @@ export default function Home() {
   }
 
   function restartRound() {
-    setTiles(makeTiles(roundSize));
+    setTiles(makeTiles(roundStart, roundEnd));
     setSelectedId(null);
     setHistory([]);
     setEquation(null);
-    nextId.current = roundSize + 1;
+    nextId.current = roundCount + 1;
   }
 
   return (
     <main>
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="数合实验室首页">
-          <span className="brand-mark" aria-hidden="true">
-            ∑
+        <a className="brand" href="#top" aria-label="魔法数学首页">
+          <span className="brand-mark magic-hat" aria-hidden="true">
+            <span>✦</span>
           </span>
-          <span>数合实验室</span>
+          <span>魔法数学</span>
         </a>
         <span className="header-tag">数学思维小游戏</span>
       </header>
 
       <section className="hero" id="top">
-        <div className="eyebrow"><span>01</span> 数字合并挑战</div>
+        <div className="eyebrow"><span>01</span> 数字消消乐</div>
         <h1>
           两个数碰一碰，
           <br />
           <em>最后会留下谁？</em>
         </h1>
         <p>
-          从 1 开始排好队，每次选两个数，用“相加再减 1”的规则把它们合成一个新数。
+          让一段连续的数字排好队，每次选两个数，用“相加再减 1”的规则把它们合成一个新数。
         </p>
       </section>
 
-      <section className="workspace" aria-label="数字合并游戏区">
+      <section className="workspace" aria-label="数字消消乐游戏区">
         <div className="game-card">
           <form className="number-form" onSubmit={beginRound}>
-            <label htmlFor="round-number">我想从 1 玩到</label>
+            <label htmlFor="range-start">我想从某个数玩到某个数</label>
             <div className="input-row">
-              <div className={`number-input-wrap ${error ? "has-error" : ""}`}>
-                <input
-                  id="round-number"
-                  type="number"
-                  min={MIN_NUMBER}
-                  max={MAX_NUMBER}
-                  step="1"
-                  inputMode="numeric"
-                  value={inputValue}
-                  onChange={(event) => {
-                    setInputValue(event.target.value);
-                    setError("");
-                  }}
-                  aria-describedby={error ? "input-error" : "input-hint"}
-                />
-                <span>以内</span>
+              <div className="range-inputs">
+                <div className={`range-field ${error ? "has-error" : ""}`}>
+                  <span>从</span>
+                  <input
+                    id="range-start"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={startInput}
+                    onChange={(event) => {
+                      setStartInput(event.target.value);
+                      setError("");
+                    }}
+                    aria-label="起点数字"
+                    aria-describedby={error ? "input-error" : "input-hint"}
+                  />
+                </div>
+                <span className="range-arrow" aria-hidden="true">→</span>
+                <div className={`range-field ${error ? "has-error" : ""}`}>
+                  <span>到</span>
+                  <input
+                    id="range-end"
+                    type="number"
+                    min="2"
+                    step="1"
+                    inputMode="numeric"
+                    value={endInput}
+                    onChange={(event) => {
+                      setEndInput(event.target.value);
+                      setError("");
+                    }}
+                    aria-label="终点数字"
+                    aria-describedby={error ? "input-error" : "input-hint"}
+                  />
+                </div>
               </div>
               <button className="primary-button" type="submit">
                 开始新挑战 <span aria-hidden="true">→</span>
               </button>
             </div>
             <div className="input-meta">
-              <span id="input-hint">可输入 2–{MAX_NUMBER} 的正整数</span>
+              <span id="input-hint">请输入正整数，终点需大于起点，最多生成 {MAX_TILE_COUNT} 个数</span>
               {error && <span id="input-error" className="error-text">{error}</span>}
             </div>
           </form>
@@ -184,7 +213,7 @@ export default function Home() {
           <div className="round-head">
             <div>
               <span className="round-label">本轮挑战</span>
-              <h2>从 1 到 {roundSize}</h2>
+              <h2>从 {roundStart} 到 {roundEnd}</h2>
             </div>
             <div className="move-count" aria-label={`已完成 ${movesMade} 步，共 ${totalMoves} 步`}>
               <strong>{movesMade}</strong> / {totalMoves} 步
@@ -224,7 +253,7 @@ export default function Home() {
                 <span className="success-kicker">最终留下的数字</span>
                 <strong>{tiles[0]?.value}</strong>
                 <p>
-                  漂亮！从 1 到 {roundSize}，无论先合并哪两个，最后都会得到 {expectedResult}。
+                  漂亮！从 {roundStart} 到 {roundEnd}，无论先合并哪两个，最后都会得到 {expectedResult}。
                 </p>
                 <button className="secondary-button" type="button" onClick={restartRound}>
                   再玩一次
@@ -293,7 +322,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <span>数合实验室</span>
+        <span>魔法数学</span>
         <p>让每一次点击，都离答案更近一点。</p>
       </footer>
     </main>
