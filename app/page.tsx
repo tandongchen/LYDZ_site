@@ -59,11 +59,14 @@ export default function Home() {
     if (winner || owners[number - 1]) return;
 
     if (pending.includes(number)) {
-      setPending((numbers) => numbers.filter((item) => item !== number));
+      if (number === pending[pending.length - 1]) {
+        setPending((numbers) => numbers.slice(0, -1));
+      }
       return;
     }
 
-    if (pending.length === 2) return;
+    const nextNumber = claimedTotal + pending.length + 1;
+    if (pending.length === 2 || number !== nextNumber) return;
     setPending((numbers) => [...numbers, number]);
   }
 
@@ -112,8 +115,8 @@ export default function Home() {
           <em>谁会先碰到终点？</em>
         </h1>
         <p>
-          设定一个大于 3 的终点数字，选好先手，然后轮流抢位。
-          每一轮必须拿下 1–2 个数字，率先抢到终点数字的人获胜。
+          设定一个大于 3 的终点数字，选好先手，然后从 1 开始按顺序轮流抢位。
+          每一轮必须拿下接下来的 1–2 个数字，率先抢到终点数字的人获胜。
         </p>
       </section>
 
@@ -217,7 +220,7 @@ export default function Home() {
                   <small>本轮已选</small>
                   <strong>
                     {pending.length === 0
-                      ? `请 ${currentPlayer} 选手选择 1–2 个数字`
+                      ? `请 ${currentPlayer} 选手从 ${claimedTotal + 1} 开始选择 1–2 个数字`
                       : `已选择 ${[...pending].sort((a, b) => a - b).join("、")}，可以确认或再选一个`}
                   </strong>
                 </div>
@@ -233,15 +236,17 @@ export default function Home() {
                 const number = index + 1;
                 const isPending = pending.includes(number);
                 const isTarget = number === target;
+                const isNext = !winner && !owner && number === claimedTotal + pending.length + 1;
+                const canUndoPending = isPending && number === pending[pending.length - 1];
                 return (
                   <button
-                    className={`number-tile ${owner ? `owned owned-${owner.toLowerCase()}` : ""} ${isPending ? `pending pending-${currentPlayer.toLowerCase()}` : ""} ${isTarget ? "target-tile" : ""}`}
+                    className={`number-tile ${owner ? `owned owned-${owner.toLowerCase()}` : ""} ${isPending ? `pending pending-${currentPlayer.toLowerCase()}` : ""} ${isNext ? "next-tile" : ""} ${isTarget ? "target-tile" : ""}`}
                     key={number}
                     type="button"
                     onClick={() => toggleNumber(number)}
-                    disabled={Boolean(owner) || Boolean(winner)}
+                    disabled={Boolean(owner) || Boolean(winner) || (!isNext && !canUndoPending)}
                     aria-pressed={isPending}
-                    aria-label={`${number}号${isTarget ? "，终点" : ""}${owner ? `，已被${owner}选手占领` : isPending ? "，本轮已选择" : "，可选择"}`}
+                    aria-label={`${number}号${isTarget ? "，终点" : ""}${owner ? `，已被${owner}选手占领` : isPending ? "，本轮已选择" : isNext ? "，接下来可选择" : "，尚未轮到"}`}
                   >
                     {isTarget && <small>终点</small>}
                     <span>{number}</span>
@@ -289,7 +294,7 @@ export default function Home() {
             </li>
             <li>
               <span>3</span>
-              <div><strong>轮流抢位</strong><p>每轮必须选择 1 或 2 个空位，确认后才会交换选手。</p></div>
+              <div><strong>按顺序抢位</strong><p>从 1 开始，每轮必须选择接下来的 1 或 2 个数字，确认后交换选手。</p></div>
             </li>
             <li>
               <span>4</span>

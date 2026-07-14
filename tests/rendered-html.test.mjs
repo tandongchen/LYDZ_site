@@ -24,6 +24,7 @@ test("server-renders the number position battle", async () => {
   assert.match(html, /每次抢走一格或两格/);
   assert.match(html, /这一局，要抢到几号/);
   assert.match(html, /谁先开始/);
+  assert.match(html, /从 1 开始按顺序轮流抢位/);
   assert.match(html, /确认抢位/);
   assert.match(html, /抢到终点/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);

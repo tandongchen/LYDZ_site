@@ -502,6 +502,8 @@ main {
 
 .number-tile:hover:not(:disabled) { transform: translateY(-3px) rotate(-1deg); box-shadow: 4px 6px 0 rgba(24, 49, 83, 0.13); }
 .number-tile:disabled { cursor: default; }
+.number-tile:disabled:not(.owned):not(.pending) { opacity: 0.48; }
+.number-tile.next-tile { border-color: var(--ink); box-shadow: 3px 3px 0 var(--yellow); animation: next-glow 1.7s ease-in-out infinite; }
 .number-tile small { position: absolute; top: 3px; left: 0; right: 0; color: var(--coral-dark); font-family: inherit; font-size: 7px; font-weight: 900; letter-spacing: 0.12em; }
 .number-tile.target-tile { border: 2px solid var(--yellow); box-shadow: 3px 3px 0 var(--ink); }
 .number-tile.target-tile span { display: inline-block; transform: translateY(5px); }
@@ -515,6 +517,7 @@ main {
 .number-tile.owned b { position: absolute; right: 4px; bottom: 2px; font-size: 7px; opacity: 0.72; }
 
 @keyframes tile-in { from { opacity: 0; transform: translateY(8px) scale(0.93); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes next-glow { 50% { box-shadow: 5px 5px 0 rgba(244, 196, 78, 0.55); } }
 
 .game-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
 .game-actions button { min-height: 44px; border-radius: 7px; }
