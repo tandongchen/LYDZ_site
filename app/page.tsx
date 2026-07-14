@@ -110,7 +110,7 @@ export default function Home() {
           ))}
         </div>
         <h1>
-          每次抢走一格或两格，
+          每次抢占一格或两格，
           <br />
           <em>谁会先碰到终点？</em>
         </h1>
@@ -221,7 +221,9 @@ export default function Home() {
                   <strong>
                     {pending.length === 0
                       ? `请 ${currentPlayer} 选手从 ${claimedTotal + 1} 开始选择 1–2 个数字`
-                      : `已选择 ${[...pending].sort((a, b) => a - b).join("、")}，可以确认或再选一个`}
+                      : pending.length === 2
+                        ? `已选择 ${[...pending].sort((a, b) => a - b).join("、")}，可以确认本轮抢位`
+                        : `已选择 ${pending[0]}，可以确认或再选一个`}
                   </strong>
                 </div>
               </>
@@ -311,14 +313,14 @@ export default function Home() {
 
           <div className="think-note">
             <span aria-hidden="true">✦</span>
-            <p><strong>想一想</strong>如果终点是 30，你会选择先手，还是后手？每轮拿 1 个还是 2 个更有利？</p>
+            <p><strong>想一想</strong>先手和后手有什么区别？抢占1个或2个有什么区别？你能想到必胜的策略吗</p>
           </div>
         </aside>
       </section>
 
       <footer>
         <span>魔法数学</span>
-        <p>动动手指，也动动脑筋。</p>
+        <p>运气也是实力的一部分</p>
       </footer>
     </main>
   );

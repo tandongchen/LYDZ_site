@@ -21,11 +21,13 @@ test("server-renders the number position battle", async () => {
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
   assert.match(html, /<title>数字抢位战｜魔法数学<\/title>/i);
-  assert.match(html, /每次抢走一格或两格/);
+  assert.match(html, /每次抢占一格或两格/);
   assert.match(html, /这一局，要抢到几号/);
   assert.match(html, /谁先开始/);
   assert.match(html, /从 1 开始按顺序轮流抢位/);
   assert.match(html, /确认抢位/);
   assert.match(html, /抢到终点/);
+  assert.match(html, /先手和后手有什么区别/);
+  assert.match(html, /运气也是实力的一部分/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });
