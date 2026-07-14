@@ -47,7 +47,7 @@ export default function Home() {
   const [piles, setPiles] = useState<Pile[]>(INITIAL_PILES);
   const [currentPlayer, setCurrentPlayer] = useState<Player>("A");
   const [selectedPile, setSelectedPile] = useState<number | null>(null);
-  const [takeCount, setTakeCount] = useState(1);
+  const [selectedFlowers, setSelectedFlowers] = useState<number[]>([]);
   const [winner, setWinner] = useState<Player | null>(null);
   const [round, setRound] = useState(1);
   const [history, setHistory] = useState<Move[]>([]);
@@ -62,6 +62,7 @@ export default function Home() {
     [piles],
   );
   const activePile = piles.find((pile) => pile.id === selectedPile) ?? null;
+  const takeCount = selectedFlowers.length;
   const progress = initialFlowers
     ? ((initialFlowers - flowersLeft) / initialFlowers) * 100
     : 100;
@@ -78,7 +79,7 @@ export default function Home() {
     setPiles(createPiles(nextPileCount, Date.now() ^ Math.floor(Math.random() * 1000000)));
     setCurrentPlayer(firstPlayer);
     setSelectedPile(null);
-    setTakeCount(1);
+    setSelectedFlowers([]);
     setWinner(null);
     setRound(1);
     setHistory([]);
@@ -88,23 +89,36 @@ export default function Home() {
   function choosePile(pile: Pile) {
     if (winner || pile.count === 0) return;
     setSelectedPile(pile.id);
-    setTakeCount(1);
+    setSelectedFlowers([0]);
   }
 
-  function toggleFlower(pile: Pile, isChosen: boolean) {
+  function toggleFlower(pile: Pile, flowerIndex: number, isChosen: boolean) {
     if (winner || pile.count === 0) return;
 
     if (selectedPile !== pile.id) {
       setSelectedPile(pile.id);
-      setTakeCount(1);
+      setSelectedFlowers([flowerIndex]);
       return;
     }
 
-    setTakeCount((value) =>
+    setSelectedFlowers((flowers) =>
       isChosen
-        ? Math.max(0, value - 1)
-        : Math.min(pile.count, value + 1),
+        ? flowers.filter((index) => index !== flowerIndex)
+        : [...flowers, flowerIndex],
     );
+  }
+
+  function selectNextFlower() {
+    if (!activePile) return;
+
+    setSelectedFlowers((flowers) => {
+      const nextIndex = Array.from(
+        { length: activePile.count },
+        (_, index) => index,
+      ).find((index) => !flowers.includes(index));
+
+      return nextIndex === undefined ? flowers : [...flowers, nextIndex];
+    });
   }
 
   function confirmTurn() {
@@ -121,7 +135,7 @@ export default function Home() {
       ...moves,
     ]);
     setSelectedPile(null);
-    setTakeCount(1);
+    setSelectedFlowers([]);
 
     if (remaining === 0) {
       setWinner(currentPlayer);
@@ -294,14 +308,14 @@ export default function Home() {
                   <div className="flowers" aria-hidden="true">
                     {Array.from({ length: pile.initial }, (_, flowerIndex) => {
                       const exists = flowerIndex < pile.count;
-                      const chosen = isSelected && exists && flowerIndex >= pile.count - takeCount;
+                      const chosen = isSelected && exists && selectedFlowers.includes(flowerIndex);
                       return (
                         <span
                           className={`flower ${exists ? "exists" : "removed"} ${chosen ? "chosen" : ""}`}
                           key={flowerIndex}
                           onClick={(event) => {
                             event.stopPropagation();
-                            if (exists) toggleFlower(pile, chosen);
+                            if (exists) toggleFlower(pile, flowerIndex, chosen);
                           }}
                         ><i /></span>
                       );
@@ -322,7 +336,7 @@ export default function Home() {
                     <div className="stepper">
                       <button
                         type="button"
-                        onClick={() => setTakeCount((value) => Math.max(0, value - 1))}
+                        onClick={() => setSelectedFlowers((flowers) => flowers.slice(0, -1))}
                         disabled={takeCount === 0}
                         aria-label="少拿一朵"
                       >−</button>
@@ -333,12 +347,18 @@ export default function Home() {
                       </strong>
                       <button
                         type="button"
-                        onClick={() => setTakeCount((value) => Math.min(activePile.count, value + 1))}
+                        onClick={selectNextFlower}
                         disabled={takeCount === activePile.count}
                         aria-label="多拿一朵"
                       >＋</button>
                     </div>
-                    <button className="take-all" type="button" onClick={() => setTakeCount(activePile.count)}>
+                    <button
+                      className="take-all"
+                      type="button"
+                      onClick={() => setSelectedFlowers(
+                        Array.from({ length: activePile.count }, (_, index) => index),
+                      )}
+                    >
                       全部拿走
                     </button>
                   </div>
