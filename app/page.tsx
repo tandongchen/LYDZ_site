@@ -145,7 +145,13 @@ export default function Home() {
       </header>
 
       <section className="hero" id="top">
-        <div className="eyebrow"><span>01</span> 数字消消乐</div>
+        <div className="game-name" aria-label="数字消消乐">
+          <span aria-hidden="true">数</span>
+          <span aria-hidden="true">字</span>
+          <span aria-hidden="true">消</span>
+          <span aria-hidden="true">消</span>
+          <span aria-hidden="true">乐</span>
+        </div>
         <h1>
           两个数碰一碰，
           <br />

@@ -150,23 +150,61 @@ main {
   pointer-events: none;
 }
 
-.eyebrow {
+.game-name {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 21px;
-  color: var(--coral-dark);
-  font-size: 13px;
-  font-weight: 850;
-  letter-spacing: 0.18em;
+  justify-content: center;
+  gap: clamp(3px, 1vw, 10px);
+  margin-bottom: 28px;
+  color: var(--ink);
+  font-family: "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
 }
 
-.eyebrow span {
-  padding: 5px 8px;
-  border-radius: 4px;
-  background: var(--coral);
-  color: white;
-  letter-spacing: 0;
+.game-name::before,
+.game-name::after {
+  content: "✦";
+  color: var(--yellow);
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.game-name::after {
+  color: var(--teal);
+  transform: translateY(5px) rotate(18deg);
+}
+
+.game-name span {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  text-shadow: 2px 3px 0 rgba(244, 196, 78, 0.45);
+}
+
+.game-name span:nth-child(2),
+.game-name span:nth-child(4) {
+  color: var(--coral);
+  transform: translateY(-3px) rotate(4deg);
+}
+
+.game-name span:nth-child(1),
+.game-name span:nth-child(3),
+.game-name span:nth-child(5) {
+  transform: translateY(2px) rotate(-3deg);
+}
+
+.game-name span::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -7px;
+  height: 3px;
+  border-radius: 99px;
+  background: currentColor;
+  opacity: 0.22;
 }
 
 .hero h1 {
