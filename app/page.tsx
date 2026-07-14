@@ -91,6 +91,22 @@ export default function Home() {
     setTakeCount(1);
   }
 
+  function toggleFlower(pile: Pile, isChosen: boolean) {
+    if (winner || pile.count === 0) return;
+
+    if (selectedPile !== pile.id) {
+      setSelectedPile(pile.id);
+      setTakeCount(1);
+      return;
+    }
+
+    setTakeCount((value) =>
+      isChosen
+        ? Math.max(0, value - 1)
+        : Math.min(pile.count, value + 1),
+    );
+  }
+
   function confirmTurn() {
     if (winner || !activePile || takeCount < 1 || takeCount > activePile.count) return;
 
@@ -283,6 +299,10 @@ export default function Home() {
                         <span
                           className={`flower ${exists ? "exists" : "removed"} ${chosen ? "chosen" : ""}`}
                           key={flowerIndex}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (exists) toggleFlower(pile, chosen);
+                          }}
                         ><i /></span>
                       );
                     })}
@@ -302,8 +322,8 @@ export default function Home() {
                     <div className="stepper">
                       <button
                         type="button"
-                        onClick={() => setTakeCount((value) => Math.max(1, value - 1))}
-                        disabled={takeCount === 1}
+                        onClick={() => setTakeCount((value) => Math.max(0, value - 1))}
+                        disabled={takeCount === 0}
                         aria-label="少拿一朵"
                       >−</button>
                       <strong>
@@ -338,7 +358,7 @@ export default function Home() {
                   : "一次只能从同一堆拿花"}
               </p>
             </div>
-            <button type="button" onClick={confirmTurn} disabled={!activePile}>
+            <button type="button" onClick={confirmTurn} disabled={!activePile || takeCount === 0}>
               确认拿取 {activePile ? `${takeCount} 朵` : ""}<span aria-hidden="true">→</span>
             </button>
           </div>

@@ -634,8 +634,11 @@ main {
 .flower:nth-child(3n)::after { background: #ee9867; box-shadow: 11px 5px 0 #ee9867, 4px 14px 0 #ee9867, -6px 11px 0 #ee9867; }
 .flower:nth-child(even) { transform: rotate(6deg) translateY(2px); }
 .flower:nth-child(3n) { transform: rotate(-7deg); }
+.flower.exists { cursor: pointer; }
+.flower.exists:hover { filter: brightness(1.04); }
 .flower.removed { opacity: 0.1; filter: grayscale(1); transform: scale(0.82); }
 .flower.chosen { opacity: 0.35; filter: grayscale(0.5); transform: translateY(-6px) scale(0.9); }
+.flower.chosen:hover { opacity: 0.5; filter: grayscale(0.35); }
 
 .pile-action {
   width: 100%;
@@ -794,7 +797,12 @@ footer {
 }
 footer > span { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: 0.1em; }
 footer p { margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 16px; }
-footer small { justify-self: end; font-family: Georgia, serif; font-size: 8px; letter-spacing: 0.15em; }
+footer small {
+  justify-self: end;
+  font-family: "STKaiti", "KaiTi", serif;
+  font-size: 16px;
+  letter-spacing: 0;
+}
 
 @media (max-width: 960px) {
   .hero { min-height: 420px; }
