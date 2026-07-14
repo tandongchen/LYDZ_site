@@ -120,10 +120,10 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-flower" aria-hidden="true"><i /></span>
+          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="header-tag">双人策略小游戏 · 02</span>
+        <span className="header-tag">双人数学策略小游戏</span>
       </header>
 
       <section className="hero" id="top">
@@ -134,7 +134,10 @@ export default function Home() {
               <span key={`${character}-${index}`}>{character}</span>
             ))}
           </h1>
-          <p className="hero-lead">最后一朵花，决定胜负。</p>
+          <p className="hero-lead">
+            最后一朵花<br />
+            <em>决定胜负！</em>
+          </p>
           <p className="hero-description">
             从任意一堆拿走任意数量的小花，但一回合只能动一堆。
             看似随手一拿，其实每一步都在改变胜负的天平。
@@ -285,7 +288,11 @@ export default function Home() {
                     })}
                   </div>
                   <span className="pile-action">
-                    {pile.count === 0 ? "这一堆空了" : isSelected ? "已选中" : "选择这一堆"}
+                    {pile.count === 0
+                      ? "这一堆空了"
+                      : isSelected
+                        ? `本回合选择 ${takeCount} 朵`
+                        : "选择这一堆"}
                   </span>
                 </button>
 
@@ -341,10 +348,10 @@ export default function Home() {
             <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
           </div>
           <ol>
-            <li><span>一</span><p><strong>任选一堆</strong>每回合先从还有花的堆中选择一堆。</p></li>
-            <li><span>二</span><p><strong>想拿几朵都可以</strong>至少拿一朵，也可以把这一堆全部拿空。</p></li>
-            <li><span>三</span><p><strong>拿完换人</strong>一回合不能同时拿两堆，确认后轮到对方。</p></li>
-            <li><span>四</span><p><strong>最后一朵定胜负</strong>取走桌上最后一朵花的人立即获胜。</p></li>
+            <li><span>1</span><p><strong>任选一堆</strong>每回合先从还有花的堆中选择一堆。</p></li>
+            <li><span>2</span><p><strong>想拿几朵都可以</strong>至少拿一朵，也可以把这一堆全部拿空。</p></li>
+            <li><span>3</span><p><strong>拿完换人</strong>一回合不能同时拿两堆，确认后轮到对方。</p></li>
+            <li><span>4</span><p><strong>最后一朵定胜负</strong>取走桌上最后一朵花的人立即获胜。</p></li>
           </ol>
         </aside>
 
@@ -379,7 +386,7 @@ export default function Home() {
       <footer>
         <span>魔法数学</span>
         <p>每一步，都让局面悄悄改变。</p>
-        <small>NIM · TWO PLAYER STRATEGY GAME</small>
+        <small>每一次选择都至关重要</small>
       </footer>
     </main>
   );

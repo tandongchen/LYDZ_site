@@ -67,7 +67,6 @@ main {
   letter-spacing: 0.05em;
 }
 
-.brand-flower,
 .hero-flower,
 .winner-bloom {
   position: relative;
@@ -77,8 +76,6 @@ main {
   transform: rotate(12deg);
 }
 
-.brand-flower::before,
-.brand-flower::after,
 .hero-flower::before,
 .hero-flower::after,
 .winner-bloom::before,
@@ -93,11 +90,9 @@ main {
   background: var(--coral);
 }
 
-.brand-flower::after,
 .hero-flower::after,
 .winner-bloom::after { transform: rotate(90deg); }
 
-.brand-flower i,
 .hero-flower i,
 .winner-bloom i {
   position: absolute;
@@ -110,7 +105,49 @@ main {
   background: var(--yellow);
 }
 
-.brand-flower { transform: scale(0.82) rotate(12deg); }
+.brand-mark {
+  position: relative;
+  width: 45px;
+  height: 42px;
+  flex: 0 0 auto;
+}
+
+.magic-hat::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 10px;
+  width: 0;
+  height: 0;
+  border-left: 13px solid transparent;
+  border-right: 13px solid transparent;
+  border-bottom: 31px solid var(--ink);
+  transform: skewX(-10deg) rotate(-10deg);
+  transform-origin: bottom center;
+}
+
+.magic-hat::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  bottom: 3px;
+  width: 41px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 4px 0 var(--yellow);
+  transform: rotate(-5deg);
+}
+
+.magic-hat span {
+  position: absolute;
+  z-index: 1;
+  top: 15px;
+  left: 20px;
+  color: var(--coral);
+  font-size: 10px;
+  transform: rotate(-10deg);
+}
 
 .header-tag {
   padding: 8px 14px;
@@ -129,16 +166,16 @@ main {
   min-height: 465px;
   margin: 0 auto;
   padding: 70px 0 66px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
-  align-items: center;
-  gap: 40px;
+  display: block;
 }
+
+.hero-copy { position: relative; z-index: 2; }
 
 .eyebrow {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: center;
   margin-bottom: 20px;
   color: var(--teal-dark);
   font-family: Georgia, serif;
@@ -151,6 +188,7 @@ main {
 
 .hero h1 {
   display: flex;
+  justify-content: center;
   gap: clamp(2px, 0.6vw, 8px);
   margin: 0;
   font-family: "STKaiti", "KaiTi", "Microsoft YaHei", serif;
@@ -178,11 +216,27 @@ main {
 
 .hero-lead {
   margin: 35px 0 12px;
-  color: var(--coral-dark);
+  max-width: 650px;
+  color: var(--ink);
   font-family: "STKaiti", "KaiTi", serif;
-  font-size: clamp(25px, 3vw, 36px);
+  font-size: clamp(34px, 4.2vw, 48px);
   font-weight: 900;
-  letter-spacing: -0.02em;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.hero-lead em { position: relative; color: var(--coral); font-style: normal; }
+
+.hero-lead em::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--yellow);
+  transform: rotate(-1deg);
 }
 
 .hero-description {
@@ -194,13 +248,15 @@ main {
 }
 
 .hero-art {
-  position: relative;
-  justify-self: end;
-  width: min(390px, 100%);
+  position: absolute;
+  right: -8px;
+  top: 92px;
+  width: min(340px, 36vw);
   aspect-ratio: 1;
   border: 1px solid rgba(23, 52, 76, 0.13);
   border-radius: 50%;
-  background: rgba(255, 253, 248, 0.55);
+  background: rgba(255, 253, 248, 0.42);
+  opacity: 0.3;
 }
 
 .hero-art::before,
@@ -727,7 +783,7 @@ footer p { margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 16px; }
 footer small { justify-self: end; font-family: Georgia, serif; font-size: 8px; letter-spacing: 0.15em; }
 
 @media (max-width: 960px) {
-  .hero { grid-template-columns: 1fr 300px; min-height: 420px; }
+  .hero { min-height: 420px; }
   .hero-art { width: 290px; }
   .setup-controls { grid-template-columns: 0.7fr 1.3fr; }
   .new-game-button { grid-column: 1 / -1; }
@@ -740,11 +796,10 @@ footer small { justify-self: end; font-family: Georgia, serif; font-size: 8px; l
 
 @media (max-width: 720px) {
   .site-header { height: 70px; }
-  .header-tag { display: none; }
+  .header-tag { padding: 7px 10px; font-size: 9px; }
   .hero { min-height: 0; padding: 50px 0 42px; display: block; }
   .hero h1 { font-size: clamp(58px, 18vw, 88px); }
   .hero-art { position: absolute; right: -120px; top: 38px; width: 260px; opacity: 0.15; pointer-events: none; }
-  .hero-copy { position: relative; z-index: 2; }
   .game-shell { padding: 24px 18px; }
   .setup-controls { display: block; }
   .first-player-picker { margin-top: 14px; }
@@ -767,8 +822,9 @@ footer small { justify-self: end; font-family: Georgia, serif; font-size: 8px; l
   .lower-grid,
   footer { width: min(100% - 24px, 1180px); }
   .brand { font-size: 16px; }
+  .header-tag { padding: 6px 8px; font-size: 8px; letter-spacing: 0.06em; }
   .hero h1 { font-size: 17vw; }
-  .hero-lead { font-size: 26px; }
+  .hero-lead { font-size: 34px; }
   .hero-description { font-size: 13px; }
   .setup-heading h2 { font-size: 25px; }
   .piles-grid,
