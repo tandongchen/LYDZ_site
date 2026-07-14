@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const baseUrl = `${protocol}://${host}`;
-  const title = "数字抢位战｜魔法数学";
-  const description = "两位选手轮流抢占 1–2 个数字，谁先抢到设定的终点数字，谁就获胜。";
+  const title = "尼姆博弈｜魔法数学";
+  const description = "双人轮流从任意一堆拿走任意数量的小花，取走最后一朵花的人获得胜利。";
 
   return {
     title,
