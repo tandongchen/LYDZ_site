@@ -416,9 +416,13 @@ main {
 }
 
 .player-pick.player-a.selected { border-color: var(--coral); background: #fff1ee; color: var(--coral-dark); }
-.player-pick.player-a.selected span, .player-a { background: var(--coral) !important; color: white; }
+.player-pick.player-a.selected span,
+.turn-avatar.player-a,
+.mini-avatar.player-a { background: var(--coral); color: white; }
 .player-pick.player-b.selected { border-color: var(--teal); background: #eaf8f6; color: var(--teal-dark); }
-.player-pick.player-b.selected span, .player-b { background: var(--teal) !important; color: white; }
+.player-pick.player-b.selected span,
+.turn-avatar.player-b,
+.mini-avatar.player-b { background: var(--teal); color: white; }
 
 .new-game-button {
   height: 56px;
@@ -548,8 +552,8 @@ main {
 }
 
 .pile-card:not(.empty):hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(23, 52, 76, 0.09); }
-.pile-card.selected { border-width: 2px; border-color: var(--coral); box-shadow: 0 0 0 4px rgba(233, 101, 85, 0.08); }
-.pile-card.selected.player-b { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(38, 158, 148, 0.08); color: var(--ink); }
+.pile-card.selected { border-width: 2px; border-color: var(--coral); background: #fff3f0; box-shadow: 0 0 0 4px rgba(233, 101, 85, 0.08); }
+.pile-card.selected.player-b { border-color: var(--teal); background: #f0faf8; box-shadow: 0 0 0 4px rgba(38, 158, 148, 0.08); color: var(--ink); }
 .pile-card.empty { background: #f2f0e9; }
 
 .pile-select {
