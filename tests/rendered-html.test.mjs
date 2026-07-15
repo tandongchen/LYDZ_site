@@ -13,23 +13,23 @@ async function render() {
   );
 }
 
-test("server-renders the Nim game", async () => {
+test("server-renders the Arrow Maze game", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>尼姆博弈｜魔法数学<\/title>/i);
-  assert.match(html, /最后一朵花/);
-  assert.match(html, /决定胜负！/);
-  assert.match(html, /双人数学策略小游戏/);
-  assert.match(html, /布置这一桌小花/);
-  assert.match(html, /谁先开始/);
-  assert.match(html, /随机开一局/);
-  assert.match(html, /一次只能从同一堆拿花/);
-  assert.match(html, /取走桌上最后一朵花的人立即获胜/);
-  assert.match(html, /行动记录/);
+  assert.match(html, /<title>箭阵迷域｜魔法数学<\/title>/i);
+  assert.match(html, /一次落点/);
+  assert.match(html, /引爆整座迷域！/);
+  assert.match(html, /单人连锁推理小游戏/);
+  assert.match(html, /选择迷域规模/);
+  assert.match(html, /随机生成新迷域/);
+  assert.match(html, /你只有一次点击机会/);
+  assert.match(html, /每支箭击中该方向上最近的方格/);
+  assert.match(html, /清空棋盘即胜利/);
+  assert.match(html, /连锁轨迹/);
   assert.match(html, /每一次选择都至关重要/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });

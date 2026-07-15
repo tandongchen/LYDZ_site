@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const baseUrl = `${protocol}://${host}`;
-  const title = "尼姆博弈｜魔法数学";
-  const description = "双人轮流从任意一堆拿走任意数量的小花，取走最后一朵花的人获得胜利。";
+  const title = "箭阵迷域｜魔法数学";
+  const description = "选择唯一的起点，让箭头沿八个方向触发连锁，清空整座方格迷域。";
 
   return {
     title,
@@ -21,13 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [{ url: `${baseUrl}/og.png`, width: 1536, height: 1024 }],
+      images: [{ url: `${baseUrl}/og-arrow-maze.png`, width: 1536, height: 1024 }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [`${baseUrl}/og.png`],
+      images: [`${baseUrl}/og-arrow-maze.png`],
     },
   };
 }

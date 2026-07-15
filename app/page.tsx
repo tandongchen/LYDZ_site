@@ -1,388 +1,372 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
-type Player = "A" | "B";
+type DirectionKey = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
+type GameStatus = "ready" | "running" | "success" | "failed";
 
-type Pile = {
+type Direction = {
+  key: DirectionKey;
+  glyph: string;
+  name: string;
+  dr: number;
+  dc: number;
+};
+
+type ArrowCell = {
   id: number;
-  count: number;
-  initial: number;
+  row: number;
+  col: number;
+  arrows: DirectionKey[];
 };
 
-type Move = {
-  player: Player;
-  pile: number;
-  amount: number;
-  remaining: number;
+type Board = {
+  size: number;
+  seed: number;
+  cells: ArrowCell[];
+  solutionId: number;
 };
 
-const PLAYER_NAMES: Record<Player, string> = {
-  A: "珊瑚队",
-  B: "青叶队",
-};
+const DIRECTIONS: Direction[] = [
+  { key: "n", glyph: "↑", name: "上", dr: -1, dc: 0 },
+  { key: "ne", glyph: "↗", name: "右上", dr: -1, dc: 1 },
+  { key: "e", glyph: "→", name: "右", dr: 0, dc: 1 },
+  { key: "se", glyph: "↘", name: "右下", dr: 1, dc: 1 },
+  { key: "s", glyph: "↓", name: "下", dr: 1, dc: 0 },
+  { key: "sw", glyph: "↙", name: "左下", dr: 1, dc: -1 },
+  { key: "w", glyph: "←", name: "左", dr: 0, dc: -1 },
+  { key: "nw", glyph: "↖", name: "左上", dr: -1, dc: -1 },
+];
 
-function otherPlayer(player: Player): Player {
-  return player === "A" ? "B" : "A";
-}
+const DIRECTION_MAP = Object.fromEntries(
+  DIRECTIONS.map((direction) => [direction.key, direction]),
+) as Record<DirectionKey, Direction>;
 
-function createPiles(pileCount: number, seed: number): Pile[] {
+const SIZE_OPTIONS = [5, 6, 7, 8];
+
+function seededRandom(seed: number) {
   let value = seed >>> 0;
-  const random = () => {
+  return () => {
     value = (value * 1664525 + 1013904223) >>> 0;
     return value / 4294967296;
   };
-
-  return Array.from({ length: pileCount }, (_, index) => {
-    const count = Math.floor(random() * 7) + 3;
-    return { id: index + 1, count, initial: count };
-  });
 }
 
-const INITIAL_PILES = createPiles(4, 7349);
+function directionBetween(from: { row: number; col: number }, to: { row: number; col: number }) {
+  const dr = Math.sign(to.row - from.row);
+  const dc = Math.sign(to.col - from.col);
+  return DIRECTIONS.find((direction) => direction.dr === dr && direction.dc === dc)!.key;
+}
+
+function createBoard(size: number, seed: number): Board {
+  const random = seededRandom(seed);
+  const transpose = random() > 0.5;
+  const flipRows = random() > 0.5;
+  const flipColumns = random() > 0.5;
+
+  const transform = (row: number, col: number) => {
+    let nextRow = transpose ? col : row;
+    let nextCol = transpose ? row : col;
+    if (flipRows) nextRow = size - 1 - nextRow;
+    if (flipColumns) nextCol = size - 1 - nextCol;
+    return { row: nextRow, col: nextCol };
+  };
+
+  const path = Array.from({ length: size }, (_, row) => {
+    const columns = Array.from({ length: size }, (__, col) => col);
+    if (row % 2 === 1) columns.reverse();
+    return columns.map((col) => transform(row, col));
+  }).flat();
+
+  if (random() > 0.5) path.reverse();
+
+  const cells = Array.from({ length: size * size }, (_, id) => ({
+    id,
+    row: Math.floor(id / size),
+    col: id % size,
+    arrows: [] as DirectionKey[],
+  }));
+
+  path.forEach((point, index) => {
+    const current = cells[point.row * size + point.col];
+    const neighbor = path[index === path.length - 1 ? index - 1 : index + 1];
+    const arrows = new Set<DirectionKey>([directionBetween(point, neighbor)]);
+    const extraCount = (random() < 0.7 ? 1 : 0) + (random() < 0.28 ? 1 : 0);
+
+    while (arrows.size < 1 + extraCount) {
+      arrows.add(DIRECTIONS[Math.floor(random() * DIRECTIONS.length)].key);
+    }
+
+    current.arrows = [...arrows];
+  });
+
+  return {
+    size,
+    seed,
+    cells,
+    solutionId: path[0].row * size + path[0].col,
+  };
+}
+
+const INITIAL_BOARD = createBoard(6, 20260715);
+
+function coordinateOf(id: number, size: number) {
+  return `${String.fromCharCode(65 + (id % size))}${Math.floor(id / size) + 1}`;
+}
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
 
 export default function Home() {
-  const [pileInput, setPileInput] = useState("4");
-  const [firstPlayer, setFirstPlayer] = useState<Player>("A");
-  const [piles, setPiles] = useState<Pile[]>(INITIAL_PILES);
-  const [currentPlayer, setCurrentPlayer] = useState<Player>("A");
-  const [selectedPile, setSelectedPile] = useState<number | null>(null);
-  const [selectedFlowers, setSelectedFlowers] = useState<number[]>([]);
-  const [winner, setWinner] = useState<Player | null>(null);
-  const [round, setRound] = useState(1);
-  const [history, setHistory] = useState<Move[]>([]);
-  const [error, setError] = useState("");
+  const [selectedSize, setSelectedSize] = useState(6);
+  const [board, setBoard] = useState<Board>(INITIAL_BOARD);
+  const [aliveIds, setAliveIds] = useState<number[]>(INITIAL_BOARD.cells.map((cell) => cell.id));
+  const [status, setStatus] = useState<GameStatus>("ready");
+  const [currentId, setCurrentId] = useState<number | null>(null);
+  const [startId, setStartId] = useState<number | null>(null);
+  const [trail, setTrail] = useState<number[]>([]);
+  const runToken = useRef(0);
 
-  const flowersLeft = useMemo(
-    () => piles.reduce((total, pile) => total + pile.count, 0),
-    [piles],
-  );
-  const initialFlowers = useMemo(
-    () => piles.reduce((total, pile) => total + pile.initial, 0),
-    [piles],
-  );
-  const activePile = piles.find((pile) => pile.id === selectedPile) ?? null;
-  const takeCount = selectedFlowers.length;
-  const progress = initialFlowers
-    ? ((initialFlowers - flowersLeft) / initialFlowers) * 100
-    : 100;
+  const aliveSet = useMemo(() => new Set(aliveIds), [aliveIds]);
+  const removedCount = board.cells.length - aliveIds.length;
+  const progress = (removedCount / board.cells.length) * 100;
 
-  function startGame(event?: FormEvent) {
-    event?.preventDefault();
-    const nextPileCount = Number(pileInput);
+  function resetState(nextBoard = board) {
+    runToken.current += 1;
+    setAliveIds(nextBoard.cells.map((cell) => cell.id));
+    setStatus("ready");
+    setCurrentId(null);
+    setStartId(null);
+    setTrail([]);
+  }
 
-    if (!Number.isInteger(nextPileCount) || nextPileCount < 3 || nextPileCount > 7) {
-      setError("请输入 3 到 7 之间的整数");
-      return;
+  function generateBoard(size = selectedSize) {
+    const seed = (board.seed * 1664525 + 1013904223 + size * 7919) >>> 0;
+    const nextBoard = createBoard(size, seed);
+    setSelectedSize(size);
+    setBoard(nextBoard);
+    resetState(nextBoard);
+  }
+
+  function findTarget(cell: ArrowCell, direction: Direction, alive: Set<number>) {
+    let row = cell.row + direction.dr;
+    let col = cell.col + direction.dc;
+
+    while (row >= 0 && row < board.size && col >= 0 && col < board.size) {
+      const id = row * board.size + col;
+      if (alive.has(id)) return id;
+      row += direction.dr;
+      col += direction.dc;
     }
 
-    setPiles(createPiles(nextPileCount, Date.now() ^ Math.floor(Math.random() * 1000000)));
-    setCurrentPlayer(firstPlayer);
-    setSelectedPile(null);
-    setSelectedFlowers([]);
-    setWinner(null);
-    setRound(1);
-    setHistory([]);
-    setError("");
+    return null;
   }
 
-  function choosePile(pile: Pile) {
-    if (winner || pile.count === 0) return;
-    setSelectedPile(pile.id);
-    setSelectedFlowers([0]);
-  }
+  async function startChain(id: number) {
+    if (status !== "ready") return;
 
-  function toggleFlower(pile: Pile, flowerIndex: number, isChosen: boolean) {
-    if (winner || pile.count === 0) return;
+    const token = runToken.current + 1;
+    runToken.current = token;
+    const alive = new Set(board.cells.map((cell) => cell.id));
+    const queue = [id];
+    const order: number[] = [];
 
-    if (selectedPile !== pile.id) {
-      setSelectedPile(pile.id);
-      setSelectedFlowers([flowerIndex]);
-      return;
+    setStatus("running");
+    setStartId(id);
+    setTrail([]);
+
+    while (queue.length > 0) {
+      const nextId = queue.shift()!;
+      if (!alive.has(nextId)) continue;
+
+      alive.delete(nextId);
+      order.push(nextId);
+      setCurrentId(nextId);
+      setAliveIds([...alive]);
+      setTrail([...order]);
+
+      await wait(125);
+      if (runToken.current !== token) return;
+
+      const cell = board.cells[nextId];
+      cell.arrows.forEach((key) => {
+        const target = findTarget(cell, DIRECTION_MAP[key], alive);
+        if (target !== null && !queue.includes(target)) queue.push(target);
+      });
     }
 
-    setSelectedFlowers((flowers) =>
-      isChosen
-        ? flowers.filter((index) => index !== flowerIndex)
-        : [...flowers, flowerIndex],
-    );
+    await wait(180);
+    if (runToken.current !== token) return;
+    setCurrentId(null);
+    setStatus(alive.size === 0 ? "success" : "failed");
   }
 
-  function selectNextFlower() {
-    if (!activePile) return;
-
-    setSelectedFlowers((flowers) => {
-      const nextIndex = Array.from(
-        { length: activePile.count },
-        (_, index) => index,
-      ).find((index) => !flowers.includes(index));
-
-      return nextIndex === undefined ? flowers : [...flowers, nextIndex];
-    });
-  }
-
-  function confirmTurn() {
-    if (winner || !activePile || takeCount < 1 || takeCount > activePile.count) return;
-
-    const nextPiles = piles.map((pile) =>
-      pile.id === activePile.id ? { ...pile, count: pile.count - takeCount } : pile,
-    );
-    const remaining = flowersLeft - takeCount;
-
-    setPiles(nextPiles);
-    setHistory((moves) => [
-      { player: currentPlayer, pile: activePile.id, amount: takeCount, remaining },
-      ...moves,
-    ]);
-    setSelectedPile(null);
-    setSelectedFlowers([]);
-
-    if (remaining === 0) {
-      setWinner(currentPlayer);
-      return;
-    }
-
-    setCurrentPlayer(otherPlayer(currentPlayer));
-    setRound((value) => value + 1);
-  }
+  const statusCopy = {
+    ready: { eyebrow: "等待落点", title: "请选择唯一的起点", detail: "点击任意一格，之后交给箭头完成连锁。" },
+    running: { eyebrow: "连锁进行中", title: `第 ${trail.length} 格正在消除`, detail: "箭头正在寻找对应方向上最近的方格。" },
+    success: { eyebrow: "挑战成功", title: "迷域已被全部清空！", detail: `从 ${coordinateOf(startId!, board.size)} 出发，完成了 ${trail.length} 次连锁。` },
+    failed: { eyebrow: "挑战失败", title: `还剩 ${aliveIds.length} 个方格`, detail: "这条连锁已经停止，换一个起点再试试。" },
+  }[status];
 
   return (
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <span className="brand-mark" aria-hidden="true">↗</span>
           <span>魔法数学</span>
         </a>
-        <span className="header-tag">双人数学策略小游戏</span>
+        <span className="header-tag">单人连锁推理小游戏</span>
       </header>
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <div className="eyebrow"><span /> TWO PLAYER GAME <span /></div>
-          <h1 aria-label="尼姆博弈">
-            {"尼姆博弈".split("").map((character, index) => (
+          <div className="eyebrow"><span /> SOLO CHAIN PUZZLE <span /></div>
+          <h1 aria-label="箭阵迷域">
+            {"箭阵迷域".split("").map((character, index) => (
               <span key={`${character}-${index}`}>{character}</span>
             ))}
           </h1>
           <p className="hero-lead">
-            最后一朵花<br />
-            <em>决定胜负！</em>
+            一次落点<br />
+            <em>引爆整座迷域！</em>
           </p>
           <p className="hero-description">
-            从任意一堆拿走任意数量的小花，但一回合只能动一堆。
-            看似随手一拿，其实每一步都在改变胜负的天平。
+            每个方格都藏着一组方向。选中一个起点后，箭头会击中该方向上最近的方格，
+            再由新方格继续传递。看懂箭阵的路径，让最后一格也消失。
           </p>
         </div>
         <div className="hero-art" aria-hidden="true">
-          <div className="orbit orbit-one" />
-          <div className="orbit orbit-two" />
-          <span className="hero-flower flower-one"><i /></span>
-          <span className="hero-flower flower-two"><i /></span>
-          <span className="hero-flower flower-three"><i /></span>
-          <span className="hero-flower flower-four"><i /></span>
-          <span className="hero-number">NIM</span>
+          <span className="art-arrow art-a">↗</span>
+          <span className="art-arrow art-b">←</span>
+          <span className="art-arrow art-c">↓</span>
+          <span className="art-arrow art-d">↘</span>
+          <span className="hero-number">GO</span>
         </div>
       </section>
 
-      <section className="game-shell" aria-label="尼姆博弈游戏区">
-        <form className="setup-panel" onSubmit={startGame}>
+      <section className="game-shell" aria-label="箭阵迷域游戏区">
+        <div className="setup-panel">
           <div className="setup-heading">
-            <span className="section-kicker">NEW ROUND</span>
-            <h2>布置这一桌小花</h2>
-            <p>设置花堆数量、决定先手，然后生成一局全新的对战。</p>
+            <span className="section-kicker">NEW MAZE</span>
+            <h2>选择迷域规模</h2>
+            <p>尺寸越大，方向越多。每一张新棋盘都至少藏着一条完整通路。</p>
           </div>
 
           <div className="setup-controls">
-            <label className={`pile-field ${error ? "has-error" : ""}`} htmlFor="pile-count">
-              <span>花堆数量</span>
+            <fieldset className="size-picker">
+              <legend>方格尺寸</legend>
               <div>
-                <input
-                  id="pile-count"
-                  type="number"
-                  min="3"
-                  max="7"
-                  step="1"
-                  inputMode="numeric"
-                  value={pileInput}
-                  onChange={(event) => {
-                    setPileInput(event.target.value);
-                    setError("");
-                  }}
-                  aria-describedby={error ? "pile-error" : "pile-hint"}
-                />
-                <b>堆</b>
-              </div>
-            </label>
-
-            <fieldset className="first-player-picker">
-              <legend>谁先开始？</legend>
-              <div>
-                {(["A", "B"] as Player[]).map((player) => (
+                {SIZE_OPTIONS.map((size) => (
                   <button
-                    className={`player-pick player-${player.toLowerCase()} ${firstPlayer === player ? "selected" : ""}`}
-                    key={player}
+                    className={selectedSize === size ? "selected" : ""}
+                    key={size}
                     type="button"
-                    onClick={() => setFirstPlayer(player)}
-                    aria-pressed={firstPlayer === player}
+                    onClick={() => generateBoard(size)}
+                    disabled={status === "running"}
+                    aria-pressed={selectedSize === size}
                   >
-                    <span>{player}</span>{PLAYER_NAMES[player]}
+                    <strong>{size}×{size}</strong>
+                    <span>{size === 5 ? "轻巧" : size === 6 ? "标准" : size === 7 ? "进阶" : "极限"}</span>
                   </button>
                 ))}
               </div>
             </fieldset>
-
-            <button className="new-game-button" type="submit">
-              随机开一局 <span aria-hidden="true">↗</span>
+            <button
+              className="new-game-button"
+              type="button"
+              onClick={() => generateBoard()}
+              disabled={status === "running"}
+            >
+              随机生成新迷域 <span aria-hidden="true">↗</span>
             </button>
           </div>
-          <div className="setup-meta">
-            <span id="pile-hint">可设置 3–7 堆，每堆随机出现 3–9 朵花</span>
-            {error && <span id="pile-error" className="error-text">{error}</span>}
-          </div>
-        </form>
+        </div>
 
         <div className="game-divider" />
 
         <div className="status-row">
-          <div className="turn-status">
-            <span className={`turn-avatar player-${currentPlayer.toLowerCase()}`}>{currentPlayer}</span>
-            <div>
-              <small>{winner ? "本局结束" : `第 ${round} 回合`}</small>
-              <strong>
-                {winner ? `${PLAYER_NAMES[winner]} 获胜！` : `轮到 ${PLAYER_NAMES[currentPlayer]}`}
-              </strong>
-            </div>
+          <div className={`status-orb status-${status}`} aria-hidden="true">
+            {status === "success" ? "✓" : status === "failed" ? "!" : "↗"}
           </div>
-          <div className="flower-counter">
-            <span>桌上还剩</span>
-            <strong>{flowersLeft}</strong>
-            <span>朵花</span>
+          <div className="turn-status" aria-live="polite">
+            <small>{statusCopy.eyebrow}</small>
+            <strong>{statusCopy.title}</strong>
+            <p>{statusCopy.detail}</p>
+          </div>
+          <div className="cell-counter">
+            <span>剩余</span>
+            <strong>{aliveIds.length}</strong>
+            <span>/ {board.cells.length} 格</span>
           </div>
         </div>
 
-        <div className="progress-track" aria-label={`已取走 ${initialFlowers - flowersLeft} 朵，共 ${initialFlowers} 朵`}>
+        <div className="progress-track" aria-label={`已消除 ${removedCount} 格，共 ${board.cells.length} 格`}>
           <span style={{ width: `${progress}%` }} />
         </div>
 
-        {winner ? (
-          <div className={`winner-banner player-${winner.toLowerCase()}`} role="status">
-            <span className="winner-bloom" aria-hidden="true"><i /></span>
-            <div>
-              <small>LAST FLOWER</small>
-              <h2>{PLAYER_NAMES[winner]} 拿走了最后一朵花</h2>
-              <p>漂亮的收官！第 {round} 回合结束了这场对局。</p>
+        <div className={`result-banner result-${status}`} role="status">
+          <span className="result-mark" aria-hidden="true">
+            {status === "success" ? "全消" : status === "failed" ? "止步" : status === "running" ? "连锁" : "一击"}
+          </span>
+          <p>
+            {status === "ready" && <><strong>你只有一次点击机会。</strong>先沿着箭头在心里走一遍，再决定从哪里开始。</>}
+            {status === "running" && <><strong>不要眨眼。</strong>每一次消除都会改变下一支箭寻找的“最近方格”。</>}
+            {status === "success" && <><strong>漂亮的落点！</strong>所有箭头都完成了使命，迷域中没有方格了。</>}
+            {status === "failed" && <><strong>连锁在这里断开。</strong>保底通路从 {coordinateOf(board.solutionId, board.size)} 开始，再观察一次箭头关系。</>}
+          </p>
+          {(status === "success" || status === "failed") && (
+            <div className="result-actions">
+              <button type="button" onClick={() => resetState()}>再试同一局</button>
+              <button type="button" onClick={() => generateBoard()}>换一张棋盘</button>
             </div>
-            <button type="button" onClick={() => startGame()}>再来一局</button>
-          </div>
-        ) : (
-          <div className="turn-prompt" aria-live="polite">
-            <span>本回合</span>
-            <strong>
-              {activePile
-                ? `从第 ${activePile.id} 堆拿走 ${takeCount} 朵花`
-                : `请 ${PLAYER_NAMES[currentPlayer]} 先选择一堆花`}
-            </strong>
-          </div>
-        )}
-
-        <div className={`piles-grid pile-count-${piles.length}`}>
-          {piles.map((pile) => {
-            const isSelected = selectedPile === pile.id;
-            return (
-              <article
-                className={`pile-card ${isSelected ? `selected player-${currentPlayer.toLowerCase()}` : ""} ${pile.count === 0 ? "empty" : ""}`}
-                key={pile.id}
-              >
-                <button
-                  className="pile-select"
-                  type="button"
-                  onClick={() => choosePile(pile)}
-                  disabled={pile.count === 0 || Boolean(winner)}
-                  aria-pressed={isSelected}
-                  aria-label={`第 ${pile.id} 堆，剩余 ${pile.count} 朵花${isSelected ? "，已选择" : ""}`}
-                >
-                  <div className="pile-label">
-                    <span>PILE {String(pile.id).padStart(2, "0")}</span>
-                    <strong>{pile.count}<small> 朵</small></strong>
-                  </div>
-                  <div className="flowers" aria-hidden="true">
-                    {Array.from({ length: pile.initial }, (_, flowerIndex) => {
-                      const exists = flowerIndex < pile.count;
-                      const chosen = isSelected && exists && selectedFlowers.includes(flowerIndex);
-                      return (
-                        <span
-                          className={`flower ${exists ? "exists" : "removed"} ${chosen ? "chosen" : ""}`}
-                          key={flowerIndex}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            if (exists) toggleFlower(pile, flowerIndex, chosen);
-                          }}
-                        ><i /></span>
-                      );
-                    })}
-                  </div>
-                  <span className="pile-action">
-                    {pile.count === 0
-                      ? "这一堆空了"
-                      : isSelected
-                        ? "已选中"
-                        : "选择这一堆"}
-                  </span>
-                </button>
-
-                {isSelected && activePile && !winner && (
-                  <div className="take-control">
-                    <span>拿几朵？</span>
-                    <div className="stepper">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFlowers((flowers) => flowers.slice(0, -1))}
-                        disabled={takeCount === 0}
-                        aria-label="少拿一朵"
-                      >−</button>
-                      <strong>
-                        <small>本回合选择</small>
-                        <b>{takeCount}</b>
-                        <small>朵</small>
-                      </strong>
-                      <button
-                        type="button"
-                        onClick={selectNextFlower}
-                        disabled={takeCount === activePile.count}
-                        aria-label="多拿一朵"
-                      >＋</button>
-                    </div>
-                    <button
-                      className="take-all"
-                      type="button"
-                      onClick={() => setSelectedFlowers(
-                        Array.from({ length: activePile.count }, (_, index) => index),
-                      )}
-                    >
-                      全部拿走
-                    </button>
-                  </div>
-                )}
-              </article>
-            );
-          })}
+          )}
         </div>
 
-        {!winner && (
-          <div className="confirm-bar">
-            <div>
-              <span className={`mini-avatar player-${currentPlayer.toLowerCase()}`}>{currentPlayer}</span>
-              <p>
-                {activePile
-                  ? `确认后将交给 ${PLAYER_NAMES[otherPlayer(currentPlayer)]}`
-                  : "一次只能从同一堆拿花"}
-              </p>
-            </div>
-            <button type="button" onClick={confirmTurn} disabled={!activePile || takeCount === 0}>
-              确认拿取 {activePile ? `${takeCount} 朵` : ""}<span aria-hidden="true">→</span>
-            </button>
+        <div
+          className="board-frame"
+          style={{ "--board-size": board.size } as CSSProperties}
+        >
+          <div className="column-labels" aria-hidden="true">
+            {Array.from({ length: board.size }, (_, index) => <span key={index}>{String.fromCharCode(65 + index)}</span>)}
           </div>
-        )}
+          <div className="board-body">
+            <div className="row-labels" aria-hidden="true">
+              {Array.from({ length: board.size }, (_, index) => <span key={index}>{index + 1}</span>)}
+            </div>
+            <div className={`arrow-board board-${board.size}`}>
+              {board.cells.map((cell) => {
+                const removed = !aliveSet.has(cell.id);
+                const coordinate = coordinateOf(cell.id, board.size);
+                const arrowNames = cell.arrows.map((key) => DIRECTION_MAP[key].name).join("、");
+                return (
+                  <button
+                    className={`arrow-cell arrows-${cell.arrows.length} ${removed ? "is-removed" : ""} ${currentId === cell.id ? "is-current" : ""}`}
+                    key={cell.id}
+                    type="button"
+                    disabled={status !== "ready" || removed}
+                    onClick={() => startChain(cell.id)}
+                    aria-label={`${coordinate}，箭头方向：${arrowNames}${removed ? "，已消除" : ""}`}
+                  >
+                    <span className="cell-coordinate" aria-hidden="true">{coordinate}</span>
+                    <span className="arrow-cluster" aria-hidden="true">
+                      {cell.arrows.map((key) => (
+                        <i key={key}>{DIRECTION_MAP[key].glyph}</i>
+                      ))}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="board-footnote">
+          <span><i className="dot dot-live" />仍在场</span>
+          <span><i className="dot dot-chain" />正在连锁</span>
+          <p>{status === "ready" ? "点击任意一格开始挑战" : `本局起点：${startId === null ? "—" : coordinateOf(startId, board.size)}`}</p>
+        </div>
       </section>
 
       <section className="lower-grid">
@@ -392,44 +376,43 @@ export default function Home() {
             <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
           </div>
           <ol>
-            <li><span>1</span><p><strong>任选一堆</strong>每回合先从还有花的堆中选择一堆。</p></li>
-            <li><span>2</span><p><strong>想拿几朵都可以</strong>至少拿一朵，也可以把这一堆全部拿空。</p></li>
-            <li><span>3</span><p><strong>拿完换人</strong>一回合不能同时拿两堆，确认后轮到对方。</p></li>
-            <li><span>4</span><p><strong>最后一朵定胜负</strong>取走桌上最后一朵花的人立即获胜。</p></li>
+            <li><span>1</span><p><strong>只选一次起点</strong>棋盘静止时，任选一个仍存在的方格点击。</p></li>
+            <li><span>2</span><p><strong>沿箭头寻找目标</strong>每支箭击中该方向上最近的方格；没有目标就停止。</p></li>
+            <li><span>3</span><p><strong>被击中的格继续触发</strong>多支箭可以同时延伸，形成一串自动连锁。</p></li>
+            <li><span>4</span><p><strong>清空棋盘即胜利</strong>连锁结束后没有方格留下，挑战成功；否则失败。</p></li>
           </ol>
         </aside>
 
         <aside className="history-card">
           <div className="card-heading">
             <span className="card-number">02</span>
-            <div><small>MOVE LOG</small><h2>行动记录</h2></div>
+            <div><small>CHAIN TRACE</small><h2>连锁轨迹</h2></div>
           </div>
-          {history.length === 0 ? (
+          {trail.length === 0 ? (
             <div className="empty-history">
-              <span aria-hidden="true">✦</span>
-              <p>第一步还没有落下<br />仔细看看每一堆的数量吧</p>
+              <span aria-hidden="true">↗</span>
+              <p>还没有箭头被触发<br />先找一条能贯穿全局的路径</p>
             </div>
           ) : (
-            <ol className="move-list">
-              {history.slice(0, 6).map((move, index) => (
-                <li key={`${move.remaining}-${index}`}>
-                  <span className={`mini-avatar player-${move.player.toLowerCase()}`}>{move.player}</span>
-                  <p><strong>{PLAYER_NAMES[move.player]}</strong> 从第 {move.pile} 堆拿走 {move.amount} 朵</p>
-                  <small>余 {move.remaining}</small>
-                </li>
+            <div className="trace-list" aria-label="最近消除的方格">
+              {trail.slice(-12).map((id, index) => (
+                <span key={`${id}-${index}`}>
+                  <small>{Math.max(1, trail.length - 11) + index}</small>
+                  <strong>{coordinateOf(id, board.size)}</strong>
+                </span>
               ))}
-            </ol>
+            </div>
           )}
           <div className="strategy-note">
-            <span aria-hidden="true">※</span>
-            <p><strong>想一想</strong>每次拿完之后，怎样的花堆组合会让对手最难选择？</p>
+            <span aria-hidden="true">“</span>
+            <p><strong>观察窍门</strong>先找“没有其他格子指向它”的方格，它往往更适合作为连锁起点。</p>
           </div>
         </aside>
       </section>
 
       <footer>
         <span>魔法数学</span>
-        <p>每一步，都让局面悄悄改变。</p>
+        <p>看清方向，再落下唯一的一步。</p>
         <small>每一次选择都至关重要</small>
       </footer>
     </main>
