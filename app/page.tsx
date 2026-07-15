@@ -12,6 +12,7 @@ type Direction = {
   name: string;
   dr: number;
   dc: number;
+  angle: number;
 };
 
 type ArrowCell = {
@@ -25,18 +26,24 @@ type Board = {
   size: number;
   seed: number;
   cells: ArrowCell[];
-  solutionId: number;
+  solutionIds: number[];
+};
+
+type Shot = {
+  id: string;
+  fromId: number;
+  toId: number;
 };
 
 const DIRECTIONS: Direction[] = [
-  { key: "n", glyph: "↑", name: "上", dr: -1, dc: 0 },
-  { key: "ne", glyph: "↗", name: "右上", dr: -1, dc: 1 },
-  { key: "e", glyph: "→", name: "右", dr: 0, dc: 1 },
-  { key: "se", glyph: "↘", name: "右下", dr: 1, dc: 1 },
-  { key: "s", glyph: "↓", name: "下", dr: 1, dc: 0 },
-  { key: "sw", glyph: "↙", name: "左下", dr: 1, dc: -1 },
-  { key: "w", glyph: "←", name: "左", dr: 0, dc: -1 },
-  { key: "nw", glyph: "↖", name: "左上", dr: -1, dc: -1 },
+  { key: "n", glyph: "↑", name: "上", dr: -1, dc: 0, angle: -90 },
+  { key: "ne", glyph: "↗", name: "右上", dr: -1, dc: 1, angle: -45 },
+  { key: "e", glyph: "→", name: "右", dr: 0, dc: 1, angle: 0 },
+  { key: "se", glyph: "↘", name: "右下", dr: 1, dc: 1, angle: 45 },
+  { key: "s", glyph: "↓", name: "下", dr: 1, dc: 0, angle: 90 },
+  { key: "sw", glyph: "↙", name: "左下", dr: 1, dc: -1, angle: 135 },
+  { key: "w", glyph: "←", name: "左", dr: 0, dc: -1, angle: 180 },
+  { key: "nw", glyph: "↖", name: "左上", dr: -1, dc: -1, angle: -135 },
 ];
 
 const DIRECTION_MAP = Object.fromEntries(
@@ -59,7 +66,46 @@ function directionBetween(from: { row: number; col: number }, to: { row: number;
   return DIRECTIONS.find((direction) => direction.dr === dr && direction.dc === dc)!.key;
 }
 
-function createBoard(size: number, seed: number): Board {
+function outwardDirection(point: { row: number; col: number }, size: number): DirectionKey {
+  if (point.row === 0) return "n";
+  if (point.row === size - 1) return "s";
+  if (point.col === 0) return "w";
+  return "e";
+}
+
+function findTargetId(board: Board, cell: ArrowCell, direction: Direction, alive: Set<number>) {
+  let row = cell.row + direction.dr;
+  let col = cell.col + direction.dc;
+
+  while (row >= 0 && row < board.size && col >= 0 && col < board.size) {
+    const id = row * board.size + col;
+    if (alive.has(id)) return id;
+    row += direction.dr;
+    col += direction.dc;
+  }
+
+  return null;
+}
+
+function clearsBoard(board: Board, startId: number) {
+  const alive = new Set(board.cells.map((cell) => cell.id));
+  const queue = [startId];
+
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    if (!alive.has(id)) continue;
+    alive.delete(id);
+
+    board.cells[id].arrows.forEach((key) => {
+      const target = findTargetId(board, board.cells[id], DIRECTION_MAP[key], alive);
+      if (target !== null && !queue.includes(target)) queue.push(target);
+    });
+  }
+
+  return alive.size === 0;
+}
+
+function createBoardCandidate(size: number, seed: number, withExtraArrows = true): Board {
   const random = seededRandom(seed);
   const transpose = random() > 0.5;
   const flipRows = random() > 0.5;
@@ -90,11 +136,16 @@ function createBoard(size: number, seed: number): Board {
 
   path.forEach((point, index) => {
     const current = cells[point.row * size + point.col];
-    const neighbor = path[index === path.length - 1 ? index - 1 : index + 1];
-    const arrows = new Set<DirectionKey>([directionBetween(point, neighbor)]);
-    const extraCount = (random() < 0.7 ? 1 : 0) + (random() < 0.28 ? 1 : 0);
+    const isLast = index === path.length - 1;
+    const primary = isLast
+      ? outwardDirection(point, size)
+      : directionBetween(point, path[index + 1]);
+    const arrows = new Set<DirectionKey>([primary]);
+    const extraCount = withExtraArrows
+      ? (random() < 0.7 ? 1 : 0) + (random() < 0.28 ? 1 : 0)
+      : 0;
 
-    while (arrows.size < 1 + extraCount) {
+    while (!isLast && arrows.size < 1 + extraCount) {
       arrows.add(DIRECTIONS[Math.floor(random() * DIRECTIONS.length)].key);
     }
 
@@ -105,7 +156,27 @@ function createBoard(size: number, seed: number): Board {
     size,
     seed,
     cells,
-    solutionId: path[0].row * size + path[0].col,
+    solutionIds: [],
+  };
+}
+
+function createBoard(size: number, seed: number): Board {
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    const candidateSeed = (seed + attempt * 2654435761) >>> 0;
+    const candidate = createBoardCandidate(size, candidateSeed);
+    const solutionIds = candidate.cells
+      .map((cell) => cell.id)
+      .filter((id) => clearsBoard(candidate, id));
+
+    if (solutionIds.length >= 1 && solutionIds.length <= 3) {
+      return { ...candidate, solutionIds };
+    }
+  }
+
+  const fallback = createBoardCandidate(size, seed, false);
+  return {
+    ...fallback,
+    solutionIds: fallback.cells.map((cell) => cell.id).filter((id) => clearsBoard(fallback, id)),
   };
 }
 
@@ -127,6 +198,8 @@ export default function Home() {
   const [currentId, setCurrentId] = useState<number | null>(null);
   const [startId, setStartId] = useState<number | null>(null);
   const [trail, setTrail] = useState<number[]>([]);
+  const [shots, setShots] = useState<Shot[]>([]);
+  const [targetIds, setTargetIds] = useState<number[]>([]);
   const runToken = useRef(0);
 
   const aliveSet = useMemo(() => new Set(aliveIds), [aliveIds]);
@@ -140,6 +213,8 @@ export default function Home() {
     setCurrentId(null);
     setStartId(null);
     setTrail([]);
+    setShots([]);
+    setTargetIds([]);
   }
 
   function generateBoard(size = selectedSize) {
@@ -148,20 +223,6 @@ export default function Home() {
     setSelectedSize(size);
     setBoard(nextBoard);
     resetState(nextBoard);
-  }
-
-  function findTarget(cell: ArrowCell, direction: Direction, alive: Set<number>) {
-    let row = cell.row + direction.dr;
-    let col = cell.col + direction.dc;
-
-    while (row >= 0 && row < board.size && col >= 0 && col < board.size) {
-      const id = row * board.size + col;
-      if (alive.has(id)) return id;
-      row += direction.dr;
-      col += direction.dc;
-    }
-
-    return null;
   }
 
   async function startChain(id: number) {
@@ -176,6 +237,8 @@ export default function Home() {
     setStatus("running");
     setStartId(id);
     setTrail([]);
+    setShots([]);
+    setTargetIds([]);
 
     while (queue.length > 0) {
       const nextId = queue.shift()!;
@@ -187,20 +250,62 @@ export default function Home() {
       setAliveIds([...alive]);
       setTrail([...order]);
 
-      await wait(125);
+      await wait(115);
       if (runToken.current !== token) return;
 
       const cell = board.cells[nextId];
-      cell.arrows.forEach((key) => {
-        const target = findTarget(cell, DIRECTION_MAP[key], alive);
-        if (target !== null && !queue.includes(target)) queue.push(target);
-      });
+      const targets = cell.arrows
+        .map((key) => findTargetId(board, cell, DIRECTION_MAP[key], alive))
+        .filter((target): target is number => target !== null)
+        .filter((target, index, values) => values.indexOf(target) === index);
+
+      if (targets.length > 0) {
+        setShots(targets.map((target, index) => ({
+          id: `${nextId}-${target}-${order.length}-${index}`,
+          fromId: nextId,
+          toId: target,
+        })));
+        setTargetIds(targets);
+        await wait(300);
+        if (runToken.current !== token) return;
+        setShots([]);
+        setTargetIds([]);
+        targets.forEach((target) => {
+          if (!queue.includes(target)) queue.push(target);
+        });
+      }
     }
 
     await wait(180);
     if (runToken.current !== token) return;
     setCurrentId(null);
+    setShots([]);
+    setTargetIds([]);
     setStatus(alive.size === 0 ? "success" : "failed");
+  }
+
+  function shotStyle(shot: Shot) {
+    const from = board.cells[shot.fromId];
+    const to = board.cells[shot.toId];
+    const step = 100 / board.size;
+    const dx = (to.col - from.col) * step;
+    const dy = (to.row - from.row) * step;
+
+    return {
+      left: `${(from.col + 0.5) * step}%`,
+      top: `${(from.row + 0.5) * step}%`,
+      width: `${Math.hypot(dx, dy)}%`,
+      "--shot-angle": `${Math.atan2(dy, dx)}rad`,
+    } as CSSProperties;
+  }
+
+  function targetStyle(id: number) {
+    const cell = board.cells[id];
+    const step = 100 / board.size;
+    return {
+      left: `${(cell.col + 0.5) * step}%`,
+      top: `${(cell.row + 0.5) * step}%`,
+    } as CSSProperties;
   }
 
   const statusCopy = {
@@ -214,10 +319,10 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark" aria-hidden="true">↗</span>
+          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="header-tag">单人连锁推理小游戏</span>
+        <span className="header-tag">数学思维小游戏</span>
       </header>
 
       <section className="hero" id="top">
@@ -251,7 +356,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">NEW MAZE</span>
             <h2>选择迷域规模</h2>
-            <p>尺寸越大，方向越多。每一张新棋盘都至少藏着一条完整通路。</p>
+            <p>尺寸越大，方向越多。每张棋盘都有解，并将有效起点控制在 3 个以内。</p>
           </div>
 
           <div className="setup-controls">
@@ -314,7 +419,7 @@ export default function Home() {
             {status === "ready" && <><strong>你只有一次点击机会。</strong>先沿着箭头在心里走一遍，再决定从哪里开始。</>}
             {status === "running" && <><strong>不要眨眼。</strong>每一次消除都会改变下一支箭寻找的“最近方格”。</>}
             {status === "success" && <><strong>漂亮的落点！</strong>所有箭头都完成了使命，迷域中没有方格了。</>}
-            {status === "failed" && <><strong>连锁在这里断开。</strong>保底通路从 {coordinateOf(board.solutionId, board.size)} 开始，再观察一次箭头关系。</>}
+            {status === "failed" && <><strong>连锁在这里断开。</strong>保底通路从 {coordinateOf(board.solutionIds[0], board.size)} 开始，再观察一次箭头关系。</>}
           </p>
           {(status === "success" || status === "failed") && (
             <div className="result-actions">
@@ -327,6 +432,7 @@ export default function Home() {
         <div
           className="board-frame"
           style={{ "--board-size": board.size } as CSSProperties}
+          data-solution-count={board.solutionIds.length}
         >
           <div className="column-labels" aria-hidden="true">
             {Array.from({ length: board.size }, (_, index) => <span key={index}>{String.fromCharCode(65 + index)}</span>)}
@@ -336,13 +442,21 @@ export default function Home() {
               {Array.from({ length: board.size }, (_, index) => <span key={index}>{index + 1}</span>)}
             </div>
             <div className={`arrow-board board-${board.size}`}>
+              <div className="chain-effects" aria-hidden="true">
+                {shots.map((shot, index) => (
+                  <span className={`flying-shot shot-color-${index % 3}`} key={shot.id} style={shotStyle(shot)}><i /></span>
+                ))}
+                {targetIds.map((target) => (
+                  <span className="target-burst" key={`target-${target}`} style={targetStyle(target)} />
+                ))}
+              </div>
               {board.cells.map((cell) => {
                 const removed = !aliveSet.has(cell.id);
                 const coordinate = coordinateOf(cell.id, board.size);
                 const arrowNames = cell.arrows.map((key) => DIRECTION_MAP[key].name).join("、");
                 return (
                   <button
-                    className={`arrow-cell arrows-${cell.arrows.length} ${removed ? "is-removed" : ""} ${currentId === cell.id ? "is-current" : ""}`}
+                    className={`arrow-cell arrows-${cell.arrows.length} ${removed ? "is-removed" : ""} ${currentId === cell.id ? "is-current" : ""} ${targetIds.includes(cell.id) ? "is-targeted" : ""}`}
                     key={cell.id}
                     type="button"
                     disabled={status !== "ready" || removed}
@@ -350,9 +464,13 @@ export default function Home() {
                     aria-label={`${coordinate}，箭头方向：${arrowNames}${removed ? "，已消除" : ""}`}
                   >
                     <span className="cell-coordinate" aria-hidden="true">{coordinate}</span>
-                    <span className="arrow-cluster" aria-hidden="true">
+                    <span className="arrow-origin" aria-hidden="true">
                       {cell.arrows.map((key) => (
-                        <i key={key}>{DIRECTION_MAP[key].glyph}</i>
+                        <i
+                          className="cell-arrow"
+                          key={key}
+                          style={{ "--arrow-angle": `${DIRECTION_MAP[key].angle}deg` } as CSSProperties}
+                        />
                       ))}
                     </span>
                   </button>
@@ -413,7 +531,7 @@ export default function Home() {
       <footer>
         <span>魔法数学</span>
         <p>看清方向，再落下唯一的一步。</p>
-        <small>每一次选择都至关重要</small>
+        <small>一次机会，深思熟虑</small>
       </footer>
     </main>
   );
