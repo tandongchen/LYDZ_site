@@ -141,9 +141,7 @@ function createBoardCandidate(size: number, seed: number, withExtraArrows = true
       ? outwardDirection(point, size)
       : directionBetween(point, path[index + 1]);
     const arrows = new Set<DirectionKey>([primary]);
-    const extraCount = withExtraArrows
-      ? (random() < 0.7 ? 1 : 0) + (random() < 0.28 ? 1 : 0)
-      : 0;
+    const extraCount = withExtraArrows && random() < 0.72 ? 1 : 0;
 
     while (!isLast && arrows.size < 1 + extraCount) {
       arrows.add(DIRECTIONS[Math.floor(random() * DIRECTIONS.length)].key);

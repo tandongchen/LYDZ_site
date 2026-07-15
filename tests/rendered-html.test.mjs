@@ -32,5 +32,6 @@ test("server-renders the Arrow Maze game", async () => {
   assert.match(html, /连锁轨迹/);
   assert.match(html, /一次机会，深思熟虑/);
   assert.match(html, /data-solution-count="[1-3]"/);
+  assert.doesNotMatch(html, /arrows-[3-9]/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });
