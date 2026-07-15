@@ -145,9 +145,6 @@ main {
 .arrow-origin::after { content: ""; position: absolute; z-index: 2; left: 50%; top: 50%; width: 6px; height: 6px; border: 2px solid white; border-radius: 50%; background: var(--ink); transform: translate(-50%,-50%); }
 .cell-arrow { position: absolute; left: 50%; top: 50%; width: 42%; height: 3px; border-radius: 999px; background: white; transform: translateY(-50%) rotate(var(--arrow-angle)); transform-origin: 0 50%; }
 .cell-arrow::after { content: ""; position: absolute; right: -1px; top: 50%; width: 8px; height: 8px; border-top: 3px solid white; border-right: 3px solid white; transform: translateY(-50%) rotate(45deg); }
-.board-7 .arrow-origin::after, .board-8 .arrow-origin::after { width: 4px; height: 4px; border-width: 1px; }
-.board-7 .cell-arrow, .board-8 .cell-arrow { height: 2px; }
-.board-7 .cell-arrow::after, .board-8 .cell-arrow::after { width: 6px; height: 6px; border-width: 2px; }
 .chain-effects { position: absolute; z-index: 8; inset: 0; pointer-events: none; }
 .flying-shot { position: absolute; height: 6px; transform: translateY(-50%) rotate(var(--shot-angle)); transform-origin: 0 50%; filter: drop-shadow(0 0 5px rgba(242,196,83,.9)); }
 .flying-shot i { position: absolute; inset: 0; display: block; border-radius: 999px; background: linear-gradient(90deg, transparent 0, var(--yellow) 18%, #fff 78%, #fff 100%); transform-origin: 0 50%; animation: arrow-flight 300ms cubic-bezier(.2,.8,.2,1) both; }
