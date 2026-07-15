@@ -13,25 +13,22 @@ async function render() {
   );
 }
 
-test("server-renders the Arrow Maze game", async () => {
+test("server-renders the Parity Fusion game", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>箭阵迷域｜魔法数学<\/title>/i);
-  assert.match(html, /一次落点/);
-  assert.match(html, /引爆整座迷域！/);
-  assert.match(html, /数学思维小游戏/);
-  assert.match(html, /选择迷域规模/);
-  assert.match(html, /随机生成新迷域/);
-  assert.match(html, /你只有一次点击机会/);
-  assert.match(html, /每支箭击中该方向上最近的方格/);
-  assert.match(html, /清空棋盘即胜利/);
-  assert.match(html, /连锁轨迹/);
-  assert.match(html, /一次机会，深思熟虑/);
-  assert.match(html, /data-solution-count="[1-3]"/);
-  assert.doesNotMatch(html, /arrows-[3-9]/);
-  assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
+  assert.match(html, /<title>层叠消融｜魔法数学<\/title>/i);
+  assert.match(html, /把重叠，变成/);
+  assert.match(html, /选择图形个数/);
+  assert.match(html, /随机生成新目标/);
+  assert.match(html, /目标图形/);
+  assert.match(html, /答题区域/);
+  assert.match(html, /奇数层保留黑色，偶数层消成白色/);
+  assert.match(html, /选择 1—5 块图形/);
+  assert.match(html, /藏在重叠里的数学/);
+  assert.match(html, /方向键可微调/);
+  assert.doesNotMatch(html, /箭阵迷域|codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });

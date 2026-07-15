@@ -1,56 +1,63 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, KeyboardEvent, PointerEvent } from "react";
 
-type DirectionKey = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
-type GameStatus = "ready" | "running" | "success" | "failed";
+type GameStatus = "playing" | "success";
 
-type Direction = {
-  key: DirectionKey;
-  glyph: string;
-  name: string;
-  dr: number;
-  dc: number;
-  angle: number;
-};
-
-type ArrowCell = {
-  id: number;
-  row: number;
-  col: number;
-  arrows: DirectionKey[];
-};
-
-type Board = {
-  size: number;
-  seed: number;
-  cells: ArrowCell[];
-  solutionIds: number[];
-};
-
-type Shot = {
+type Shape = {
   id: string;
-  fromId: number;
-  toId: number;
+  name: string;
+  width: number;
+  height: number;
+  points: number[][];
 };
 
-const DIRECTIONS: Direction[] = [
-  { key: "n", glyph: "↑", name: "上", dr: -1, dc: 0, angle: -90 },
-  { key: "ne", glyph: "↗", name: "右上", dr: -1, dc: 1, angle: -45 },
-  { key: "e", glyph: "→", name: "右", dr: 0, dc: 1, angle: 0 },
-  { key: "se", glyph: "↘", name: "右下", dr: 1, dc: 1, angle: 45 },
-  { key: "s", glyph: "↓", name: "下", dr: 1, dc: 0, angle: 90 },
-  { key: "sw", glyph: "↙", name: "左下", dr: 1, dc: -1, angle: 135 },
-  { key: "w", glyph: "←", name: "左", dr: 0, dc: -1, angle: 180 },
-  { key: "nw", glyph: "↖", name: "左上", dr: -1, dc: -1, angle: -135 },
+type Piece = {
+  id: number;
+  shape: Shape;
+  rotation: number;
+  x: number;
+  y: number;
+  initialX: number;
+  initialY: number;
+  targetX: number;
+  targetY: number;
+};
+
+type Challenge = {
+  seed: number;
+  pieces: Piece[];
+};
+
+type DragState = {
+  id: number;
+  pointerId: number;
+  offsetX: number;
+  offsetY: number;
+};
+
+const BOARD_WIDTH = 700;
+const BOARD_HEIGHT = 420;
+const GRID = 10;
+
+const SHAPES: Shape[] = [
+  { id: "diamond", name: "菱形", width: 126, height: 126, points: [[50, 0], [100, 50], [50, 100], [0, 50]] },
+  { id: "triangle", name: "三角形", width: 138, height: 120, points: [[50, 0], [100, 100], [0, 100]] },
+  { id: "house", name: "屋形", width: 132, height: 138, points: [[50, 0], [100, 42], [100, 100], [0, 100], [0, 42]] },
+  { id: "flag", name: "旗形", width: 140, height: 126, points: [[0, 0], [100, 0], [72, 50], [100, 100], [0, 100]] },
+  { id: "kite", name: "风筝形", width: 112, height: 142, points: [[50, 0], [100, 38], [50, 100], [0, 38]] },
+  { id: "chevron", name: "折角形", width: 138, height: 130, points: [[0, 0], [58, 0], [100, 50], [58, 100], [0, 100], [42, 50]] },
+  { id: "trapezoid", name: "梯形", width: 140, height: 112, points: [[22, 0], [78, 0], [100, 100], [0, 100]] },
 ];
 
-const DIRECTION_MAP = Object.fromEntries(
-  DIRECTIONS.map((direction) => [direction.key, direction]),
-) as Record<DirectionKey, Direction>;
-
-const SIZE_OPTIONS = [5, 6, 7, 8];
+const TARGET_LAYOUTS: Record<number, Array<[number, number]>> = {
+  1: [[350, 190]],
+  2: [[310, 200], [390, 200]],
+  3: [[350, 145], [300, 225], [400, 225]],
+  4: [[350, 135], [285, 205], [415, 205], [350, 270]],
+  5: [[350, 130], [285, 195], [415, 195], [315, 270], [385, 270]],
+};
 
 function seededRandom(seed: number) {
   let value = seed >>> 0;
@@ -60,258 +67,265 @@ function seededRandom(seed: number) {
   };
 }
 
-function directionBetween(from: { row: number; col: number }, to: { row: number; col: number }) {
-  const dr = Math.sign(to.row - from.row);
-  const dc = Math.sign(to.col - from.col);
-  return DIRECTIONS.find((direction) => direction.dr === dr && direction.dc === dc)!.key;
+function snap(value: number) {
+  return Math.round(value / GRID) * GRID;
 }
 
-function outwardDirection(point: { row: number; col: number }, size: number): DirectionKey {
-  if (point.row === 0) return "n";
-  if (point.row === size - 1) return "s";
-  if (point.col === 0) return "w";
-  return "e";
-}
-
-function findTargetId(board: Board, cell: ArrowCell, direction: Direction, alive: Set<number>) {
-  let row = cell.row + direction.dr;
-  let col = cell.col + direction.dc;
-
-  while (row >= 0 && row < board.size && col >= 0 && col < board.size) {
-    const id = row * board.size + col;
-    if (alive.has(id)) return id;
-    row += direction.dr;
-    col += direction.dc;
-  }
-
-  return null;
-}
-
-function clearsBoard(board: Board, startId: number) {
-  const alive = new Set(board.cells.map((cell) => cell.id));
-  const queue = [startId];
-
-  while (queue.length > 0) {
-    const id = queue.shift()!;
-    if (!alive.has(id)) continue;
-    alive.delete(id);
-
-    board.cells[id].arrows.forEach((key) => {
-      const target = findTargetId(board, board.cells[id], DIRECTION_MAP[key], alive);
-      if (target !== null && !queue.includes(target)) queue.push(target);
-    });
-  }
-
-  return alive.size === 0;
-}
-
-function createBoardCandidate(size: number, seed: number, withExtraArrows = true): Board {
+function createChallenge(count: number, seed: number): Challenge {
   const random = seededRandom(seed);
-  const transpose = random() > 0.5;
-  const flipRows = random() > 0.5;
-  const flipColumns = random() > 0.5;
+  const pool = [...SHAPES];
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+  }
 
-  const transform = (row: number, col: number) => {
-    let nextRow = transpose ? col : row;
-    let nextCol = transpose ? row : col;
-    if (flipRows) nextRow = size - 1 - nextRow;
-    if (flipColumns) nextCol = size - 1 - nextCol;
-    return { row: nextRow, col: nextCol };
-  };
+  const startXs = Array.from({ length: count }, (_, index) =>
+    count === 1 ? 350 : 90 + (520 * index) / (count - 1),
+  );
 
-  const path = Array.from({ length: size }, (_, row) => {
-    const columns = Array.from({ length: size }, (__, col) => col);
-    if (row % 2 === 1) columns.reverse();
-    return columns.map((col) => transform(row, col));
-  }).flat();
+  const pieces = pool.slice(0, count).map((shape, index) => {
+    const [baseTargetX, baseTargetY] = TARGET_LAYOUTS[count][index];
+    const targetX = snap(baseTargetX + (Math.floor(random() * 3) - 1) * 10);
+    const targetY = snap(baseTargetY + (Math.floor(random() * 3) - 1) * 10);
+    const initialX = snap(startXs[index]);
+    const initialY = snap(344 + (index % 2) * 8);
 
-  if (random() > 0.5) path.reverse();
-
-  const cells = Array.from({ length: size * size }, (_, id) => ({
-    id,
-    row: Math.floor(id / size),
-    col: id % size,
-    arrows: [] as DirectionKey[],
-  }));
-
-  path.forEach((point, index) => {
-    const current = cells[point.row * size + point.col];
-    const isLast = index === path.length - 1;
-    const primary = isLast
-      ? outwardDirection(point, size)
-      : directionBetween(point, path[index + 1]);
-    const arrows = new Set<DirectionKey>([primary]);
-    const extraCount = withExtraArrows && random() < 0.72 ? 1 : 0;
-
-    while (!isLast && arrows.size < 1 + extraCount) {
-      arrows.add(DIRECTIONS[Math.floor(random() * DIRECTIONS.length)].key);
-    }
-
-    current.arrows = [...arrows];
+    return {
+      id: index,
+      shape,
+      rotation: Math.floor(random() * 8) * 45,
+      x: initialX,
+      y: initialY,
+      initialX,
+      initialY,
+      targetX,
+      targetY,
+    };
   });
 
-  return {
-    size,
-    seed,
-    cells,
-    solutionIds: [],
-  };
+  return { seed, pieces };
 }
 
-function createBoard(size: number, seed: number): Board {
-  for (let attempt = 0; attempt < 80; attempt += 1) {
-    const candidateSeed = (seed + attempt * 2654435761) >>> 0;
-    const candidate = createBoardCandidate(size, candidateSeed);
-    const solutionIds = candidate.cells
-      .map((cell) => cell.id)
-      .filter((id) => clearsBoard(candidate, id));
+function drawMask(pieces: Piece[], useTarget: boolean) {
+  const canvas = document.createElement("canvas");
+  canvas.width = BOARD_WIDTH / 2;
+  canvas.height = BOARD_HEIGHT / 2;
+  const context = canvas.getContext("2d", { willReadFrequently: true })!;
+  context.globalCompositeOperation = "xor";
+  context.fillStyle = "#000";
 
-    if (solutionIds.length >= 1 && solutionIds.length <= 3) {
-      return { ...candidate, solutionIds };
-    }
+  pieces.forEach((piece) => {
+    const centerX = (useTarget ? piece.targetX : piece.x) / 2;
+    const centerY = (useTarget ? piece.targetY : piece.y) / 2;
+    const width = piece.shape.width / 2;
+    const height = piece.shape.height / 2;
+
+    context.save();
+    context.translate(centerX, centerY);
+    context.rotate((piece.rotation * Math.PI) / 180);
+    context.beginPath();
+    piece.shape.points.forEach(([pointX, pointY], index) => {
+      const x = (pointX / 100 - 0.5) * width;
+      const y = (pointY / 100 - 0.5) * height;
+      if (index === 0) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    });
+    context.closePath();
+    context.fill();
+    context.restore();
+  });
+
+  return context.getImageData(0, 0, canvas.width, canvas.height).data;
+}
+
+function isSolved(pieces: Piece[]) {
+  const current = drawMask(pieces, false);
+  const target = drawMask(pieces, true);
+  for (let index = 3; index < current.length; index += 4) {
+    if ((current[index] > 0) !== (target[index] > 0)) return false;
   }
+  return true;
+}
 
-  const fallback = createBoardCandidate(size, seed, false);
+function pieceStyle(piece: Piece, target = false): CSSProperties {
+  const x = target ? piece.targetX : piece.x;
+  const y = target ? piece.targetY : piece.y;
   return {
-    ...fallback,
-    solutionIds: fallback.cells.map((cell) => cell.id).filter((id) => clearsBoard(fallback, id)),
+    left: `${(x / BOARD_WIDTH) * 100}%`,
+    top: `${(y / BOARD_HEIGHT) * 100}%`,
+    width: `${(piece.shape.width / BOARD_WIDTH) * 100}%`,
+    aspectRatio: `${piece.shape.width} / ${piece.shape.height}`,
+    clipPath: `polygon(${piece.shape.points.map(([px, py]) => `${px}% ${py}%`).join(",")})`,
+    transform: `translate(-50%, -50%) rotate(${piece.rotation}deg)`,
   };
 }
 
-const INITIAL_BOARD = createBoard(6, 20260715);
-
-function coordinateOf(id: number, size: number) {
-  return `${String.fromCharCode(65 + (id % size))}${Math.floor(id / size) + 1}`;
+function FusionStage({
+  pieces,
+  target = false,
+  selectedId,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onKeyDown,
+}: {
+  pieces: Piece[];
+  target?: boolean;
+  selectedId?: number | null;
+  onPointerDown?: (event: PointerEvent<HTMLButtonElement>, piece: Piece) => void;
+  onPointerMove?: (event: PointerEvent<HTMLButtonElement>) => void;
+  onPointerUp?: (event: PointerEvent<HTMLButtonElement>) => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLButtonElement>, piece: Piece) => void;
+}) {
+  return (
+    <div className={`fusion-stage ${target ? "target-stage" : "answer-stage"}`}>
+      <div className="stage-axis axis-x" aria-hidden="true" />
+      <div className="stage-axis axis-y" aria-hidden="true" />
+      {pieces.map((piece) =>
+        target ? (
+          <div key={piece.id} className="fusion-piece target-piece" style={pieceStyle(piece, true)} />
+        ) : (
+          <button
+            key={piece.id}
+            type="button"
+            className={`fusion-piece draggable-piece ${selectedId === piece.id ? "is-selected" : ""}`}
+            style={pieceStyle(piece)}
+            aria-label={`移动${piece.shape.name}，方向键可微调`}
+            onPointerDown={(event) => onPointerDown?.(event, piece)}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onKeyDown={(event) => onKeyDown?.(event, piece)}
+          />
+        ),
+      )}
+    </div>
+  );
 }
 
-function wait(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
+const INITIAL_CHALLENGE = createChallenge(3, 173);
 
 export default function Home() {
-  const [selectedSize, setSelectedSize] = useState(6);
-  const [board, setBoard] = useState<Board>(INITIAL_BOARD);
-  const [aliveIds, setAliveIds] = useState<number[]>(INITIAL_BOARD.cells.map((cell) => cell.id));
-  const [status, setStatus] = useState<GameStatus>("ready");
-  const [currentId, setCurrentId] = useState<number | null>(null);
-  const [startId, setStartId] = useState<number | null>(null);
-  const [trail, setTrail] = useState<number[]>([]);
-  const [shots, setShots] = useState<Shot[]>([]);
-  const [targetIds, setTargetIds] = useState<number[]>([]);
-  const runToken = useRef(0);
+  const [pieceCount, setPieceCount] = useState(3);
+  const [challenge, setChallenge] = useState(INITIAL_CHALLENGE);
+  const [status, setStatus] = useState<GameStatus>("playing");
+  const [moves, setMoves] = useState(0);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const dragRef = useRef<DragState | null>(null);
 
-  const aliveSet = useMemo(() => new Set(aliveIds), [aliveIds]);
-  const removedCount = board.cells.length - aliveIds.length;
-  const progress = (removedCount / board.cells.length) * 100;
+  const placedCount = useMemo(
+    () => challenge.pieces.filter((piece) => piece.x === piece.targetX && piece.y === piece.targetY).length,
+    [challenge.pieces],
+  );
 
-  function resetState(nextBoard = board) {
-    runToken.current += 1;
-    setAliveIds(nextBoard.cells.map((cell) => cell.id));
-    setStatus("ready");
-    setCurrentId(null);
-    setStartId(null);
-    setTrail([]);
-    setShots([]);
-    setTargetIds([]);
+  function replacePieces(pieces: Piece[], countMove = false) {
+    setChallenge((current) => ({ ...current, pieces }));
+    if (countMove) setMoves((current) => current + 1);
+    setStatus(isSolved(pieces) ? "success" : "playing");
   }
 
-  function generateBoard(size = selectedSize) {
-    const seed = (board.seed * 1664525 + 1013904223 + size * 7919) >>> 0;
-    const nextBoard = createBoard(size, seed);
-    setSelectedSize(size);
-    setBoard(nextBoard);
-    resetState(nextBoard);
+  function generateChallenge(count = pieceCount) {
+    const seed = (challenge.seed * 1664525 + 1013904223) >>> 0;
+    setPieceCount(count);
+    setChallenge(createChallenge(count, seed));
+    setStatus("playing");
+    setMoves(0);
+    setSelectedId(null);
+    dragRef.current = null;
   }
 
-  async function startChain(id: number) {
-    if (status !== "ready") return;
-
-    const token = runToken.current + 1;
-    runToken.current = token;
-    const alive = new Set(board.cells.map((cell) => cell.id));
-    const queue = [id];
-    const order: number[] = [];
-
-    setStatus("running");
-    setStartId(id);
-    setTrail([]);
-    setShots([]);
-    setTargetIds([]);
-
-    while (queue.length > 0) {
-      const nextId = queue.shift()!;
-      if (!alive.has(nextId)) continue;
-
-      alive.delete(nextId);
-      order.push(nextId);
-      setCurrentId(nextId);
-      setAliveIds([...alive]);
-      setTrail([...order]);
-
-      await wait(115);
-      if (runToken.current !== token) return;
-
-      const cell = board.cells[nextId];
-      const targets = cell.arrows
-        .map((key) => findTargetId(board, cell, DIRECTION_MAP[key], alive))
-        .filter((target): target is number => target !== null)
-        .filter((target, index, values) => values.indexOf(target) === index);
-
-      if (targets.length > 0) {
-        setShots(targets.map((target, index) => ({
-          id: `${nextId}-${target}-${order.length}-${index}`,
-          fromId: nextId,
-          toId: target,
-        })));
-        setTargetIds(targets);
-        await wait(300);
-        if (runToken.current !== token) return;
-        setShots([]);
-        setTargetIds([]);
-        targets.forEach((target) => {
-          if (!queue.includes(target)) queue.push(target);
-        });
-      }
-    }
-
-    await wait(180);
-    if (runToken.current !== token) return;
-    setCurrentId(null);
-    setShots([]);
-    setTargetIds([]);
-    setStatus(alive.size === 0 ? "success" : "failed");
+  function resetChallenge() {
+    const pieces = challenge.pieces.map((piece) => ({ ...piece, x: piece.initialX, y: piece.initialY }));
+    setChallenge((current) => ({ ...current, pieces }));
+    setStatus("playing");
+    setMoves(0);
+    setSelectedId(null);
   }
 
-  function shotStyle(shot: Shot) {
-    const from = board.cells[shot.fromId];
-    const to = board.cells[shot.toId];
-    const step = 100 / board.size;
-    const dx = (to.col - from.col) * step;
-    const dy = (to.row - from.row) * step;
+  function hintOnePiece() {
+    const piece = challenge.pieces.find((item) => item.x !== item.targetX || item.y !== item.targetY);
+    if (!piece) return;
+    const pieces = challenge.pieces.map((item) =>
+      item.id === piece.id ? { ...item, x: item.targetX, y: item.targetY } : item,
+    );
+    setSelectedId(piece.id);
+    replacePieces(pieces, true);
+  }
 
+  function pointerCoordinates(event: PointerEvent<HTMLButtonElement>) {
+    const stage = event.currentTarget.parentElement!.getBoundingClientRect();
     return {
-      left: `${(from.col + 0.5) * step}%`,
-      top: `${(from.row + 0.5) * step}%`,
-      width: `${Math.hypot(dx, dy)}%`,
-      "--shot-angle": `${Math.atan2(dy, dx)}rad`,
-    } as CSSProperties;
+      x: ((event.clientX - stage.left) / stage.width) * BOARD_WIDTH,
+      y: ((event.clientY - stage.top) / stage.height) * BOARD_HEIGHT,
+    };
   }
 
-  function targetStyle(id: number) {
-    const cell = board.cells[id];
-    const step = 100 / board.size;
-    return {
-      left: `${(cell.col + 0.5) * step}%`,
-      top: `${(cell.row + 0.5) * step}%`,
-    } as CSSProperties;
+  function handlePointerDown(event: PointerEvent<HTMLButtonElement>, piece: Piece) {
+    if (status === "success") return;
+    const point = pointerCoordinates(event);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      id: piece.id,
+      pointerId: event.pointerId,
+      offsetX: point.x - piece.x,
+      offsetY: point.y - piece.y,
+    };
+    setSelectedId(piece.id);
   }
 
-  const statusCopy = {
-    ready: { eyebrow: "等待落点", title: "请选择唯一的起点", detail: "点击任意一格，之后交给箭头完成连锁。" },
-    running: { eyebrow: "连锁进行中", title: `第 ${trail.length} 格正在消除`, detail: "箭头正在寻找对应方向上最近的方格。" },
-    success: { eyebrow: "挑战成功", title: "迷域已被全部清空！", detail: `从 ${coordinateOf(startId!, board.size)} 出发，完成了 ${trail.length} 次连锁。` },
-    failed: { eyebrow: "挑战失败", title: `还剩 ${aliveIds.length} 个方格`, detail: "这条连锁已经停止，换一个起点再试试。" },
-  }[status];
+  function handlePointerMove(event: PointerEvent<HTMLButtonElement>) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const point = pointerCoordinates(event);
+    const currentPiece = challenge.pieces.find((piece) => piece.id === drag.id)!;
+    const halfWidth = currentPiece.shape.width / 2;
+    const halfHeight = currentPiece.shape.height / 2;
+    const x = Math.max(halfWidth, Math.min(BOARD_WIDTH - halfWidth, point.x - drag.offsetX));
+    const y = Math.max(halfHeight, Math.min(BOARD_HEIGHT - halfHeight, point.y - drag.offsetY));
+    setChallenge((current) => ({
+      ...current,
+      pieces: current.pieces.map((piece) => (piece.id === drag.id ? { ...piece, x, y } : piece)),
+    }));
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLButtonElement>) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const point = pointerCoordinates(event);
+    const draggedPiece = challenge.pieces.find((piece) => piece.id === drag.id)!;
+    const boundary = Math.max(draggedPiece.shape.width, draggedPiece.shape.height) / 2;
+    const x = snap(Math.max(boundary, Math.min(BOARD_WIDTH - boundary, point.x - drag.offsetX)));
+    const y = snap(Math.max(boundary, Math.min(BOARD_HEIGHT - boundary, point.y - drag.offsetY)));
+    const pieces = challenge.pieces.map((piece) => piece.id === drag.id ? { ...piece, x, y } : piece);
+    dragRef.current = null;
+    replacePieces(pieces, true);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, piece: Piece) {
+    const directions: Record<string, [number, number]> = {
+      ArrowLeft: [-GRID, 0],
+      ArrowRight: [GRID, 0],
+      ArrowUp: [0, -GRID],
+      ArrowDown: [0, GRID],
+    };
+    const direction = directions[event.key];
+    if (!direction || status === "success") return;
+    event.preventDefault();
+    const [dx, dy] = direction;
+    const halfWidth = piece.shape.width / 2;
+    const halfHeight = piece.shape.height / 2;
+    const pieces = challenge.pieces.map((item) =>
+      item.id === piece.id
+        ? {
+            ...item,
+            x: Math.max(halfWidth, Math.min(BOARD_WIDTH - halfWidth, item.x + dx)),
+            y: Math.max(halfHeight, Math.min(BOARD_HEIGHT - halfHeight, item.y + dy)),
+          }
+        : item,
+    );
+    setSelectedId(piece.id);
+    replacePieces(pieces, true);
+  }
 
   return (
     <main>
@@ -325,64 +339,47 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <div className="eyebrow"><span /> SOLO CHAIN PUZZLE <span /></div>
-          <h1 aria-label="箭阵迷域">
-            {"箭阵迷域".split("").map((character, index) => (
-              <span key={`${character}-${index}`}>{character}</span>
-            ))}
-          </h1>
-          <p className="hero-lead">
-            一次落点<br />
-            <em>引爆整座迷域！</em>
-          </p>
+          <div className="eyebrow"><span />PARITY PUZZLE · 叠一叠，消一消<span /></div>
+          <h1 aria-label="层叠消融"><span>层</span><span>叠</span><span>消</span><span>融</span></h1>
+          <p className="hero-lead">把重叠，变成<em>答案。</em></p>
           <p className="hero-description">
-            每个方格都藏着一组方向。选中一个起点后，箭头会击中该方向上最近的方格，
-            再由新方格继续传递。看懂箭阵的路径，让最后一格也消失。
+            黑色图形相遇时，重叠一次变白，再叠一次又变黑。移动每一块图形，
+            用奇与偶的规律拼出上方目标。
           </p>
         </div>
-        <div className="hero-art" aria-hidden="true">
-          <span className="art-arrow art-a">↗</span>
-          <span className="art-arrow art-b">←</span>
-          <span className="art-arrow art-c">↓</span>
-          <span className="art-arrow art-d">↘</span>
-          <span className="hero-number">GO</span>
+        <div className="hero-art parity-art" aria-hidden="true">
+          <i className="parity-shape parity-one" />
+          <i className="parity-shape parity-two" />
+          <span className="parity-label">奇 · 黑<br />偶 · 白</span>
         </div>
       </section>
 
-      <section className="game-shell" aria-label="箭阵迷域游戏区">
+      <section className="game-shell" aria-label="层叠消融游戏区">
         <div className="setup-panel">
           <div className="setup-heading">
-            <span className="section-kicker">NEW MAZE</span>
-            <h2>选择迷域规模</h2>
-            <p>尺寸越大，方向越多。每张棋盘都有解。</p>
+            <span className="section-kicker">01 · SET THE PIECES</span>
+            <h2>先选择图形个数</h2>
+            <p>1—5 块均可挑战。图形越多，重叠关系越丰富。</p>
           </div>
-
           <div className="setup-controls">
             <fieldset className="size-picker">
-              <legend>方格尺寸</legend>
-              <div>
-                {SIZE_OPTIONS.map((size) => (
+              <legend>本局使用</legend>
+              <div className="count-options">
+                {[1, 2, 3, 4, 5].map((count) => (
                   <button
-                    className={selectedSize === size ? "selected" : ""}
-                    key={size}
                     type="button"
-                    onClick={() => generateBoard(size)}
-                    disabled={status === "running"}
-                    aria-pressed={selectedSize === size}
+                    key={count}
+                    className={pieceCount === count ? "selected" : ""}
+                    onClick={() => generateChallenge(count)}
+                    aria-pressed={pieceCount === count}
                   >
-                    <strong>{size}×{size}</strong>
-                    <span>{size === 5 ? "轻巧" : size === 6 ? "标准" : size === 7 ? "进阶" : "极限"}</span>
+                    <strong>{count}</strong><span>块图形</span>
                   </button>
                 ))}
               </div>
             </fieldset>
-            <button
-              className="new-game-button"
-              type="button"
-              onClick={() => generateBoard()}
-              disabled={status === "running"}
-            >
-              随机生成新迷域 <span aria-hidden="true">↗</span>
+            <button className="new-game-button" type="button" onClick={() => generateChallenge()}>
+              随机生成新目标 <span>↗</span>
             </button>
           </div>
         </div>
@@ -390,146 +387,104 @@ export default function Home() {
         <div className="game-divider" />
 
         <div className="status-row">
-          <div className={`status-orb status-${status}`} aria-hidden="true">
-            {status === "success" ? "✓" : status === "failed" ? "!" : "↗"}
-          </div>
+          <span className={`status-orb status-${status}`}>{status === "success" ? "✓" : "∿"}</span>
           <div className="turn-status" aria-live="polite">
-            <small>{statusCopy.eyebrow}</small>
-            <strong>{statusCopy.title}</strong>
-            <p>{statusCopy.detail}</p>
+            <small>{status === "success" ? "CHALLENGE COMPLETE" : "YOUR TURN"}</small>
+            <strong>{status === "success" ? "图形完全一致，挑战成功！" : "拖动图形，复刻目标轮廓"}</strong>
+            <p>{status === "success" ? "奇偶叠加的每一处都对上了。" : "松开鼠标后会自动吸附到点阵。"}</p>
           </div>
-          <div className="cell-counter">
-            <span>剩余</span>
-            <strong>{aliveIds.length}</strong>
-            <span>/ {board.cells.length} 格</span>
+          <div className="game-metrics">
+            <span><strong>{moves}</strong> 次移动</span>
+            <span><strong>{pieceCount}</strong> 块图形</span>
           </div>
         </div>
 
-        <div className="progress-track" aria-label={`已消除 ${removedCount} 格，共 ${board.cells.length} 格`}>
-          <span style={{ width: `${progress}%` }} />
-        </div>
-
-        <div className={`result-banner result-${status}`} role="status">
-          <span className="result-mark" aria-hidden="true">
-            {status === "success" ? "全消" : status === "failed" ? "止步" : status === "running" ? "连锁" : "一击"}
-          </span>
+        <div className={`result-banner result-${status}`}>
+          <span className="result-mark">{status === "success" ? "MATCH" : "XOR"}</span>
           <p>
-            {status === "ready" && <><strong>你只有一次点击机会。</strong>先沿着箭头在心里走一遍，再决定从哪里开始。</>}
-            {status === "running" && <><strong>不要眨眼。</strong>每一次消除都会改变下一支箭寻找的“最近方格”。</>}
-            {status === "success" && <><strong>漂亮的落点！</strong>所有箭头都完成了使命，迷域中没有方格了。</>}
-            {status === "failed" && <><strong>连锁在这里断开。</strong>保底通路从 {coordinateOf(board.solutionIds[0], board.size)} 开始，再观察一次箭头关系。</>}
+            <strong>{status === "success" ? "漂亮的消融！" : "奇数层保留黑色，偶数层消成白色"}</strong>
+            {status === "success" ? "可以换一组图形继续挑战。" : "不必按图形原来的顺序，只看最终黑白轮廓是否一致。"}
           </p>
-          {(status === "success" || status === "failed") && (
-            <div className="result-actions">
-              <button type="button" onClick={() => resetState()}>再试同一局</button>
-              <button type="button" onClick={() => generateBoard()}>换一张棋盘</button>
-            </div>
-          )}
-        </div>
-
-        <div
-          className="board-frame"
-          style={{ "--board-size": board.size } as CSSProperties}
-          data-solution-count={board.solutionIds.length}
-        >
-          <div className="column-labels" aria-hidden="true">
-            {Array.from({ length: board.size }, (_, index) => <span key={index}>{String.fromCharCode(65 + index)}</span>)}
-          </div>
-          <div className="board-body">
-            <div className="row-labels" aria-hidden="true">
-              {Array.from({ length: board.size }, (_, index) => <span key={index}>{index + 1}</span>)}
-            </div>
-            <div className={`arrow-board board-${board.size}`}>
-              <div className="chain-effects" aria-hidden="true">
-                {shots.map((shot, index) => (
-                  <span className={`flying-shot shot-color-${index % 3}`} key={shot.id} style={shotStyle(shot)}><i /></span>
-                ))}
-                {targetIds.map((target) => (
-                  <span className="target-burst" key={`target-${target}`} style={targetStyle(target)} />
-                ))}
-              </div>
-              {board.cells.map((cell) => {
-                const removed = !aliveSet.has(cell.id);
-                const coordinate = coordinateOf(cell.id, board.size);
-                const arrowNames = cell.arrows.map((key) => DIRECTION_MAP[key].name).join("、");
-                return (
-                  <button
-                    className={`arrow-cell arrows-${cell.arrows.length} ${removed ? "is-removed" : ""} ${currentId === cell.id ? "is-current" : ""} ${targetIds.includes(cell.id) ? "is-targeted" : ""}`}
-                    key={cell.id}
-                    type="button"
-                    disabled={status !== "ready" || removed}
-                    onClick={() => startChain(cell.id)}
-                    aria-label={`${coordinate}，箭头方向：${arrowNames}${removed ? "，已消除" : ""}`}
-                  >
-                    <span className="cell-coordinate" aria-hidden="true">{coordinate}</span>
-                    <span className="arrow-origin" aria-hidden="true">
-                      {cell.arrows.map((key) => (
-                        <i
-                          className="cell-arrow"
-                          key={key}
-                          style={{ "--arrow-angle": `${DIRECTION_MAP[key].angle}deg` } as CSSProperties}
-                        />
-                      ))}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="result-actions">
+            <button type="button" onClick={resetChallenge}>还原位置</button>
+            <button type="button" onClick={status === "success" ? () => generateChallenge() : hintOnePiece}>
+              {status === "success" ? "下一题" : "提示一步"}
+            </button>
           </div>
         </div>
 
-        <div className="board-footnote">
-          <span><i className="dot dot-live" />仍在场</span>
-          <span><i className="dot dot-chain" />正在连锁</span>
-          <p>{status === "ready" ? "点击任意一格开始挑战" : `本局起点：${startId === null ? "—" : coordinateOf(startId, board.size)}`}</p>
-        </div>
+        <section className="target-zone" aria-labelledby="target-heading">
+          <div className="zone-heading">
+            <span><b>02</b><small>TARGET</small></span>
+            <div><h2 id="target-heading">目标图形</h2><p>观察所有黑色区域与白色缺口。</p></div>
+          </div>
+          <div className="target-frame">
+            <FusionStage pieces={challenge.pieces} target />
+          </div>
+        </section>
+
+        <section className="answer-zone" aria-labelledby="answer-heading">
+          <div className="zone-heading">
+            <span><b>03</b><small>WORKSPACE</small></span>
+            <div><h2 id="answer-heading">答题区域</h2><p>用鼠标或触摸拖动；选中后也可用方向键微调。</p></div>
+            <span className="placed-note">已就位 {placedCount} / {pieceCount}</span>
+          </div>
+          <div className="answer-frame">
+            <FusionStage
+              pieces={challenge.pieces}
+              selectedId={selectedId}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+          <div className="board-footnote">
+            <span><i className="dot dot-grid" />每一格 = 10 个位置单位</span>
+            <span><i className="dot dot-black" />奇数次重叠</span>
+            <span><i className="dot dot-white" />偶数次重叠</span>
+            <p>让黑与白共同完成图形。</p>
+          </div>
+        </section>
       </section>
 
       <section className="lower-grid">
-        <aside className="rules-card">
+        <article className="rules-card">
           <div className="card-heading">
-            <span className="card-number">01</span>
+            <span className="card-number">04</span>
             <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
           </div>
           <ol>
-            <li><span>1</span><p><strong>只选一次起点</strong>棋盘静止时，任选一个仍存在的方格点击。</p></li>
-            <li><span>2</span><p><strong>沿箭头寻找目标</strong>每支箭击中该方向上最近的方格；没有目标就停止。</p></li>
-            <li><span>3</span><p><strong>被击中的格继续触发</strong>多支箭可以同时延伸，形成一串自动连锁。</p></li>
-            <li><span>4</span><p><strong>清空棋盘即胜利</strong>连锁结束后没有方格留下，挑战成功；否则失败。</p></li>
+            <li><span>一</span><p><strong>选择数量</strong>选择 1—5 块图形，系统生成一题必定可解的目标。</p></li>
+            <li><span>二</span><p><strong>移动图形</strong>按住答题区中的黑色图形，把它拖到新的位置。</p></li>
+            <li><span>三</span><p><strong>观察消融</strong>同一区域叠两层变白，叠三层又恢复黑色。</p></li>
+            <li><span>四</span><p><strong>完成匹配</strong>最终黑白轮廓与目标完全一致时，立即判定成功。</p></li>
           </ol>
-        </aside>
+        </article>
 
-        <aside className="history-card">
+        <article className="history-card parity-card">
           <div className="card-heading">
-            <span className="card-number">02</span>
-            <div><small>CHAIN TRACE</small><h2>连锁轨迹</h2></div>
+            <span className="card-number">∿</span>
+            <div><small>PARITY SECRET</small><h2>藏在重叠里的数学</h2></div>
           </div>
-          {trail.length === 0 ? (
-            <div className="empty-history">
-              <span aria-hidden="true">↗</span>
-              <p>还没有箭头被触发<br />先找一条能贯穿全局的路径</p>
-            </div>
-          ) : (
-            <div className="trace-list" aria-label="最近消除的方格">
-              {trail.slice(-12).map((id, index) => (
-                <span key={`${id}-${index}`}>
-                  <small>{Math.max(1, trail.length - 11) + index}</small>
-                  <strong>{coordinateOf(id, board.size)}</strong>
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="parity-equation" aria-label="一层为黑，两层为白，三层为黑">
+            <span><i className="mini-shape one" /><b>1 层</b><small>黑</small></span>
+            <em>→</em>
+            <span><i className="mini-shape two" /><b>2 层</b><small>白</small></span>
+            <em>→</em>
+            <span><i className="mini-shape three" /><b>3 层</b><small>黑</small></span>
+          </div>
           <div className="strategy-note">
-            <span aria-hidden="true">“</span>
-            <p><strong>观察窍门</strong>先找“没有其他格子指向它”的方格，它往往更适合作为连锁起点。</p>
+            <span>✦</span>
+            <p><strong>小策略</strong>先找目标中最完整的大轮廓，再利用其他图形“挖掉”白色缺口，通常会更容易。</p>
           </div>
-        </aside>
+        </article>
       </section>
 
       <footer>
         <span>魔法数学</span>
-        <p>看清方向，再落下唯一的一步。</p>
-        <small>一次机会，深思熟虑</small>
+        <p>在动手中看见规律，在重叠里找到答案。</p>
+        <small>层叠消融 · PARITY LAB</small>
       </footer>
     </main>
   );
