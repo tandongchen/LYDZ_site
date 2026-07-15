@@ -356,7 +356,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">NEW MAZE</span>
             <h2>选择迷域规模</h2>
-            <p>尺寸越大，方向越多。每张棋盘都有解，并将有效起点控制在 3 个以内。</p>
+            <p>尺寸越大，方向越多。每张棋盘都有解。</p>
           </div>
 
           <div className="setup-controls">
