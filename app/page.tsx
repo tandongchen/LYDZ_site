@@ -62,7 +62,7 @@ const SHAPES: Shape[] = [
   { id: "small-square", name: "小正方形", width: 80, height: 80, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
   { id: "rectangle", name: "窄矩形", width: 40, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
   { id: "block-rectangle", name: "宽矩形", width: 80, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
-  { id: "triangle", name: "直角三角形", width: 130, height: 130, points: [[0, 0], [100, 0], [0, 100]] },
+  { id: "triangle", name: "直角三角形", width: 120, height: 120, points: [[0, 0], [100, 0], [0, 100]] },
   { id: "trapezoid", name: "梯形", width: 138, height: 104, points: [[22, 0], [78, 0], [100, 100], [0, 100]] },
   { id: "ell", name: "L 形", width: 120, height: 120, points: [[0, 0], [100, 0], [100, 33.333], [33.333, 33.333], [33.333, 100], [0, 100]] },
   { id: "parallelogram", name: "平行四边形", width: 138, height: 104, points: [[24, 0], [100, 0], [76, 100], [0, 100]] },
@@ -194,11 +194,11 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
     ]),
     gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "unit-square", col: 4, row: 3, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
     ]),
     gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 3, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
     ]),
   ],
   3: [
@@ -209,13 +209,13 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
     ]),
     gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "small-square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
       { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
     gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 3, row: 2, rotation: 0 },
-      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 4, rotation: 0 },
     ]),
   ],
   4: [
@@ -225,17 +225,17 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
       { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
       { shapeId: "unit-square", col: 4, row: 3, rotation: 0 },
     ]),
-    gridTemplate("wide5x3", [
+    gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "square", col: 4, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 3, row: 2, rotation: 0 },
       { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
-    gridTemplate("wide5x3", [
+    gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "square", col: 4, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
-      { shapeId: "small-square", col: 3, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
   ],
   5: [
@@ -246,19 +246,19 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
       { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
       { shapeId: "unit-square", col: 5, row: 3, rotation: 0 },
     ]),
-    gridTemplate("wide5x3", [
+    gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "square", col: 4, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
-      { shapeId: "unit-square", col: 4, row: 2, rotation: 0 },
-      { shapeId: "unit-square", col: 4, row: 4, rotation: 0 },
-    ]),
-    gridTemplate("wide5x3", [
-      { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "square", col: 4, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
-      { shapeId: "small-square", col: 3, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 3, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 2, row: 3, rotation: 0 },
       { shapeId: "unit-square", col: 4, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
   ],
 };
