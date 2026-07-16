@@ -66,76 +66,76 @@ const PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
   ],
   2: [
     [
-      { shapeId: "square", x: 325, y: 200, rotation: 0 },
-      { shapeId: "rectangle", x: 385, y: 200, rotation: 0 },
+      { shapeId: "ell", x: 320, y: 200, rotation: 0 },
+      { shapeId: "ell", x: 380, y: 200, rotation: 90 },
     ],
     [
-      { shapeId: "triangle", x: 320, y: 190, rotation: 0 },
-      { shapeId: "trapezoid", x: 385, y: 220, rotation: 180 },
+      { shapeId: "triangle", x: 320, y: 200, rotation: 0 },
+      { shapeId: "triangle", x: 380, y: 200, rotation: 90 },
     ],
     [
-      { shapeId: "ell", x: 330, y: 205, rotation: 0 },
-      { shapeId: "square", x: 385, y: 185, rotation: 0 },
+      { shapeId: "parallelogram", x: 320, y: 200, rotation: 0 },
+      { shapeId: "parallelogram", x: 380, y: 200, rotation: 180 },
     ],
   ],
   3: [
     [
-      { shapeId: "ell", x: 325, y: 205, rotation: 0 },
-      { shapeId: "square", x: 370, y: 180, rotation: 0 },
-      { shapeId: "rectangle", x: 385, y: 235, rotation: 0 },
+      { shapeId: "ell", x: 320, y: 210, rotation: 0 },
+      { shapeId: "ell", x: 380, y: 210, rotation: 90 },
+      { shapeId: "square", x: 350, y: 180, rotation: 0 },
     ],
     [
-      { shapeId: "triangle", x: 315, y: 175, rotation: 0 },
-      { shapeId: "rectangle", x: 385, y: 195, rotation: 90 },
-      { shapeId: "trapezoid", x: 350, y: 245, rotation: 0 },
+      { shapeId: "triangle", x: 310, y: 200, rotation: 0 },
+      { shapeId: "triangle", x: 390, y: 200, rotation: 90 },
+      { shapeId: "tee", x: 350, y: 215, rotation: 0 },
     ],
     [
-      { shapeId: "tee", x: 330, y: 190, rotation: 0 },
-      { shapeId: "square", x: 385, y: 205, rotation: 0 },
-      { shapeId: "triangle", x: 340, y: 245, rotation: 270 },
+      { shapeId: "trapezoid", x: 310, y: 210, rotation: 0 },
+      { shapeId: "trapezoid", x: 390, y: 210, rotation: 0 },
+      { shapeId: "rectangle", x: 350, y: 210, rotation: 90 },
     ],
   ],
   4: [
     [
-      { shapeId: "rectangle", x: 315, y: 175, rotation: 0 },
-      { shapeId: "triangle", x: 385, y: 175, rotation: 0 },
-      { shapeId: "ell", x: 325, y: 235, rotation: 0 },
-      { shapeId: "trapezoid", x: 390, y: 240, rotation: 0 },
+      { shapeId: "ell", x: 310, y: 210, rotation: 0 },
+      { shapeId: "ell", x: 390, y: 210, rotation: 90 },
+      { shapeId: "square", x: 350, y: 180, rotation: 0 },
+      { shapeId: "rectangle", x: 350, y: 240, rotation: 90 },
     ],
     [
-      { shapeId: "square", x: 325, y: 170, rotation: 0 },
-      { shapeId: "rectangle", x: 385, y: 205, rotation: 0 },
-      { shapeId: "triangle", x: 325, y: 245, rotation: 270 },
-      { shapeId: "trapezoid", x: 380, y: 245, rotation: 180 },
+      { shapeId: "triangle", x: 310, y: 180, rotation: 0 },
+      { shapeId: "triangle", x: 390, y: 180, rotation: 90 },
+      { shapeId: "trapezoid", x: 310, y: 230, rotation: 0 },
+      { shapeId: "trapezoid", x: 390, y: 230, rotation: 0 },
     ],
     [
-      { shapeId: "ell", x: 320, y: 190, rotation: 90 },
-      { shapeId: "parallelogram", x: 385, y: 175, rotation: 0 },
-      { shapeId: "rectangle", x: 370, y: 240, rotation: 90 },
-      { shapeId: "triangle", x: 325, y: 245, rotation: 180 },
+      { shapeId: "parallelogram", x: 310, y: 180, rotation: 0 },
+      { shapeId: "parallelogram", x: 390, y: 180, rotation: 180 },
+      { shapeId: "ell", x: 320, y: 230, rotation: 0 },
+      { shapeId: "ell", x: 380, y: 230, rotation: 90 },
     ],
   ],
   5: [
     [
-      { shapeId: "ell", x: 315, y: 210, rotation: 0 },
-      { shapeId: "square", x: 370, y: 170, rotation: 0 },
-      { shapeId: "rectangle", x: 400, y: 220, rotation: 0 },
-      { shapeId: "triangle", x: 345, y: 255, rotation: 270 },
-      { shapeId: "trapezoid", x: 365, y: 225, rotation: 180 },
+      { shapeId: "ell", x: 310, y: 210, rotation: 0 },
+      { shapeId: "ell", x: 390, y: 210, rotation: 90 },
+      { shapeId: "square", x: 350, y: 180, rotation: 0 },
+      { shapeId: "rectangle", x: 320, y: 240, rotation: 90 },
+      { shapeId: "rectangle", x: 380, y: 240, rotation: 90 },
     ],
     [
-      { shapeId: "tee", x: 330, y: 175, rotation: 90 },
-      { shapeId: "square", x: 385, y: 205, rotation: 0 },
-      { shapeId: "rectangle", x: 325, y: 240, rotation: 0 },
-      { shapeId: "triangle", x: 385, y: 165, rotation: 0 },
-      { shapeId: "parallelogram", x: 365, y: 255, rotation: 0 },
+      { shapeId: "triangle", x: 310, y: 180, rotation: 0 },
+      { shapeId: "triangle", x: 390, y: 180, rotation: 90 },
+      { shapeId: "trapezoid", x: 310, y: 230, rotation: 0 },
+      { shapeId: "trapezoid", x: 390, y: 230, rotation: 0 },
+      { shapeId: "tee", x: 350, y: 210, rotation: 0 },
     ],
     [
-      { shapeId: "ell", x: 320, y: 175, rotation: 180 },
-      { shapeId: "rectangle", x: 380, y: 175, rotation: 90 },
-      { shapeId: "trapezoid", x: 395, y: 225, rotation: 90 },
-      { shapeId: "triangle", x: 330, y: 245, rotation: 180 },
-      { shapeId: "square", x: 365, y: 220, rotation: 0 },
+      { shapeId: "parallelogram", x: 310, y: 180, rotation: 0 },
+      { shapeId: "parallelogram", x: 390, y: 180, rotation: 180 },
+      { shapeId: "ell", x: 320, y: 230, rotation: 0 },
+      { shapeId: "ell", x: 380, y: 230, rotation: 90 },
+      { shapeId: "square", x: 350, y: 210, rotation: 0 },
     ],
   ],
 };
@@ -478,7 +478,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">01 · SET THE PIECES</span>
             <h2>先选择图形个数</h2>
-            <p>1—5 块均可挑战。3 块以上会出现更多空间相消与内部缺口。</p>
+            <p>1—5 块均可挑战。3 块以上包含镜像布局与多重空间相消。</p>
           </div>
           <div className="setup-controls">
             <fieldset className="size-picker">
@@ -535,7 +535,7 @@ export default function Home() {
         <section className="target-zone" aria-labelledby="target-heading">
           <div className="zone-heading">
             <span><b>02</b><small>TARGET</small></span>
-            <div><h2 id="target-heading">目标图形</h2><p>先想象哪些重叠会消失，再拆解黑色轮廓与内部缺口。</p></div>
+            <div><h2 id="target-heading">目标图形</h2><p>目标关于某条轴对称，中心通常包含二重与三重叠加。</p></div>
           </div>
           <div className="target-frame">
             <FusionStage pieces={challenge.pieces} target />
