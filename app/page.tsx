@@ -57,6 +57,7 @@ const GRID = 10;
 const SHAPE_UNIT = 40;
 
 const SHAPES: Shape[] = [
+  { id: "unit-square", name: "单位正方形", width: 40, height: 40, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
   { id: "square", name: "正方形", width: 120, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
   { id: "small-square", name: "小正方形", width: 80, height: 80, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
   { id: "rectangle", name: "窄矩形", width: 40, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
@@ -154,6 +155,7 @@ const SIMPLE_TARGETS = {
   square2: { width: 2, height: 2 },
   square3: { width: 3, height: 3 },
   rectangle2x3: { width: 2, height: 3 },
+  wide5x3: { width: 5, height: 3 },
 } as const;
 
 function gridTemplate(
@@ -186,77 +188,77 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
     [{ shapeId: "small-square", x: 350, y: 200, rotation: 0 }],
   ],
   2: [
-    gridTemplate("rectangle2x3", [
-      { shapeId: "rectangle", col: 1, row: 2, rotation: 0 },
-      { shapeId: "square", col: 1, row: 2, rotation: 0 },
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
-    gridTemplate("square2", [
-      { shapeId: "ell", col: 1, row: 1, rotation: 0 },
-      { shapeId: "square", col: 1, row: 1, rotation: 0 },
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 3, rotation: 0 },
     ]),
-    gridTemplate("square2", [
-      { shapeId: "ell", col: 2, row: 1, rotation: 0 },
-      { shapeId: "tee", col: 2, row: 1, rotation: 0 },
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 3, row: 2, rotation: 0 },
     ]),
   ],
   3: [
-    gridTemplate("rectangle2x3", [
-      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
-      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
-      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 4, rotation: 0 },
     ]),
-    gridTemplate("square2", [
-      { shapeId: "rectangle", col: 1, row: 1, rotation: 0 },
-      { shapeId: "block-rectangle", col: 2, row: 1, rotation: 0 },
-      { shapeId: "ell", col: 1, row: 1, rotation: 0 },
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "small-square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
-    gridTemplate("square2", [
-      { shapeId: "rectangle", col: 0, row: 1, rotation: 90 },
-      { shapeId: "block-rectangle", col: 1, row: 2, rotation: 90 },
-      { shapeId: "tee", col: 0, row: 1, rotation: 0 },
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 3, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
   ],
   4: [
-    gridTemplate("rectangle2x3", [
-      { shapeId: "square", col: 2, row: 1, rotation: 0 },
-      { shapeId: "ell", col: 2, row: 2, rotation: 270 },
-      { shapeId: "ell", col: 2, row: 1, rotation: 0 },
-      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
-    ]),
-    gridTemplate("rectangle2x3", [
-      { shapeId: "square", col: 1, row: 2, rotation: 0 },
-      { shapeId: "ell", col: 1, row: 2, rotation: 0 },
-      { shapeId: "tee", col: 2, row: 1, rotation: 90 },
-      { shapeId: "rectangle", col: 4, row: 1, rotation: 0 },
-    ]),
-    gridTemplate("rectangle2x3", [
+    gridTemplate("wide5x3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "ell", col: 2, row: 2, rotation: 90 },
-      { shapeId: "tee", col: 1, row: 1, rotation: 270 },
-      { shapeId: "rectangle", col: 1, row: 1, rotation: 0 },
+      { shapeId: "square", col: 4, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("wide5x3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "square", col: 4, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("wide5x3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "square", col: 4, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "small-square", col: 3, row: 2, rotation: 0 },
     ]),
   ],
   5: [
-    gridTemplate("square3", [
-      { shapeId: "block-rectangle", col: 3, row: 2, rotation: 0 },
-      { shapeId: "ell", col: 2, row: 1, rotation: 270 },
-      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
-      { shapeId: "small-square", col: 3, row: 2, rotation: 0 },
-      { shapeId: "rectangle", col: 2, row: 1, rotation: 0 },
-    ]),
-    gridTemplate("rectangle2x3", [
+    gridTemplate("wide5x3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "ell", col: 1, row: 2, rotation: 90 },
-      { shapeId: "tee", col: 1, row: 2, rotation: 0 },
+      { shapeId: "square", col: 4, row: 2, rotation: 0 },
       { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
-      { shapeId: "small-square", col: 2, row: 3, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+      { shapeId: "unit-square", col: 5, row: 3, rotation: 0 },
     ]),
-    gridTemplate("square3", [
-      { shapeId: "block-rectangle", col: 2, row: 3, rotation: 90 },
-      { shapeId: "ell", col: 1, row: 2, rotation: 90 },
-      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
-      { shapeId: "small-square", col: 2, row: 3, rotation: 0 },
-      { shapeId: "rectangle", col: 1, row: 2, rotation: 90 },
+    gridTemplate("wide5x3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "square", col: 4, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 4, rotation: 0 },
+    ]),
+    gridTemplate("wide5x3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "square", col: 4, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "small-square", col: 3, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 4, row: 3, rotation: 0 },
     ]),
   ],
 };
@@ -644,7 +646,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">01 · SET THE PIECES</span>
             <h2>先选择图形个数</h2>
-            <p>1—5 块均可挑战。目标越简单，反推隐藏的消融步骤越烧脑。</p>
+            <p>1—5 块均可挑战。黑白缺口越丰富，反推隐藏的消融步骤越烧脑。</p>
           </div>
           <div className="setup-controls">
             <fieldset className="size-picker">
@@ -701,7 +703,7 @@ export default function Home() {
         <section className="target-zone" aria-labelledby="target-heading">
           <div className="zone-heading">
             <span><b>02</b><small>TARGET</small></span>
-            <div><h2 id="target-heading">目标图形</h2><p>答案只是简单几何形，难点是反推出多次叠加与相消。</p></div>
+            <div><h2 id="target-heading">目标图形</h2><p>观察黑白相间的规则构型，反推出多次叠加与相消。</p></div>
           </div>
           <div className="target-frame">
             <FusionStage pieces={challenge.pieces} target />

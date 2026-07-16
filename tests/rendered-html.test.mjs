@@ -25,8 +25,8 @@ test("server-renders the Parity Fusion game", async () => {
   assert.match(html, /选择图形个数/);
   assert.match(html, /随机生成新目标/);
   assert.match(html, /目标图形/);
-  assert.match(html, /目标越简单/);
-  assert.match(html, /答案只是简单几何形/);
+  assert.match(html, /黑白缺口越丰富/);
+  assert.match(html, /观察黑白相间的规则构型/);
   assert.match(html, /class="target-silhouette"/);
   assert.doesNotMatch(html, /class="fusion-piece target-piece"/);
   assert.match(html, /答题区域/);
