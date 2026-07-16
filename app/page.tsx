@@ -30,6 +30,13 @@ type Challenge = {
   pieces: Piece[];
 };
 
+type PieceSpec = {
+  shapeId: string;
+  x: number;
+  y: number;
+  rotation: number;
+};
+
 type DragState = {
   id: number;
   pointerId: number;
@@ -42,31 +49,103 @@ const BOARD_HEIGHT = 420;
 const GRID = 10;
 
 const SHAPES: Shape[] = [
-  { id: "diamond", name: "菱形", width: 126, height: 126, points: [[50, 0], [100, 50], [50, 100], [0, 50]] },
-  { id: "triangle", name: "三角形", width: 138, height: 120, points: [[50, 0], [100, 100], [0, 100]] },
-  { id: "house", name: "屋形", width: 132, height: 138, points: [[50, 0], [100, 42], [100, 100], [0, 100], [0, 42]] },
-  { id: "flag", name: "旗形", width: 140, height: 126, points: [[0, 0], [100, 0], [72, 50], [100, 100], [0, 100]] },
-  { id: "kite", name: "风筝形", width: 112, height: 142, points: [[50, 0], [100, 38], [50, 100], [0, 38]] },
-  { id: "chevron", name: "折角形", width: 138, height: 130, points: [[0, 0], [58, 0], [100, 50], [58, 100], [0, 100], [42, 50]] },
-  { id: "trapezoid", name: "梯形", width: 140, height: 112, points: [[22, 0], [78, 0], [100, 100], [0, 100]] },
+  { id: "square", name: "正方形", width: 112, height: 112, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+  { id: "rectangle", name: "矩形", width: 76, height: 142, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+  { id: "triangle", name: "直角三角形", width: 130, height: 130, points: [[0, 0], [100, 0], [0, 100]] },
+  { id: "trapezoid", name: "梯形", width: 138, height: 104, points: [[22, 0], [78, 0], [100, 100], [0, 100]] },
+  { id: "ell", name: "L 形", width: 136, height: 136, points: [[0, 0], [100, 0], [100, 42], [42, 42], [42, 100], [0, 100]] },
+  { id: "parallelogram", name: "平行四边形", width: 138, height: 104, points: [[24, 0], [100, 0], [76, 100], [0, 100]] },
+  { id: "tee", name: "T 形", width: 136, height: 136, points: [[0, 0], [100, 0], [100, 34], [68, 34], [68, 100], [32, 100], [32, 34], [0, 34]] },
 ];
 
-const REGULAR_SHAPES = SHAPES.filter((shape) => shape.id !== "flag" && shape.id !== "chevron");
-
-const TARGET_LAYOUTS: Record<number, Array<[number, number, number]>> = {
-  1: [[350, 200, 0]],
-  2: [[315, 200, -45], [385, 200, 45]],
-  3: [[350, 145, 0], [300, 225, -45], [400, 225, 45]],
-  4: [[350, 145, 0], [405, 200, 90], [350, 255, 180], [295, 200, 270]],
-  5: [[350, 200, 0], [350, 135, 0], [415, 200, 90], [350, 265, 180], [285, 200, 270]],
+const PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
+  1: [
+    [{ shapeId: "triangle", x: 350, y: 200, rotation: 0 }],
+    [{ shapeId: "trapezoid", x: 350, y: 200, rotation: 0 }],
+    [{ shapeId: "ell", x: 350, y: 200, rotation: 0 }],
+  ],
+  2: [
+    [
+      { shapeId: "square", x: 325, y: 200, rotation: 0 },
+      { shapeId: "rectangle", x: 385, y: 200, rotation: 0 },
+    ],
+    [
+      { shapeId: "triangle", x: 320, y: 190, rotation: 0 },
+      { shapeId: "trapezoid", x: 385, y: 220, rotation: 180 },
+    ],
+    [
+      { shapeId: "ell", x: 330, y: 205, rotation: 0 },
+      { shapeId: "square", x: 385, y: 185, rotation: 0 },
+    ],
+  ],
+  3: [
+    [
+      { shapeId: "ell", x: 325, y: 205, rotation: 0 },
+      { shapeId: "square", x: 370, y: 180, rotation: 0 },
+      { shapeId: "rectangle", x: 385, y: 235, rotation: 0 },
+    ],
+    [
+      { shapeId: "triangle", x: 315, y: 175, rotation: 0 },
+      { shapeId: "rectangle", x: 385, y: 195, rotation: 90 },
+      { shapeId: "trapezoid", x: 350, y: 245, rotation: 0 },
+    ],
+    [
+      { shapeId: "tee", x: 330, y: 190, rotation: 0 },
+      { shapeId: "square", x: 385, y: 205, rotation: 0 },
+      { shapeId: "triangle", x: 340, y: 245, rotation: 270 },
+    ],
+  ],
+  4: [
+    [
+      { shapeId: "rectangle", x: 315, y: 175, rotation: 0 },
+      { shapeId: "triangle", x: 385, y: 175, rotation: 0 },
+      { shapeId: "ell", x: 325, y: 235, rotation: 0 },
+      { shapeId: "trapezoid", x: 390, y: 240, rotation: 0 },
+    ],
+    [
+      { shapeId: "square", x: 325, y: 170, rotation: 0 },
+      { shapeId: "rectangle", x: 385, y: 205, rotation: 0 },
+      { shapeId: "triangle", x: 325, y: 245, rotation: 270 },
+      { shapeId: "trapezoid", x: 380, y: 245, rotation: 180 },
+    ],
+    [
+      { shapeId: "ell", x: 320, y: 190, rotation: 90 },
+      { shapeId: "parallelogram", x: 385, y: 175, rotation: 0 },
+      { shapeId: "rectangle", x: 370, y: 240, rotation: 90 },
+      { shapeId: "triangle", x: 325, y: 245, rotation: 180 },
+    ],
+  ],
+  5: [
+    [
+      { shapeId: "ell", x: 315, y: 210, rotation: 0 },
+      { shapeId: "square", x: 370, y: 170, rotation: 0 },
+      { shapeId: "rectangle", x: 400, y: 220, rotation: 0 },
+      { shapeId: "triangle", x: 345, y: 255, rotation: 270 },
+      { shapeId: "trapezoid", x: 365, y: 225, rotation: 180 },
+    ],
+    [
+      { shapeId: "tee", x: 330, y: 175, rotation: 90 },
+      { shapeId: "square", x: 385, y: 205, rotation: 0 },
+      { shapeId: "rectangle", x: 325, y: 240, rotation: 0 },
+      { shapeId: "triangle", x: 385, y: 165, rotation: 0 },
+      { shapeId: "parallelogram", x: 365, y: 255, rotation: 0 },
+    ],
+    [
+      { shapeId: "ell", x: 320, y: 175, rotation: 180 },
+      { shapeId: "rectangle", x: 380, y: 175, rotation: 90 },
+      { shapeId: "trapezoid", x: 395, y: 225, rotation: 90 },
+      { shapeId: "triangle", x: 330, y: 245, rotation: 180 },
+      { shapeId: "square", x: 365, y: 220, rotation: 0 },
+    ],
+  ],
 };
 
-const SHAPE_PATTERNS: Record<number, number[]> = {
-  1: [0],
-  2: [0, 0],
-  3: [0, 1, 1],
-  4: [0, 1, 0, 1],
-  5: [0, 1, 1, 1, 1],
+const INITIAL_LAYOUTS: Record<number, Array<[number, number]>> = {
+  1: [[350, 325]],
+  2: [[240, 325], [460, 325]],
+  3: [[150, 325], [350, 325], [550, 325]],
+  4: [[150, 285], [350, 285], [250, 350], [450, 350]],
+  5: [[150, 275], [350, 275], [550, 275], [250, 345], [450, 345]],
 };
 
 function seededRandom(seed: number) {
@@ -83,35 +162,25 @@ function snap(value: number) {
 
 function createChallenge(count: number, seed: number): Challenge {
   const random = seededRandom(seed);
-  const pool = [...REGULAR_SHAPES];
-  for (let index = pool.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1));
-    [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
-  }
-
-  const startXs = Array.from({ length: count }, (_, index) =>
-    count === 1 ? 350 : 90 + (520 * index) / (count - 1),
-  );
-
+  const templates = PUZZLE_TEMPLATES[count];
+  const template = templates[Math.floor(random() * templates.length)];
   const quarterTurns = Math.floor(random() * 4);
-  const patternShapes = SHAPE_PATTERNS[count].map((shapeIndex) => pool[shapeIndex]);
 
-  const pieces = patternShapes.map((shape, index) => {
-    const [baseTargetX, baseTargetY, baseRotation] = TARGET_LAYOUTS[count][index];
-    let offsetX = baseTargetX - 350;
-    let offsetY = baseTargetY - 200;
+  const pieces = template.map((spec, index) => {
+    const shape = SHAPES.find((candidate) => candidate.id === spec.shapeId)!;
+    let offsetX = spec.x - 350;
+    let offsetY = spec.y - 200;
     for (let turn = 0; turn < quarterTurns; turn += 1) {
       [offsetX, offsetY] = [-offsetY, offsetX];
     }
     const targetX = snap(350 + offsetX);
     const targetY = snap(200 + offsetY);
-    const initialX = snap(startXs[index]);
-    const initialY = snap(344 + (index % 2) * 8);
+    const [initialX, initialY] = INITIAL_LAYOUTS[count][index];
 
     return {
       id: index,
       shape,
-      rotation: baseRotation + quarterTurns * 90,
+      rotation: spec.rotation + quarterTurns * 90,
       x: initialX,
       y: initialY,
       initialX,
@@ -409,7 +478,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">01 · SET THE PIECES</span>
             <h2>先选择图形个数</h2>
-            <p>1—5 块均可挑战。图形越多，重叠关系越丰富。</p>
+            <p>1—5 块均可挑战。3 块以上会出现更多空间相消与内部缺口。</p>
           </div>
           <div className="setup-controls">
             <fieldset className="size-picker">
@@ -466,7 +535,7 @@ export default function Home() {
         <section className="target-zone" aria-labelledby="target-heading">
           <div className="zone-heading">
             <span><b>02</b><small>TARGET</small></span>
-            <div><h2 id="target-heading">目标图形</h2><p>观察规则轮廓中的黑色区域与白色缺口。</p></div>
+            <div><h2 id="target-heading">目标图形</h2><p>先想象哪些重叠会消失，再拆解黑色轮廓与内部缺口。</p></div>
           </div>
           <div className="target-frame">
             <FusionStage pieces={challenge.pieces} target />

@@ -25,6 +25,8 @@ test("server-renders the Parity Fusion game", async () => {
   assert.match(html, /选择图形个数/);
   assert.match(html, /随机生成新目标/);
   assert.match(html, /目标图形/);
+  assert.match(html, /空间相消与内部缺口/);
+  assert.match(html, /哪些重叠会消失/);
   assert.match(html, /答题区域/);
   assert.match(html, /整体位置不同也能判定成功/);
   assert.match(html, /位置不限/);
