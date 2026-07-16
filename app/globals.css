@@ -111,6 +111,7 @@ main { min-height: 100vh; overflow: hidden; background-image: linear-gradient(rg
 .stage-axis { position: absolute; z-index: 0; pointer-events: none; opacity: .06; background: var(--ink); }
 .axis-x { left: 0; right: 0; top: 50%; height: 1px; }
 .axis-y { top: 0; bottom: 0; left: 50%; width: 1px; }
+.target-silhouette { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 .fusion-piece { position: absolute; z-index: 1; margin: 0; padding: 0; border: 0; background: #fff; mix-blend-mode: difference; }
 .draggable-piece { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 .draggable-piece:active { cursor: grabbing; }

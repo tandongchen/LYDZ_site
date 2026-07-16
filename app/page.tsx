@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent, PointerEvent } from "react";
 
 type GameStatus = "playing" | "success";
@@ -350,6 +350,51 @@ function drawMask(pieces: Piece[], useTarget: boolean) {
   };
 }
 
+function TargetSilhouette({ pieces }: { pieces: Piece[] }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.width = BOARD_WIDTH;
+    canvas.height = BOARD_HEIGHT;
+    const context = canvas.getContext("2d", { willReadFrequently: true })!;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.globalCompositeOperation = "xor";
+    context.fillStyle = "#000";
+
+    pieces.forEach((piece) => {
+      context.save();
+      context.translate(piece.targetX, piece.targetY);
+      context.rotate((piece.rotation * Math.PI) / 180);
+      context.beginPath();
+      piece.shape.points.forEach(([pointX, pointY], index) => {
+        const x = (pointX / 100 - 0.5) * piece.shape.width;
+        const y = (pointY / 100 - 0.5) * piece.shape.height;
+        if (index === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      });
+      context.closePath();
+      context.fill();
+      context.restore();
+    });
+
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let index = 0; index < image.data.length; index += 4) {
+      const visible = image.data[index + 3] >= 128;
+      image.data[index] = 0;
+      image.data[index + 1] = 0;
+      image.data[index + 2] = 0;
+      image.data[index + 3] = visible ? 255 : 0;
+    }
+    context.globalCompositeOperation = "source-over";
+    context.putImageData(image, 0, 0);
+  }, [pieces]);
+
+  return <canvas ref={canvasRef} className="target-silhouette" aria-hidden="true" />;
+}
+
 function trimMask(mask: ReturnType<typeof drawMask>) {
   let minX = mask.width;
   let minY = mask.height;
@@ -426,10 +471,10 @@ function FusionStage({
     <div className={`fusion-stage ${target ? "target-stage" : "answer-stage"}`}>
       <div className="stage-axis axis-x" aria-hidden="true" />
       <div className="stage-axis axis-y" aria-hidden="true" />
-      {pieces.map((piece) =>
-        target ? (
-          <div key={piece.id} className="fusion-piece target-piece" style={pieceStyle(piece, true)} />
-        ) : (
+      {target ? (
+        <TargetSilhouette pieces={pieces} />
+      ) : (
+        pieces.map((piece) => (
           <button
             key={piece.id}
             type="button"
@@ -442,7 +487,7 @@ function FusionStage({
             onPointerCancel={onPointerUp}
             onKeyDown={(event) => onKeyDown?.(event, piece)}
           />
-        ),
+        ))
       )}
     </div>
   );
