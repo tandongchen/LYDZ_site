@@ -61,7 +61,7 @@ main { min-height: 100vh; overflow: hidden; background-image: linear-gradient(rg
 .setup-controls { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: end; }
 .size-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
 .size-picker legend { margin: 0 0 7px; padding: 0; color: var(--muted); font-size: 11px; font-weight: 800; }
-.size-picker > div { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; }
+.size-picker > div { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
 .size-picker button { height: 56px; border: 1px solid var(--line); border-radius: 7px; background: white; cursor: pointer; transition: transform 150ms ease, border-color 150ms ease, background 150ms ease; }
 .size-picker button:hover { transform: translateY(-2px); }
 .size-picker button.selected { border: 2px solid var(--teal); background: #eaf8f6; color: var(--teal-dark); }
@@ -183,7 +183,7 @@ footer small { justify-self: end; font-family: "STKaiti", "KaiTi", serif; font-s
   .hero-lead { font-size: 34px; }
   .hero-description { font-size: 13px; }
   .setup-heading h2 { font-size: 25px; }
-  .size-picker > div { grid-template-columns: repeat(5,1fr); gap: 4px; }
+  .size-picker > div { grid-template-columns: repeat(3,1fr); gap: 4px; }
   .size-picker button { height: 51px; }
   .size-picker button span { display: none; }
   .status-row { grid-template-columns: auto 1fr; }

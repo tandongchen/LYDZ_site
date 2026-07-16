@@ -182,25 +182,6 @@ function gridTemplate(
 }
 
 const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
-  1: [
-    [{ shapeId: "triangle", x: 350, y: 200, rotation: 0 }],
-    [{ shapeId: "trapezoid", x: 350, y: 200, rotation: 0 }],
-    [{ shapeId: "small-square", x: 350, y: 200, rotation: 0 }],
-  ],
-  2: [
-    gridTemplate("square3", [
-      { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
-    ]),
-    gridTemplate("square3", [
-      { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
-    ]),
-    gridTemplate("square3", [
-      { shapeId: "square", col: 2, row: 2, rotation: 0 },
-      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
-    ]),
-  ],
   3: [
     gridTemplate("square3", [
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
@@ -216,6 +197,31 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
       { shapeId: "square", col: 2, row: 2, rotation: 0 },
       { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
       { shapeId: "unit-square", col: 4, row: 4, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 180 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 90 },
+      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 90 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "trapezoid", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 180 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
   ],
   4: [
@@ -236,6 +242,36 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
       { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
       { shapeId: "ell", col: 2, row: 2, rotation: 0 },
       { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 90 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 180 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 180 },
+      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 90 },
+      { shapeId: "rectangle", col: 2, row: 3, rotation: 90 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "trapezoid", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "parallelogram", col: 2, row: 2, rotation: 0 },
+      { shapeId: "parallelogram", col: 2, row: 2, rotation: 180 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 90 },
+      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
     ]),
   ],
   5: [
@@ -260,12 +296,45 @@ const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
       { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
       { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
     ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 90 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 180 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 0 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 180 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 90 },
+      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 180 },
+      { shapeId: "rectangle", col: 2, row: 3, rotation: 90 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "trapezoid", col: 2, row: 2, rotation: 0 },
+      { shapeId: "trapezoid", col: 2, row: 2, rotation: 180 },
+      { shapeId: "triangle", col: 2, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 0 },
+      { shapeId: "unit-square", col: 3, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "parallelogram", col: 2, row: 2, rotation: 0 },
+      { shapeId: "parallelogram", col: 2, row: 2, rotation: 180 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 2, row: 2, rotation: 270 },
+      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
+    ]),
   ],
 };
 
 const INITIAL_LAYOUTS: Record<number, Array<[number, number]>> = {
-  1: [[350, 325]],
-  2: [[240, 325], [460, 325]],
   3: [[150, 325], [350, 325], [550, 325]],
   4: [[150, 285], [350, 285], [250, 350], [450, 350]],
   5: [[150, 275], [350, 275], [550, 275], [250, 345], [450, 345]],
@@ -646,13 +715,13 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">01 · SET THE PIECES</span>
             <h2>先选择图形个数</h2>
-            <p>1—5 块均可挑战。黑白缺口越丰富，反推隐藏的消融步骤越烧脑。</p>
+            <p>3—5 块均可挑战。图形越多、黑白缺口越丰富，反推消融步骤越烧脑。</p>
           </div>
           <div className="setup-controls">
             <fieldset className="size-picker">
               <legend>本局使用</legend>
               <div className="count-options">
-                {[1, 2, 3, 4, 5].map((count) => (
+                {[3, 4, 5].map((count) => (
                   <button
                     type="button"
                     key={count}
@@ -742,7 +811,7 @@ export default function Home() {
             <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
           </div>
           <ol>
-            <li><span>一</span><p><strong>选择数量</strong>选择 1—5 块图形，系统生成一题必定可解的目标。</p></li>
+            <li><span>一</span><p><strong>选择数量</strong>选择 3—5 块图形，系统从分级题库生成一题必定可解的目标。</p></li>
             <li><span>二</span><p><strong>移动图形</strong>按住答题区中的黑色图形，把它拖到新的位置。</p></li>
             <li><span>三</span><p><strong>观察消融</strong>同一区域叠两层变白，叠三层又恢复黑色。</p></li>
             <li><span>四</span><p><strong>完成匹配</strong>最终黑白轮廓与目标形状一致即可，整体位置不限。</p></li>

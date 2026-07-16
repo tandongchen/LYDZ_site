@@ -34,7 +34,10 @@ test("server-renders the Parity Fusion game", async () => {
   assert.match(html, /位置不限/);
   assert.match(html, /黑白无间道/);
   assert.match(html, /奇数层保留黑色，偶数层消成白色/);
-  assert.match(html, /选择 1—5 块图形/);
+  assert.match(html, /3—5 块均可挑战/);
+  assert.match(html, /选择 3—5 块图形/);
+  assert.doesNotMatch(html, />1<\/strong><span>块图形/);
+  assert.doesNotMatch(html, />2<\/strong><span>块图形/);
   assert.match(html, /藏在重叠里的数学/);
   assert.match(html, /方向键可微调/);
   assert.doesNotMatch(html, /叠一叠，消一消/);
