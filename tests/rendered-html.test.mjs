@@ -5,7 +5,6 @@ async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
-
   return worker.fetch(
     new Request("http://localhost/", { headers: { accept: "text/html" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
@@ -13,33 +12,20 @@ async function render() {
   );
 }
 
-test("server-renders the Parity Fusion game", async () => {
+test("server-renders the Number Bomb game", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>层叠消融｜魔法数学<\/title>/i);
-  assert.match(html, /把重叠，变成/);
-  assert.match(html, /选择图形个数/);
-  assert.match(html, /随机生成新目标/);
-  assert.match(html, /目标图形/);
-  assert.match(html, /黑白缺口越丰富/);
-  assert.match(html, /观察黑白相间的规则构型/);
-  assert.match(html, /class="target-silhouette"/);
-  assert.doesNotMatch(html, /class="fusion-piece target-piece"/);
-  assert.match(html, /答题区域/);
-  assert.match(html, /整体位置不同也能判定成功/);
-  assert.match(html, /位置不限/);
-  assert.match(html, /黑白无间道/);
-  assert.match(html, /奇数层保留黑色，偶数层消成白色/);
-  assert.match(html, /3—5 块均可挑战/);
-  assert.match(html, /选择 3—5 块图形/);
-  assert.doesNotMatch(html, />1<\/strong><span>块图形/);
-  assert.doesNotMatch(html, />2<\/strong><span>块图形/);
-  assert.match(html, /藏在重叠里的数学/);
-  assert.match(html, /方向键可微调/);
-  assert.doesNotMatch(html, /叠一叠，消一消/);
-  assert.doesNotMatch(html, /箭阵迷域|codex-preview|SkeletonPreview|react-loading-skeleton/i);
+  assert.match(html, /<title>数字炸弹｜多人猜数字派对游戏<\/title>/i);
+  assert.match(html, /召集你的队伍/);
+  assert.match(html, /选择参加人数/);
+  assert.match(html, /每位玩家代表一支队伍/);
+  assert.match(html, /埋下炸弹/);
+  assert.match(html, /2—5 名玩家/);
+  assert.match(html, /缩小范围/);
+  assert.match(html, /猜中系统随机生成的秘密数字/);
+  assert.doesNotMatch(html, /层叠消融|目标图形|codex-preview|SkeletonPreview/i);
 });
