@@ -37,6 +37,13 @@ type PieceSpec = {
   rotation: number;
 };
 
+type GridPieceSpec = {
+  shapeId: string;
+  col: number;
+  row: number;
+  rotation: number;
+};
+
 type DragState = {
   id: number;
   pointerId: number;
@@ -47,15 +54,18 @@ type DragState = {
 const BOARD_WIDTH = 700;
 const BOARD_HEIGHT = 420;
 const GRID = 10;
+const SHAPE_UNIT = 40;
 
 const SHAPES: Shape[] = [
-  { id: "square", name: "正方形", width: 112, height: 112, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
-  { id: "rectangle", name: "矩形", width: 76, height: 142, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+  { id: "square", name: "正方形", width: 120, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+  { id: "small-square", name: "小正方形", width: 80, height: 80, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+  { id: "rectangle", name: "窄矩形", width: 40, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+  { id: "block-rectangle", name: "宽矩形", width: 80, height: 120, points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
   { id: "triangle", name: "直角三角形", width: 130, height: 130, points: [[0, 0], [100, 0], [0, 100]] },
   { id: "trapezoid", name: "梯形", width: 138, height: 104, points: [[22, 0], [78, 0], [100, 100], [0, 100]] },
-  { id: "ell", name: "L 形", width: 136, height: 136, points: [[0, 0], [100, 0], [100, 42], [42, 42], [42, 100], [0, 100]] },
+  { id: "ell", name: "L 形", width: 120, height: 120, points: [[0, 0], [100, 0], [100, 33.333], [33.333, 33.333], [33.333, 100], [0, 100]] },
   { id: "parallelogram", name: "平行四边形", width: 138, height: 104, points: [[24, 0], [100, 0], [76, 100], [0, 100]] },
-  { id: "tee", name: "T 形", width: 136, height: 136, points: [[0, 0], [100, 0], [100, 34], [68, 34], [68, 100], [32, 100], [32, 34], [0, 34]] },
+  { id: "tee", name: "T 形", width: 120, height: 120, points: [[0, 0], [100, 0], [100, 33.333], [66.667, 33.333], [66.667, 100], [33.333, 100], [33.333, 33.333], [0, 33.333]] },
 ];
 
 const PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
@@ -140,6 +150,117 @@ const PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
   ],
 };
 
+const SIMPLE_TARGETS = {
+  square2: { width: 2, height: 2 },
+  square3: { width: 3, height: 3 },
+  rectangle2x3: { width: 2, height: 3 },
+} as const;
+
+function gridTemplate(
+  targetId: keyof typeof SIMPLE_TARGETS,
+  specs: GridPieceSpec[],
+): PieceSpec[] {
+  const target = SIMPLE_TARGETS[targetId];
+  const originX = 350 - (2 + target.width / 2) * SHAPE_UNIT;
+  const originY = 200 - (2 + target.height / 2) * SHAPE_UNIT;
+
+  return specs.map((spec) => {
+    const shape = SHAPES.find((candidate) => candidate.id === spec.shapeId)!;
+    const swapsAxes = Math.abs(spec.rotation / 90) % 2 === 1;
+    const width = (swapsAxes ? shape.height : shape.width) / SHAPE_UNIT;
+    const height = (swapsAxes ? shape.width : shape.height) / SHAPE_UNIT;
+
+    return {
+      shapeId: spec.shapeId,
+      x: originX + (spec.col + width / 2) * SHAPE_UNIT,
+      y: originY + (spec.row + height / 2) * SHAPE_UNIT,
+      rotation: spec.rotation,
+    };
+  });
+}
+
+const SIMPLE_PUZZLE_TEMPLATES: Record<number, PieceSpec[][]> = {
+  1: [
+    [{ shapeId: "triangle", x: 350, y: 200, rotation: 0 }],
+    [{ shapeId: "trapezoid", x: 350, y: 200, rotation: 0 }],
+    [{ shapeId: "small-square", x: 350, y: 200, rotation: 0 }],
+  ],
+  2: [
+    gridTemplate("rectangle2x3", [
+      { shapeId: "rectangle", col: 1, row: 2, rotation: 0 },
+      { shapeId: "square", col: 1, row: 2, rotation: 0 },
+    ]),
+    gridTemplate("square2", [
+      { shapeId: "ell", col: 1, row: 1, rotation: 0 },
+      { shapeId: "square", col: 1, row: 1, rotation: 0 },
+    ]),
+    gridTemplate("square2", [
+      { shapeId: "ell", col: 2, row: 1, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 1, rotation: 0 },
+    ]),
+  ],
+  3: [
+    gridTemplate("rectangle2x3", [
+      { shapeId: "small-square", col: 3, row: 3, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+    ]),
+    gridTemplate("square2", [
+      { shapeId: "rectangle", col: 1, row: 1, rotation: 0 },
+      { shapeId: "block-rectangle", col: 2, row: 1, rotation: 0 },
+      { shapeId: "ell", col: 1, row: 1, rotation: 0 },
+    ]),
+    gridTemplate("square2", [
+      { shapeId: "rectangle", col: 0, row: 1, rotation: 90 },
+      { shapeId: "block-rectangle", col: 1, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 0, row: 1, rotation: 0 },
+    ]),
+  ],
+  4: [
+    gridTemplate("rectangle2x3", [
+      { shapeId: "square", col: 2, row: 1, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 270 },
+      { shapeId: "ell", col: 2, row: 1, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+    ]),
+    gridTemplate("rectangle2x3", [
+      { shapeId: "square", col: 1, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 1, row: 2, rotation: 0 },
+      { shapeId: "tee", col: 2, row: 1, rotation: 90 },
+      { shapeId: "rectangle", col: 4, row: 1, rotation: 0 },
+    ]),
+    gridTemplate("rectangle2x3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 1, row: 1, rotation: 270 },
+      { shapeId: "rectangle", col: 1, row: 1, rotation: 0 },
+    ]),
+  ],
+  5: [
+    gridTemplate("square3", [
+      { shapeId: "block-rectangle", col: 3, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 2, row: 1, rotation: 270 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "small-square", col: 3, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 2, row: 1, rotation: 0 },
+    ]),
+    gridTemplate("rectangle2x3", [
+      { shapeId: "square", col: 2, row: 2, rotation: 0 },
+      { shapeId: "ell", col: 1, row: 2, rotation: 90 },
+      { shapeId: "tee", col: 1, row: 2, rotation: 0 },
+      { shapeId: "rectangle", col: 4, row: 2, rotation: 0 },
+      { shapeId: "small-square", col: 2, row: 3, rotation: 0 },
+    ]),
+    gridTemplate("square3", [
+      { shapeId: "block-rectangle", col: 2, row: 3, rotation: 90 },
+      { shapeId: "ell", col: 1, row: 2, rotation: 90 },
+      { shapeId: "ell", col: 2, row: 2, rotation: 0 },
+      { shapeId: "small-square", col: 2, row: 3, rotation: 0 },
+      { shapeId: "rectangle", col: 1, row: 2, rotation: 90 },
+    ]),
+  ],
+};
+
 const INITIAL_LAYOUTS: Record<number, Array<[number, number]>> = {
   1: [[350, 325]],
   2: [[240, 325], [460, 325]],
@@ -162,7 +283,7 @@ function snap(value: number) {
 
 function createChallenge(count: number, seed: number): Challenge {
   const random = seededRandom(seed);
-  const templates = PUZZLE_TEMPLATES[count];
+  const templates = SIMPLE_PUZZLE_TEMPLATES[count] ?? PUZZLE_TEMPLATES[count];
   const template = templates[Math.floor(random() * templates.length)];
   const quarterTurns = Math.floor(random() * 4);
 
@@ -478,7 +599,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">01 · SET THE PIECES</span>
             <h2>先选择图形个数</h2>
-            <p>1—5 块均可挑战。3 块以上包含镜像布局与多重空间相消。</p>
+            <p>1—5 块均可挑战。目标越简单，反推隐藏的消融步骤越烧脑。</p>
           </div>
           <div className="setup-controls">
             <fieldset className="size-picker">
@@ -535,7 +656,7 @@ export default function Home() {
         <section className="target-zone" aria-labelledby="target-heading">
           <div className="zone-heading">
             <span><b>02</b><small>TARGET</small></span>
-            <div><h2 id="target-heading">目标图形</h2><p>目标关于某条轴对称，中心通常包含二重与三重叠加。</p></div>
+            <div><h2 id="target-heading">目标图形</h2><p>答案只是简单几何形，难点是反推出多次叠加与相消。</p></div>
           </div>
           <div className="target-frame">
             <FusionStage pieces={challenge.pieces} target />
