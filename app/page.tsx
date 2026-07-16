@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent, PointerEvent } from "react";
 
 type GameStatus = "playing" | "success";
@@ -51,12 +51,22 @@ const SHAPES: Shape[] = [
   { id: "trapezoid", name: "梯形", width: 140, height: 112, points: [[22, 0], [78, 0], [100, 100], [0, 100]] },
 ];
 
-const TARGET_LAYOUTS: Record<number, Array<[number, number]>> = {
-  1: [[350, 190]],
-  2: [[310, 200], [390, 200]],
-  3: [[350, 145], [300, 225], [400, 225]],
-  4: [[350, 135], [285, 205], [415, 205], [350, 270]],
-  5: [[350, 130], [285, 195], [415, 195], [315, 270], [385, 270]],
+const REGULAR_SHAPES = SHAPES.filter((shape) => shape.id !== "flag" && shape.id !== "chevron");
+
+const TARGET_LAYOUTS: Record<number, Array<[number, number, number]>> = {
+  1: [[350, 200, 0]],
+  2: [[315, 200, -45], [385, 200, 45]],
+  3: [[350, 145, 0], [300, 225, -45], [400, 225, 45]],
+  4: [[350, 145, 0], [405, 200, 90], [350, 255, 180], [295, 200, 270]],
+  5: [[350, 200, 0], [350, 135, 0], [415, 200, 90], [350, 265, 180], [285, 200, 270]],
+};
+
+const SHAPE_PATTERNS: Record<number, number[]> = {
+  1: [0],
+  2: [0, 0],
+  3: [0, 1, 1],
+  4: [0, 1, 0, 1],
+  5: [0, 1, 1, 1, 1],
 };
 
 function seededRandom(seed: number) {
@@ -73,7 +83,7 @@ function snap(value: number) {
 
 function createChallenge(count: number, seed: number): Challenge {
   const random = seededRandom(seed);
-  const pool = [...SHAPES];
+  const pool = [...REGULAR_SHAPES];
   for (let index = pool.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(random() * (index + 1));
     [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
@@ -83,17 +93,25 @@ function createChallenge(count: number, seed: number): Challenge {
     count === 1 ? 350 : 90 + (520 * index) / (count - 1),
   );
 
-  const pieces = pool.slice(0, count).map((shape, index) => {
-    const [baseTargetX, baseTargetY] = TARGET_LAYOUTS[count][index];
-    const targetX = snap(baseTargetX + (Math.floor(random() * 3) - 1) * 10);
-    const targetY = snap(baseTargetY + (Math.floor(random() * 3) - 1) * 10);
+  const quarterTurns = Math.floor(random() * 4);
+  const patternShapes = SHAPE_PATTERNS[count].map((shapeIndex) => pool[shapeIndex]);
+
+  const pieces = patternShapes.map((shape, index) => {
+    const [baseTargetX, baseTargetY, baseRotation] = TARGET_LAYOUTS[count][index];
+    let offsetX = baseTargetX - 350;
+    let offsetY = baseTargetY - 200;
+    for (let turn = 0; turn < quarterTurns; turn += 1) {
+      [offsetX, offsetY] = [-offsetY, offsetX];
+    }
+    const targetX = snap(350 + offsetX);
+    const targetY = snap(200 + offsetY);
     const initialX = snap(startXs[index]);
     const initialY = snap(344 + (index % 2) * 8);
 
     return {
       id: index,
       shape,
-      rotation: Math.floor(random() * 8) * 45,
+      rotation: baseRotation + quarterTurns * 90,
       x: initialX,
       y: initialY,
       initialX,
@@ -135,14 +153,51 @@ function drawMask(pieces: Piece[], useTarget: boolean) {
     context.restore();
   });
 
-  return context.getImageData(0, 0, canvas.width, canvas.height).data;
+  return {
+    data: context.getImageData(0, 0, canvas.width, canvas.height).data,
+    width: canvas.width,
+    height: canvas.height,
+  };
+}
+
+function trimMask(mask: ReturnType<typeof drawMask>) {
+  let minX = mask.width;
+  let minY = mask.height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < mask.height; y += 1) {
+    for (let x = 0; x < mask.width; x += 1) {
+      const alpha = mask.data[(y * mask.width + x) * 4 + 3];
+      if (alpha <= 16) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (maxX < minX || maxY < minY) return { width: 0, height: 0, pixels: new Uint8Array() };
+
+  const width = maxX - minX + 1;
+  const height = maxY - minY + 1;
+  const pixels = new Uint8Array(width * height);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const alpha = mask.data[((minY + y) * mask.width + minX + x) * 4 + 3];
+      pixels[y * width + x] = alpha > 16 ? 1 : 0;
+    }
+  }
+
+  return { width, height, pixels };
 }
 
 function isSolved(pieces: Piece[]) {
-  const current = drawMask(pieces, false);
-  const target = drawMask(pieces, true);
-  for (let index = 3; index < current.length; index += 4) {
-    if ((current[index] > 0) !== (target[index] > 0)) return false;
+  const current = trimMask(drawMask(pieces, false));
+  const target = trimMask(drawMask(pieces, true));
+  if (current.width !== target.width || current.height !== target.height) return false;
+  for (let index = 0; index < current.pixels.length; index += 1) {
+    if (current.pixels[index] !== target.pixels[index]) return false;
   }
   return true;
 }
@@ -212,11 +267,6 @@ export default function Home() {
   const [moves, setMoves] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const dragRef = useRef<DragState | null>(null);
-
-  const placedCount = useMemo(
-    () => challenge.pieces.filter((piece) => piece.x === piece.targetX && piece.y === piece.targetY).length,
-    [challenge.pieces],
-  );
 
   function replacePieces(pieces: Piece[], countMove = false) {
     setChallenge((current) => ({ ...current, pieces }));
@@ -339,7 +389,7 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <div className="eyebrow"><span />PARITY PUZZLE · 叠一叠，消一消<span /></div>
+          <div className="eyebrow"><span />PARITY PUZZLE<span /></div>
           <h1 aria-label="层叠消融"><span>层</span><span>叠</span><span>消</span><span>融</span></h1>
           <p className="hero-lead">把重叠，变成<em>答案。</em></p>
           <p className="hero-description">
@@ -403,7 +453,7 @@ export default function Home() {
           <span className="result-mark">{status === "success" ? "MATCH" : "XOR"}</span>
           <p>
             <strong>{status === "success" ? "漂亮的消融！" : "奇数层保留黑色，偶数层消成白色"}</strong>
-            {status === "success" ? "可以换一组图形继续挑战。" : "不必按图形原来的顺序，只看最终黑白轮廓是否一致。"}
+            {status === "success" ? "可以换一组图形继续挑战。" : "只看最终黑白轮廓；整体放在答题区的任何位置都可以。"}
           </p>
           <div className="result-actions">
             <button type="button" onClick={resetChallenge}>还原位置</button>
@@ -416,7 +466,7 @@ export default function Home() {
         <section className="target-zone" aria-labelledby="target-heading">
           <div className="zone-heading">
             <span><b>02</b><small>TARGET</small></span>
-            <div><h2 id="target-heading">目标图形</h2><p>观察所有黑色区域与白色缺口。</p></div>
+            <div><h2 id="target-heading">目标图形</h2><p>观察规则轮廓中的黑色区域与白色缺口。</p></div>
           </div>
           <div className="target-frame">
             <FusionStage pieces={challenge.pieces} target />
@@ -426,8 +476,8 @@ export default function Home() {
         <section className="answer-zone" aria-labelledby="answer-heading">
           <div className="zone-heading">
             <span><b>03</b><small>WORKSPACE</small></span>
-            <div><h2 id="answer-heading">答题区域</h2><p>用鼠标或触摸拖动；选中后也可用方向键微调。</p></div>
-            <span className="placed-note">已就位 {placedCount} / {pieceCount}</span>
+            <div><h2 id="answer-heading">答题区域</h2><p>用鼠标或触摸拖动；整体位置不同也能判定成功。</p></div>
+            <span className="placed-note">位置不限</span>
           </div>
           <div className="answer-frame">
             <FusionStage
@@ -458,7 +508,7 @@ export default function Home() {
             <li><span>一</span><p><strong>选择数量</strong>选择 1—5 块图形，系统生成一题必定可解的目标。</p></li>
             <li><span>二</span><p><strong>移动图形</strong>按住答题区中的黑色图形，把它拖到新的位置。</p></li>
             <li><span>三</span><p><strong>观察消融</strong>同一区域叠两层变白，叠三层又恢复黑色。</p></li>
-            <li><span>四</span><p><strong>完成匹配</strong>最终黑白轮廓与目标完全一致时，立即判定成功。</p></li>
+            <li><span>四</span><p><strong>完成匹配</strong>最终黑白轮廓与目标形状一致即可，整体位置不限。</p></li>
           </ol>
         </article>
 
@@ -484,7 +534,7 @@ export default function Home() {
       <footer>
         <span>魔法数学</span>
         <p>在动手中看见规律，在重叠里找到答案。</p>
-        <small>层叠消融 · PARITY LAB</small>
+        <small>黑白无间道</small>
       </footer>
     </main>
   );

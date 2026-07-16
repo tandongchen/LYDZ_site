@@ -26,9 +26,13 @@ test("server-renders the Parity Fusion game", async () => {
   assert.match(html, /随机生成新目标/);
   assert.match(html, /目标图形/);
   assert.match(html, /答题区域/);
+  assert.match(html, /整体位置不同也能判定成功/);
+  assert.match(html, /位置不限/);
+  assert.match(html, /黑白无间道/);
   assert.match(html, /奇数层保留黑色，偶数层消成白色/);
   assert.match(html, /选择 1—5 块图形/);
   assert.match(html, /藏在重叠里的数学/);
   assert.match(html, /方向键可微调/);
+  assert.doesNotMatch(html, /叠一叠，消一消/);
   assert.doesNotMatch(html, /箭阵迷域|codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });
