@@ -29,6 +29,8 @@ test("server-renders the Number Bomb game", async () => {
   assert.match(html, /拉文克劳/);
   assert.match(html, /赫奇帕奇/);
   assert.match(html, /埋下炸弹/);
+  assert.match(html, /别猜中它/);
+  assert.match(html, /让范围越来越小/);
   assert.match(html, /2—4 名玩家/);
   assert.doesNotMatch(html, /数字实验室|NO\. 03|NUMBER BOMB · 2026/);
   assert.match(html, /缩小范围/);

@@ -40,7 +40,7 @@ main { min-height: 100vh; overflow: hidden; background-image: radial-gradient(rg
 .hero h1 span:nth-child(4)::after { content: ""; position: absolute; left: 10%; right: -5%; bottom: -12px; height: 10px; border-radius: 50%; background: var(--gold); transform: rotate(-3deg); }
 .hero-lead { margin: 0 0 22px; font-family: "STKaiti", "KaiTi", serif; font-size: clamp(34px,4.2vw,49px); font-weight: 900; line-height: 1.08; letter-spacing: -.045em; }
 .hero-lead em { color: var(--red-dark); font-style: normal; }
-.hero-description { max-width: 650px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
+.hero-description { width: min(650px, calc(100% - 340px)); margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
 
 .hero-bomb { position: absolute; right: 4%; top: 50%; width: 260px; height: 300px; transform: translateY(-52%) rotate(4deg); }
 .bomb-body { position: absolute; left: 28px; bottom: 17px; display: grid; width: 218px; aspect-ratio: 1; place-items: center; border-radius: 48% 52% 47% 53%; background: var(--ink); box-shadow: inset -20px -20px 0 var(--ink-deep), inset 13px 12px 0 rgba(255,255,255,.05); }
@@ -171,7 +171,8 @@ footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif;
   .site-header { height: 70px; }
   .hero { min-height: 0; padding: 50px 0 42px; }
   .hero h1 { font-size: clamp(44px,10vw,62px); }
-  .hero-description { padding-right: 20px; }
+  .hero-description { width: 100%; padding-right: 0; }
+  .hero-bomb { display: none; }
   .hero-bomb { right: -130px; top: 46%; opacity: .11; transform: translateY(-52%) rotate(4deg) scale(.9); }
   .game-shell { padding: 24px 18px; }
   .setup-form { grid-template-columns: 1fr; gap: 22px; }

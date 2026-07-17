@@ -118,7 +118,7 @@ export default function NumberBombGame() {
         <div className="hero-copy">
           <p className="eyebrow"><span />THE NUMBER BOMB<span /></p>
           <h1><span>数</span><span>字</span><span>炸</span><span>弹</span></h1>
-          <p className="hero-lead">别猜中它，<em>让范围越来越小。</em></p>
+          <p className="hero-lead">别猜中它，<br /><em>让范围越来越小。</em></p>
           <p className="hero-description">
             一个秘密数字，一场轮流试探。每一次安全猜测都会压缩炸弹区间，
             直到某位玩家亲手按下那个危险的数字。
