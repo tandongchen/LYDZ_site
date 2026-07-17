@@ -38,7 +38,11 @@ export default function NumberBombGame() {
     [teamCount, teamNames],
   );
   const currentTeam = activeTeams[turn] ?? activeTeams[0];
-  const rangeWidth = upper - lower;
+  const lowerWasGuessed = records.some((record) => record.guess === lower);
+  const upperWasGuessed = records.some((record) => record.guess === upper);
+  const playableLower = lower + (lowerWasGuessed ? 1 : 0);
+  const playableUpper = upper - (upperWasGuessed ? 1 : 0);
+  const remainingPossibilities = playableUpper - playableLower + 1;
 
   function resetRound() {
     setSecret(makeSecret());
@@ -71,8 +75,8 @@ export default function NumberBombGame() {
       setError("请输入一个整数。");
       return;
     }
-    if (value < lower || value > upper) {
-      setError(`请输入 ${lower} 到 ${upper} 之间的数字。`);
+    if (value < playableLower || value > playableUpper) {
+      setError(`请输入 ${playableLower} 到 ${playableUpper} 之间的数字。`);
       return;
     }
     if (records.some((record) => record.guess === value)) {
@@ -206,7 +210,7 @@ export default function NumberBombGame() {
                 <span className="section-kicker">DANGER ZONE</span>
                 <p>{phase === "exploded" ? "炸弹数字揭晓" : "炸弹就在这个范围内"}</p>
                 <strong>{phase === "exploded" ? secret : `${lower} — ${upper}`}</strong>
-                <small>{phase === "exploded" ? `${loser} 引爆了炸弹` : `还剩约 ${rangeWidth + 1} 个可能`}</small>
+                <small>{phase === "exploded" ? `${loser} 引爆了炸弹` : `还剩 ${remainingPossibilities} 个可能`}</small>
               </div>
               <div className="range-bomb" aria-hidden="true">
                 <span className="mini-fuse" />
@@ -242,16 +246,16 @@ export default function NumberBombGame() {
                         id="guess-input"
                         type="number"
                         inputMode="numeric"
-                        min={lower}
-                        max={upper}
+                        min={playableLower}
+                        max={playableUpper}
                         value={guess}
                         onChange={(event) => setGuess(event.target.value)}
-                        placeholder={`${Math.round((lower + upper) / 2)}`}
+                        placeholder={`${Math.round((playableLower + playableUpper) / 2)}`}
                         autoComplete="off"
                       />
                       <button className="primary-button" type="submit">确认猜测 <span>→</span></button>
                     </div>
-                    <p className="form-error" aria-live="polite">{error || `可输入 ${lower} 到 ${upper}`}</p>
+                    <p className="form-error" aria-live="polite">{error || `可输入 ${playableLower} 到 ${playableUpper}`}</p>
                   </form>
                 </div>
 
