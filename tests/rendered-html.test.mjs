@@ -23,8 +23,14 @@ test("server-renders the Number Bomb game", async () => {
   assert.match(html, /召集你的队伍/);
   assert.match(html, /选择参加人数/);
   assert.match(html, /每位玩家代表一支队伍/);
+  assert.match(html, /魔法数学/);
+  assert.match(html, /格兰芬多/);
+  assert.match(html, /斯莱特林/);
+  assert.match(html, /拉文克劳/);
+  assert.match(html, /赫奇帕奇/);
   assert.match(html, /埋下炸弹/);
-  assert.match(html, /2—5 名玩家/);
+  assert.match(html, /2—4 名玩家/);
+  assert.doesNotMatch(html, /数字实验室|NO\. 03|NUMBER BOMB · 2026/);
   assert.match(html, /缩小范围/);
   assert.match(html, /猜中系统随机生成的秘密数字/);
   assert.doesNotMatch(html, /层叠消融|目标图形|codex-preview|SkeletonPreview/i);

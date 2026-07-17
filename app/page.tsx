@@ -12,8 +12,8 @@ type GuessRecord = {
   hint: string;
 };
 
-const TEAM_COLORS = ["#ee654b", "#1f8f95", "#e8ae36", "#7b6cc6", "#4d9a68"];
-const DEFAULT_TEAMS = ["赤焰队", "蓝鲸队", "星芒队", "紫电队", "绿洲队"];
+const TEAM_COLORS = ["#b63a3a", "#2f7a52", "#315e91", "#d09a2d"];
+const DEFAULT_TEAMS = ["格兰芬多", "斯莱特林", "拉文克劳", "赫奇帕奇"];
 
 function makeSecret() {
   return Math.floor(Math.random() * 100) + 1;
@@ -21,7 +21,7 @@ function makeSecret() {
 
 export default function NumberBombGame() {
   const [phase, setPhase] = useState<Phase>("setup");
-  const [teamCount, setTeamCount] = useState(3);
+  const [teamCount, setTeamCount] = useState(4);
   const [teamNames, setTeamNames] = useState(DEFAULT_TEAMS);
   const [secret, setSecret] = useState<number | null>(null);
   const [lower, setLower] = useState(1);
@@ -107,11 +107,11 @@ export default function NumberBombGame() {
   return (
     <main>
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="数字实验室首页">
-          <span className="brand-mark">N</span>
-          <span>数字实验室</span>
+        <a className="brand" href="#top" aria-label="魔法数学首页">
+          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <span>魔法数学</span>
         </a>
-        <span className="issue-tag">派对游戏 · NO. 03</span>
+        <span className="issue-tag">派对游戏</span>
       </header>
 
       <section className="hero" id="top">
@@ -151,7 +151,7 @@ export default function NumberBombGame() {
             <fieldset className="count-picker">
               <legend>选择参加人数</legend>
               <div>
-                {[2, 3, 4, 5].map((count) => (
+                {[2, 3, 4].map((count) => (
                   <button
                     type="button"
                     className={teamCount === count ? "selected" : ""}
@@ -285,13 +285,13 @@ export default function NumberBombGame() {
           <h2>三步开始，越猜越刺激</h2>
         </div>
         <ol>
-          <li><span>01</span><div><strong>组建队伍</strong><p>选择 2—5 名玩家，每人代表一支队伍，按顺序轮流猜数。</p></div></li>
+          <li><span>01</span><div><strong>组建队伍</strong><p>选择 2—4 名玩家，每人代表一支队伍，按顺序轮流猜数。</p></div></li>
           <li><span>02</span><div><strong>缩小范围</strong><p>系统会根据猜测提示新区间。下一位只能在当前范围内继续猜。</p></div></li>
           <li><span>03</span><div><strong>避开炸弹</strong><p>谁猜中系统随机生成的秘密数字，谁就引爆炸弹并输掉本轮。</p></div></li>
         </ol>
       </section>
 
-      <footer><span>数字实验室</span><p>在 1 和 100 之间，藏着一次心跳。</p><small>NUMBER BOMB · 2026</small></footer>
+      <footer><span>魔法数学</span><p>在 1 和 100 之间，藏着一次心跳。</p></footer>
     </main>
   );
 }
