@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const baseUrl = `${protocol}://${host}`;
-  const title = "楚汉之争｜玩家与 AI 的双人扑克牌战术游戏";
-  const description = "选择楚或汉，在八座战场布置三张牌的战斗队形，与 AI 军师争夺天下。";
+  const title = "世界杯风云｜本地双人足球策略游戏";
+  const description = "选择国家队，通过扑克牌强化能力，在十二回合中用进攻、防守与控制争夺世界杯胜利。";
 
   return {
     title,
@@ -21,13 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [{ url: `${baseUrl}/og-chuhan.png`, width: 1536, height: 1024 }],
+      images: [{ url: `${baseUrl}/og-world-cup.png`, width: 1536, height: 1024 }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [`${baseUrl}/og-chuhan.png`],
+      images: [`${baseUrl}/og-world-cup.png`],
     },
   };
 }

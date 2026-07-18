@@ -13,101 +13,55 @@ async function render() {
   );
 }
 
-test("server-renders the Chu-Han Contention game", async () => {
+test("server-renders the World Cup Duel game", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>楚汉之争｜玩家与 AI 的双人扑克牌战术游戏<\/title>/i);
-  assert.match(html, /楚汉之争/);
-  assert.match(html, /选择你的阵营/);
-  assert.match(html, /博弈游戏/);
-  assert.match(html, /智慧谋略/);
-  assert.match(html, /扑克桌游/);
-  assert.match(html, /选择难度/);
-  assert.match(html, /初级/);
-  assert.match(html, /高级/);
-  assert.match(html, /乱世枭雄/);
-  assert.match(html, /运筹帷幄/);
-  assert.match(html, /列阵开战/);
-  assert.match(html, /八战场，一套兵法/);
-  assert.match(html, /同花顺/);
-  assert.match(html, /大获全胜/);
-  assert.match(html, /势如破竹/);
-  assert.match(html, /边路突袭/);
-  assert.match(html, /魔法数学/);
-  assert.doesNotMatch(html, /直接宽松的策略|玩家目标胜率|计算路线与技能时机|挑战玩家胜率|纸牌兵法 · 双人对决|15–25 分钟|玩家 VS 我|御马狂飙|数字炸弹|codex-preview|SkeletonPreview/i);
+  assert.match(html, /<title>世界杯风云｜本地双人足球策略游戏<\/title>/i);
+  assert.match(html, /世界杯风云/);
+  assert.match(html, /选择对阵球队/);
+  assert.match(html, /玩家一/);
+  assert.match(html, /玩家二/);
+  assert.match(html, /进攻/);
+  assert.match(html, /防守/);
+  assert.match(html, /控制/);
+  assert.match(html, /阿根廷/);
+  assert.match(html, /西班牙/);
+  assert.match(html, /法国/);
+  assert.match(html, /英格兰/);
+  assert.match(html, /葡萄牙/);
 });
 
-test("keeps the AI rock-paper-scissors result visible until confirmation", async () => {
+test("implements all three probability formulas and their limits", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /aiOpeningTurn/);
-  assert.match(source, /确认结果，继续开战/);
-  assert.match(source, /phase:\s*"playing"/);
+  assert.match(source, /stats\[current\]\.attack - stats\[defender\]\.defense \/ \(defended \? 1 : 2\)/);
+  assert.match(source, /stats\[current\]\.control - stats\[rival\]\.control/);
+  assert.match(source, /Math\.max\(0, Math\.min\(10, value\)\)/);
+  assert.match(source, /chance \/ 10/);
 });
 
-test("prevents Han swaps from using completed battlefields", async () => {
+test("keeps the requested 5 plus 6 plus 6 round structure", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /if \(field\.winner\) return;/);
-  assert.match(source, /fieldA\.winner \|\| fieldB\.winner/);
-  assert.match(source, /两个未结束战场/);
+  assert.match(source, /prepTurn === 4/);
+  assert.match(source, /nextTurn === 6/);
+  assert.match(source, /nextTurn >= 12/);
+  assert.match(source, /otherPlayer\(firstHalfStarter\)/);
 });
 
-test("keeps a detailed, complete battle report including skills", async () => {
+test("supports red and black card allocation and halftime points", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /game\.logs\.map/);
-  assert.match(source, /第 \{log\.round\} 回合/);
-  assert.match(source, /kind: "skill"/);
-  assert.match(source, /出牌前发动/);
-  assert.match(source, /进攻第 \$\{fieldIndex \+ 1\} 战场受阻/);
+  assert.match(source, /setBoostLeft\(card\.red \? 2 : 1\)/);
+  assert.match(source, /setSabotageLeft\(card\.red \? 0 : 1\)/);
+  assert.match(source, /setHalftimePoints\(3\)/);
+  assert.match(source, /stats\[player\]\[key\] >= 15/);
+  assert.match(source, /stats\[player\]\[key\] <= 0/);
 });
 
-test("advanced AI prioritizes high-level formations and penalizes scattered formations", async () => {
+test("grants two control turns and disables repeated control", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /FORMATION_PRIORITY_SCORE/);
-  assert.match(source, /1: -6400/);
-  assert.match(source, /5: 15200/);
-  assert.match(source, /formationPlanScore/);
-  assert.match(source, /bestReachableFormation/);
-});
-
-test("uses Chu and Han army names in turn headings and battle reports", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /armyName\(game, game\.turn\).*行动/);
-  assert.match(source, /armyName\(next, "ai"\).*向第/);
-  assert.match(source, /armyName\(next, "player"\).*向第/);
-  assert.doesNotMatch(source, /你方行动|我方行动/);
-});
-
-test("blocks imminent empty-lane captures and centers the hero title across the page", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(source, /emptyLaneThreatScore/);
-  assert.match(source, /urgentBlocks/);
-  assert.match(source, /wouldEndGame/);
-  assert.match(source, /className="hero-title-lockup"/);
-  assert.match(styles, /\.hero-title-lockup\s*\{[^}]*width:\s*100%/s);
-});
-
-test("uses Chu and Han army names for rock-paper-scissors results", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /armyName\(current, "player"\).*赢了/);
-  assert.match(source, /armyName\(current, "ai"\).*赢了/);
-  assert.match(source, /<small>\{armyName\(game, "player"\)\}<\/small>/);
-  assert.match(source, /<small>\{armyName\(game, "ai"\)\}<\/small>/);
-  assert.doesNotMatch(source, /你赢了，请决定|我赢了，并选择/);
-});
-
-test("uses the shared magic hat and faction-specific battlefield outcomes", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(styles, /\.brand-mark\s*\{[^}]*width:\s*45px;[^}]*height:\s*42px/s);
-  assert.match(styles, /border-bottom:\s*31px solid var\(--ink\)/);
-  assert.match(styles, /box-shadow:\s*0 4px 0 var\(--gold\)/);
-  assert.match(source, /armyName\(game, field\.winner\).*占据/);
-  assert.match(source, /你赢了 · 这一局由/);
-  assert.match(source, /你输了 · 这一局由/);
-  assert.doesNotMatch(source, /你方占领|我方占领|这一局由我拿下/);
+  assert.match(source, /finishMatchAction\(success \? 2 : 0\)/);
+  assert.match(source, /bonusTurns > 0/);
+  assert.match(source, /额外回合禁用/);
 });
