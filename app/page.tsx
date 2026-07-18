@@ -285,7 +285,7 @@ export default function HorseRaceGame() {
           <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="issue-tag">数学思维小游戏</span>
+        <span className="issue-tag">派对游戏</span>
       </header>
 
       <section className="hero" id="top">
