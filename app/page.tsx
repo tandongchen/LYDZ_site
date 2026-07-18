@@ -44,6 +44,7 @@ type RpsState = {
   player?: Gesture;
   ai?: Gesture;
   chooser?: Actor;
+  aiOpeningTurn?: Actor;
   text: string;
 };
 
@@ -719,10 +720,27 @@ export default function ChuHanGame() {
     const aiChoosesFirst = aiPrefersFirst(game.difficulty);
     setGame((current) => ({
       ...current,
+      rps: {
+        player: playerGesture,
+        ai: aiGesture,
+        chooser: "ai",
+        aiOpeningTurn: aiChoosesFirst ? "ai" : "player",
+        text: `我赢了，并选择${aiChoosesFirst ? "先手" : "后手"}。`,
+      },
+      message: "猜拳结果已经揭晓，确认后正式开战。",
+    }));
+  }
+
+  function confirmAiOrder() {
+    const openingTurn = game.rps.aiOpeningTurn ?? "ai";
+    setGame((current) => ({
+      ...current,
       phase: "playing",
-      turn: aiChoosesFirst ? "ai" : "player",
-      rps: { player: playerGesture, ai: aiGesture, chooser: "ai", text: `我赢了，并选择${aiChoosesFirst ? "先手" : "后手"}。` },
-      message: aiChoosesFirst ? "我赢得猜拳，选择先手。" : "我赢得猜拳，选择后手；由你先出牌。",
+      turn: openingTurn,
+      message:
+        openingTurn === "ai"
+          ? "我赢得猜拳并选择先手，由我先行。"
+          : "我赢得猜拳并选择后手，由你先出牌。",
     }));
   }
 
@@ -956,6 +974,12 @@ export default function ChuHanGame() {
                 <div className="order-buttons">
                   <button className="primary-button" type="button" onClick={() => chooseOrder("player")}>选择先手</button>
                   <button className="outline-button" type="button" onClick={() => chooseOrder("ai")}>选择后手</button>
+                </div>
+              ) : game.rps.chooser === "ai" ? (
+                <div className="order-buttons">
+                  <button className="primary-button" type="button" onClick={confirmAiOrder}>
+                    确认结果，继续开战
+                  </button>
                 </div>
               ) : (
                 <div className="gesture-buttons">

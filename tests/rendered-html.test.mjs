@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 async function render() {
@@ -38,4 +39,11 @@ test("server-renders the Chu-Han Contention game", async () => {
   assert.match(html, /边路突袭/);
   assert.match(html, /魔法数学/);
   assert.doesNotMatch(html, /直接宽松的策略|玩家目标胜率|计算路线与技能时机|挑战玩家胜率|纸牌兵法 · 双人对决|15–25 分钟|玩家 VS 我|御马狂飙|数字炸弹|codex-preview|SkeletonPreview/i);
+});
+
+test("keeps the AI rock-paper-scissors result visible until confirmation", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /aiOpeningTurn/);
+  assert.match(source, /确认结果，继续开战/);
+  assert.match(source, /phase:\s*"playing"/);
 });
