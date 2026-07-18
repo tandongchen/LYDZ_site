@@ -28,8 +28,6 @@ test("server-renders the Chu-Han Contention game", async () => {
   assert.match(html, /选择难度/);
   assert.match(html, /初级/);
   assert.match(html, /高级/);
-  assert.match(html, /玩家目标胜率 70%\+/);
-  assert.match(html, /挑战玩家胜率 30%-/);
   assert.match(html, /乱世枭雄/);
   assert.match(html, /运筹帷幄/);
   assert.match(html, /列阵开战/);
@@ -39,5 +37,5 @@ test("server-renders the Chu-Han Contention game", async () => {
   assert.match(html, /势如破竹/);
   assert.match(html, /边路突袭/);
   assert.match(html, /魔法数学/);
-  assert.doesNotMatch(html, /纸牌兵法 · 双人对决|15–25 分钟|玩家 VS 我|御马狂飙|数字炸弹|codex-preview|SkeletonPreview/i);
+  assert.doesNotMatch(html, /直接宽松的策略|玩家目标胜率|计算路线与技能时机|挑战玩家胜率|纸牌兵法 · 双人对决|15–25 分钟|玩家 VS 我|御马狂飙|数字炸弹|codex-preview|SkeletonPreview/i);
 });

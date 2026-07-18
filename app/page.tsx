@@ -8,6 +8,7 @@ type Actor = "player" | "ai";
 type Phase = "setup" | "rps" | "playing" | "finished";
 type Gesture = "rock" | "scissors" | "paper";
 type Difficulty = "beginner" | "advanced";
+type RpsOutcome = "player" | "ai" | "tie";
 
 type Card = {
   id: string;
@@ -64,6 +65,7 @@ type GameState = {
   actionSeq: number;
   round: number;
   aiThinking: boolean;
+  aiRecentFields: number[];
   rps: RpsState;
 };
 
@@ -82,9 +84,19 @@ const GESTURES: Record<Gesture, { icon: string; label: string }> = {
   paper: { icon: "▱", label: "布" },
 };
 
-function randomGesture() {
-  const options = Object.keys(GESTURES) as Gesture[];
-  return options[Math.floor(Math.random() * options.length)];
+function aiGestureForOutcome(playerGesture: Gesture, outcome: RpsOutcome) {
+  if (outcome === "tie") return playerGesture;
+  const winningGesture: Record<Gesture, Gesture> = {
+    rock: "paper",
+    scissors: "rock",
+    paper: "scissors",
+  };
+  const losingGesture: Record<Gesture, Gesture> = {
+    rock: "scissors",
+    scissors: "paper",
+    paper: "rock",
+  };
+  return outcome === "ai" ? winningGesture[playerGesture] : losingGesture[playerGesture];
 }
 
 function aiPrefersFirst(difficulty: Difficulty) {
@@ -156,6 +168,7 @@ function initialGame(playerFaction: Faction = "chu", difficulty: Difficulty = "b
     actionSeq: 0,
     round: 1,
     aiThinking: false,
+    aiRecentFields: [],
     rps: { text: "出拳定先后。" },
   };
 }
@@ -167,6 +180,7 @@ function cloneGame(game: GameState): GameState {
     deck: [...game.deck],
     usedSkill: { ...game.usedSkill },
     logs: [...game.logs],
+    aiRecentFields: [...game.aiRecentFields],
     rps: { ...game.rps },
     battlefields: game.battlefields.map((field) => ({
       ...field,
@@ -345,6 +359,20 @@ const VICTORY_ROUTES = [
   [5, 6, 7],
 ];
 
+function routeFocusBonus(game: GameState, fieldIndex: number) {
+  let best = 0;
+  VICTORY_ROUTES.forEach((route) => {
+    if (!route.includes(fieldIndex)) return;
+    if (route.some((index) => game.battlefields[index].winner === "player")) return;
+    const ownWins = route.filter((index) => game.battlefields[index].winner === "ai").length;
+    const deployed = route.reduce((sum, index) => sum + game.battlefields[index].troops.ai.length, 0);
+    const contested = route.reduce((sum, index) => sum + game.battlefields[index].troops.player.length, 0);
+    const edgeBonus = route.length === 2 ? 260 : 0;
+    best = Math.max(best, ownWins * 1050 + deployed * 115 - contested * 24 + edgeBonus);
+  });
+  return best;
+}
+
 function strategicBoardScore(game: GameState, actor: Actor) {
   const opponent: Actor = actor === "ai" ? "player" : "ai";
   let score = 0;
@@ -471,7 +499,9 @@ function aiPlayChoice(game: GameState) {
 
       let score = strategicBoardScore(trial, "ai");
       const playedField = trial.battlefields[fieldIndex];
+      let createsProvableAttack = false;
       if (playedField.troops.ai.length === 3 && attackVerdict(trial, playedField, "ai").success) {
+        createsProvableAttack = true;
         const attacked = resolveAttack(trial, fieldIndex, "ai");
         score += attacked.phase === "finished" ? 25000 : 4200;
       }
@@ -484,15 +514,30 @@ function aiPlayChoice(game: GameState) {
         });
       });
       score += secondStep * 0.2;
+
+      if (game.difficulty === "advanced") {
+        score += routeFocusBonus(game, fieldIndex);
+        if (field.troops.ai.length === 0) score += 340;
+        game.aiRecentFields.forEach((recentField, recentIndex) => {
+          if (recentField === fieldIndex && !createsProvableAttack) {
+            score -= [1750, 760, 320][recentIndex] ?? 180;
+          }
+        });
+      }
       choices.push({ cardIndex, fieldIndex, score });
     });
   });
   if (choices.length === 0) return null;
-  choices.sort((a, b) => a.score - b.score);
   if (game.difficulty === "beginner") {
-    const forgivingPool = choices.slice(0, Math.max(1, Math.ceil(choices.length * 0.55)));
+    const lastField = game.aiRecentFields[0];
+    const variedChoices = choices.some((choice) => choice.fieldIndex !== lastField)
+      ? choices.filter((choice) => choice.fieldIndex !== lastField)
+      : choices;
+    variedChoices.sort((a, b) => a.score - b.score);
+    const forgivingPool = variedChoices.slice(0, Math.max(1, Math.ceil(variedChoices.length * 0.55)));
     return forgivingPool[Math.floor(Math.random() * forgivingPool.length)];
   }
+  choices.sort((a, b) => a.score - b.score);
   return choices[choices.length - 1];
 }
 
@@ -522,6 +567,7 @@ function runAiTurn(game: GameState) {
     next.actionSeq += 1;
     const field = next.battlefields[choice.fieldIndex];
     field.troops.ai.push(card);
+    next.aiRecentFields = [choice.fieldIndex, ...next.aiRecentFields].slice(0, 3);
     if (field.troops.ai.length === 3) field.completedAt.ai = next.actionSeq;
     const drawn = next.deck.shift();
     if (drawn) next.hands.ai.push(drawn);
@@ -589,6 +635,9 @@ export default function ChuHanGame() {
   const [game, setGame] = useState<GameState>(() => initialGame());
   const [swapSelection, setSwapSelection] = useState<SwapRef[]>([]);
   const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
+  const [rpsOutcomeBag, setRpsOutcomeBag] = useState<RpsOutcome[]>(() =>
+    shuffled<RpsOutcome>(["player", "ai", "tie"]),
+  );
 
   const aiFaction = game.playerFaction === "chu" ? "han" : "chu";
   const playerCanAct = game.phase === "playing" && game.turn === "player" && !game.aiThinking;
@@ -643,19 +692,24 @@ export default function ChuHanGame() {
   }
 
   function playRps(playerGesture: Gesture) {
-    const aiGesture = randomGesture();
-    if (playerGesture === aiGesture) {
+    const outcomeBag = rpsOutcomeBag.length > 0
+      ? rpsOutcomeBag
+      : shuffled<RpsOutcome>(["player", "ai", "tie"]);
+    const [outcome, ...remainingOutcomes] = outcomeBag;
+    setRpsOutcomeBag(
+      remainingOutcomes.length > 0
+        ? remainingOutcomes
+        : shuffled<RpsOutcome>(["player", "ai", "tie"]),
+    );
+    const aiGesture = aiGestureForOutcome(playerGesture, outcome);
+    if (outcome === "tie") {
       setGame((current) => ({
         ...current,
         rps: { player: playerGesture, ai: aiGesture, text: "平局，再来一拳！" },
       }));
       return;
     }
-    const playerWins =
-      (playerGesture === "rock" && aiGesture === "scissors") ||
-      (playerGesture === "scissors" && aiGesture === "paper") ||
-      (playerGesture === "paper" && aiGesture === "rock");
-    if (playerWins) {
+    if (outcome === "player") {
       setGame((current) => ({
         ...current,
         rps: { player: playerGesture, ai: aiGesture, chooser: "player", text: "你赢了，请决定先手或后手。" },
@@ -865,8 +919,6 @@ export default function ChuHanGame() {
                   onClick={() => chooseDifficulty("beginner")}
                 >
                   <strong>初级</strong>
-                  <span>直接宽松的策略</span>
-                  <small>玩家目标胜率 70%+</small>
                 </button>
                 <button
                   type="button"
@@ -875,8 +927,6 @@ export default function ChuHanGame() {
                   onClick={() => chooseDifficulty("advanced")}
                 >
                   <strong>高级</strong>
-                  <span>计算路线与技能时机</span>
-                  <small>挑战玩家胜率 30%-</small>
                 </button>
               </div>
             </div>
