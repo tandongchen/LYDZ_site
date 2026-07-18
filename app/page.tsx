@@ -9,6 +9,7 @@ type Phase = "setup" | "rps" | "playing" | "finished";
 type Gesture = "rock" | "scissors" | "paper";
 type Difficulty = "beginner" | "advanced";
 type RpsOutcome = "player" | "ai" | "tie";
+type BattleLogKind = "play" | "attack" | "skill" | "system";
 
 type Card = {
   id: string;
@@ -37,6 +38,8 @@ type BattleLog = {
   id: number;
   title: string;
   detail: string;
+  round: number;
+  kind: BattleLogKind;
   actor?: Actor;
 };
 
@@ -203,6 +206,33 @@ function actorName(actor: Actor) {
   return actor === "player" ? "你" : "我";
 }
 
+function cardLabel(card: Card) {
+  return `${card.symbol}${card.rank}`;
+}
+
+function cardList(cards: Card[]) {
+  return cards.length > 0 ? cards.map(cardLabel).join("、") : "尚未布阵";
+}
+
+function formationDetail(cards: Card[]) {
+  const formation = getFormation(cards);
+  return formation
+    ? `${formation.name}（${cardList(cards)}，点数和 ${formation.sum}）`
+    : `${cards.length}/3 布阵（${cardList(cards)}）`;
+}
+
+function troopSideName(actor: Actor) {
+  return actor === "player" ? "你方" : "我方";
+}
+
+function swapCardDetail(ref: SwapRef, card: Card) {
+  return `第 ${ref.field + 1} 战场${troopSideName(ref.actor)}的 ${cardLabel(card)}`;
+}
+
+function logKindName(kind: BattleLogKind) {
+  return { play: "出牌", attack: "进攻", skill: "技能", system: "战况" }[kind];
+}
+
 function getFormation(cards: Card[]): Formation | null {
   if (cards.length !== 3) return null;
   const sorted = [...cards].sort((a, b) => a.value - b.value);
@@ -324,6 +354,15 @@ function resolveAttack(game: GameState, fieldIndex: number, attacker: Actor) {
   const field = next.battlefields[fieldIndex];
   const verdict = attackVerdict(next, field, attacker);
   if (!verdict.success) {
+    const defender: Actor = attacker === "player" ? "ai" : "player";
+    next.logs.unshift({
+      id: Date.now() + fieldIndex,
+      title: `${actorName(attacker)}进攻第 ${fieldIndex + 1} 战场受阻`,
+      detail: `${troopSideName(attacker)}以${formationDetail(field.troops[attacker])}试攻，对阵${formationDetail(field.troops[defender])}。${verdict.text}`,
+      round: next.round,
+      kind: "attack",
+      actor: attacker,
+    });
     next.message = `第 ${fieldIndex + 1} 战场｜${verdict.text}`;
     return next;
   }
@@ -331,7 +370,9 @@ function resolveAttack(game: GameState, fieldIndex: number, attacker: Actor) {
   next.logs.unshift({
     id: Date.now() + fieldIndex,
     title: `${actorName(attacker)}夺下第 ${fieldIndex + 1} 战场`,
-    detail: verdict.text,
+    detail: `${troopSideName(attacker)}以${formationDetail(field.troops[attacker])}进攻，对阵${formationDetail(field.troops[attacker === "player" ? "ai" : "player"])}。${verdict.text}`,
+    round: next.round,
+    kind: "attack",
     actor: attacker,
   });
   next.message = `第 ${fieldIndex + 1} 战场｜${verdict.text}`;
@@ -342,11 +383,54 @@ function partialPotential(cards: Card[]) {
   if (cards.length === 3) return formationPower(cards) * 10;
   let score = cards.reduce((total, card) => total + card.value, 0);
   if (cards.length === 2) {
-    if (cards[0].value === cards[1].value) score += 55;
-    if (cards[0].suit === cards[1].suit) score += 28;
-    if (Math.abs(cards[0].value - cards[1].value) <= 2) score += 34;
+    const gap = Math.abs(cards[0].value - cards[1].value);
+    if (cards[0].suit === cards[1].suit && gap > 0 && gap <= 2) score += 180;
+    if (cards[0].value === cards[1].value) score += 145;
+    if (gap > 0 && gap <= 2) score += 92;
+    if (cards[0].suit === cards[1].suit) score += 58;
   }
   return score;
+}
+
+const FORMATION_PRIORITY_SCORE: Record<number, number> = {
+  1: -6400,
+  2: 2600,
+  3: 7600,
+  4: 11000,
+  5: 15200,
+};
+
+function strongerFormation(first: Formation | null, second: Formation | null) {
+  if (!first) return second;
+  if (!second) return first;
+  if (first.level !== second.level) return first.level > second.level ? first : second;
+  return first.sum >= second.sum ? first : second;
+}
+
+function bestReachableFormation(cards: Card[], available: Card[]) {
+  if (cards.length === 3) return getFormation(cards);
+  let best: Formation | null = null;
+  if (cards.length === 2) {
+    available.forEach((card) => {
+      best = strongerFormation(best, getFormation([...cards, card]));
+    });
+  } else if (cards.length === 1) {
+    for (let first = 0; first < available.length; first += 1) {
+      for (let second = first + 1; second < available.length; second += 1) {
+        best = strongerFormation(best, getFormation([...cards, available[first], available[second]]));
+      }
+    }
+  }
+  return best;
+}
+
+function formationPlanScore(cards: Card[], available: Card[]) {
+  const completed = getFormation(cards);
+  if (completed) return FORMATION_PRIORITY_SCORE[completed.level] + completed.sum * 18;
+  const reachable = bestReachableFormation(cards, available);
+  if (!reachable) return cards.length === 2 ? -2200 : 0;
+  const progress = cards.length === 2 ? 0.72 : 0.42;
+  return FORMATION_PRIORITY_SCORE[reachable.level] * progress + reachable.sum * 7;
 }
 
 const VICTORY_ROUTES = [
@@ -432,7 +516,9 @@ function maybeUseAiSkill(game: GameState) {
     next.logs.unshift({
       id: Date.now(),
       title: "我发动「乱世枭雄」",
-      detail: game.difficulty === "advanced" ? "手牌计划收益偏低，主动交换双方手牌。" : "双方交换全部手牌。",
+      detail: `第 ${next.round} 回合出牌前发动；我方 ${game.hands.ai.length} 张手牌与玩家 ${game.hands.player.length} 张手牌全部互换。${game.difficulty === "advanced" ? "原因：当前手牌难以形成高等级队形。" : ""}`,
+      round: next.round,
+      kind: "skill",
       actor: "ai",
     });
     return next;
@@ -474,13 +560,16 @@ function maybeUseAiSkill(game: GameState) {
   const [a, b] = bestPair;
   const cardA = next.battlefields[a.field].troops[a.actor][a.card];
   const cardB = next.battlefields[b.field].troops[b.actor][b.card];
+  const swapDetail = `${swapCardDetail(a, cardA)}与${swapCardDetail(b, cardB)}对调`;
   next.battlefields[a.field].troops[a.actor][a.card] = cardB;
   next.battlefields[b.field].troops[b.actor][b.card] = cardA;
   next.usedSkill.ai = true;
   next.logs.unshift({
     id: Date.now(),
     title: "我发动「运筹帷幄」",
-    detail: `调换第 ${a.field + 1} 与第 ${b.field + 1} 战场的一张牌。`,
+    detail: `第 ${next.round} 回合出牌前发动；${swapDetail}。`,
+    round: next.round,
+    kind: "skill",
     actor: "ai",
   });
   return next;
@@ -501,6 +590,9 @@ function aiPlayChoice(game: GameState) {
 
       let score = strategicBoardScore(trial, "ai");
       const playedField = trial.battlefields[fieldIndex];
+      const plannedFormation = bestReachableFormation(playedField.troops.ai, trial.hands.ai);
+      const plannedLevel = getFormation(playedField.troops.ai)?.level ?? plannedFormation?.level ?? 1;
+      const highFormationPlan = formationPlanScore(playedField.troops.ai, trial.hands.ai);
       let createsProvableAttack = false;
       if (playedField.troops.ai.length === 3 && attackVerdict(trial, playedField, "ai").success) {
         createsProvableAttack = true;
@@ -518,11 +610,14 @@ function aiPlayChoice(game: GameState) {
       score += secondStep * 0.2;
 
       if (game.difficulty === "advanced") {
+        score += highFormationPlan;
         score += routeFocusBonus(game, fieldIndex);
         if (field.troops.ai.length === 0) score += 340;
         game.aiRecentFields.forEach((recentField, recentIndex) => {
           if (recentField === fieldIndex && !createsProvableAttack) {
-            score -= [1750, 760, 320][recentIndex] ?? 180;
+            score -= plannedLevel >= 3
+              ? ([320, 130, 55][recentIndex] ?? 40)
+              : ([1750, 760, 320][recentIndex] ?? 180);
           }
         });
       }
@@ -576,11 +671,20 @@ function runAiTurn(game: GameState) {
     next.logs.unshift({
       id: Date.now() + 7,
       title: `我向第 ${choice.fieldIndex + 1} 战场出牌`,
-      detail: drawn ? "完成出牌并补一张牌。" : "牌堆已空，不再补牌。",
+      detail: `投入 ${cardLabel(card)}；当前为${formationDetail(field.troops.ai)}；${drawn ? "从牌堆补入一张暗牌。" : "牌堆已空，不再补牌。"}`,
+      round: next.round,
+      kind: "play",
       actor: "ai",
     });
   } else {
-    next.logs.unshift({ id: Date.now() + 8, title: "我跳过出牌", detail: "所有可用战场均已满位。", actor: "ai" });
+    next.logs.unshift({
+      id: Date.now() + 8,
+      title: "我跳过出牌",
+      detail: "所有未结束战场的我方阵位均已放满，保留进攻阶段。",
+      round: next.round,
+      kind: "system",
+      actor: "ai",
+    });
   }
   next = aiAttackProvableFields(next);
   if (next.phase === "finished") return { ...next, aiThinking: false };
@@ -790,7 +894,9 @@ export default function ChuHanGame() {
       next.logs.unshift({
         id: Date.now(),
         title: `你向第 ${fieldIndex + 1} 战场出牌`,
-        detail: `${card.symbol}${card.rank}${drawn ? " · 已补牌" : " · 牌堆已空"}`,
+        detail: `投入 ${cardLabel(card)}；当前为${formationDetail(field.troops.player)}；${drawn ? `补入 ${cardLabel(drawn)}。` : "牌堆已空，不再补牌。"}`,
+        round: next.round,
+        kind: "play",
         actor: "player",
       });
       return next;
@@ -810,7 +916,14 @@ export default function ChuHanGame() {
       next.usedSkill.player = true;
       next.selectedCardId = null;
       next.message = "「乱世枭雄」发动：你与我的全部手牌已经互换。";
-      next.logs.unshift({ id: Date.now(), title: "你发动「乱世枭雄」", detail: "双方交换全部手牌。", actor: "player" });
+      next.logs.unshift({
+        id: Date.now(),
+        title: "你发动「乱世枭雄」",
+        detail: `第 ${next.round} 回合出牌前发动；你方 ${current.hands.player.length} 张手牌与我方 ${current.hands.ai.length} 张手牌全部互换。`,
+        round: next.round,
+        kind: "skill",
+        actor: "player",
+      });
       return next;
     });
   }
@@ -839,6 +952,7 @@ export default function ChuHanGame() {
       const cardA = fieldA.troops[a.actor][a.card];
       const cardB = fieldB.troops[b.actor][b.card];
       if (!cardA || !cardB) return current;
+      const swapDetail = `${swapCardDetail(a, cardA)}与${swapCardDetail(b, cardB)}对调`;
       fieldA.troops[a.actor][a.card] = cardB;
       fieldB.troops[b.actor][b.card] = cardA;
       next.usedSkill.player = true;
@@ -846,7 +960,9 @@ export default function ChuHanGame() {
       next.logs.unshift({
         id: Date.now(),
         title: "你发动「运筹帷幄」",
-        detail: `调换第 ${a.field + 1} 与第 ${b.field + 1} 战场的一张牌。`,
+        detail: `第 ${next.round} 回合出牌前发动；${swapDetail}。`,
+        round: next.round,
+        kind: "skill",
         actor: "player",
       });
       return next;
@@ -1129,7 +1245,16 @@ export default function ChuHanGame() {
             <div className="battle-log">
               <div><span className="section-kicker">BATTLE REPORT</span><h3>军情简报</h3></div>
               <div className="log-list">
-                {game.logs.length === 0 ? <p>号角刚刚吹响，尚无军情。</p> : game.logs.slice(0, 8).map((log) => <article key={log.id}><span className={log.actor ?? "player"}>{log.actor ? factionName(factionOf(game, log.actor)) : "报"}</span><div><strong>{log.title}</strong><small>{log.detail}</small></div></article>)}
+                {game.logs.length === 0 ? <p>号角刚刚吹响，尚无军情。</p> : game.logs.map((log) => (
+                  <article key={log.id}>
+                    <span className={log.actor ?? "player"}>{log.actor ? factionName(factionOf(game, log.actor)) : "报"}</span>
+                    <div>
+                      <em>第 {log.round} 回合 · {logKindName(log.kind)}</em>
+                      <strong>{log.title}</strong>
+                      <small>{log.detail}</small>
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>

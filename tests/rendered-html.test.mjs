@@ -54,3 +54,21 @@ test("prevents Han swaps from using completed battlefields", async () => {
   assert.match(source, /fieldA\.winner \|\| fieldB\.winner/);
   assert.match(source, /两个未结束战场/);
 });
+
+test("keeps a detailed, complete battle report including skills", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /game\.logs\.map/);
+  assert.match(source, /第 \{log\.round\} 回合/);
+  assert.match(source, /kind: "skill"/);
+  assert.match(source, /出牌前发动/);
+  assert.match(source, /进攻第 \$\{fieldIndex \+ 1\} 战场受阻/);
+});
+
+test("advanced AI prioritizes high-level formations and penalizes scattered formations", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /FORMATION_PRIORITY_SCORE/);
+  assert.match(source, /1: -6400/);
+  assert.match(source, /5: 15200/);
+  assert.match(source, /formationPlanScore/);
+  assert.match(source, /bestReachableFormation/);
+});

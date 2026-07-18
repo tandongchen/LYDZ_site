@@ -290,12 +290,13 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
 .battle-log { margin-top: 13px; padding: 15px 18px; display: grid; grid-template-columns: 125px 1fr; gap: 20px; }
 .log-list { display: flex; gap: 9px; overflow-x: auto; }
 .log-list > p { margin: auto 0; color: var(--muted); font-size: 9px; }
-.log-list article { min-width: 185px; display: flex; align-items: center; gap: 8px; padding: 8px; border-left: 1px solid var(--line); }
+.log-list article { min-width: 270px; display: flex; align-items: flex-start; gap: 9px; padding: 8px 12px; border-left: 1px solid var(--line); }
 .log-list article > span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 13px; }
 .log-list article > span.ai { background: var(--han); }
-.log-list strong, .log-list small { display: block; }
-.log-list strong { font-size: 8px; }
-.log-list small { margin-top: 3px; color: var(--muted); font-size: 7px; }
+.log-list em, .log-list strong, .log-list small { display: block; }
+.log-list em { margin-bottom: 3px; color: var(--chu-dark); font-size: 7px; font-style: normal; font-weight: 900; letter-spacing: .08em; }
+.log-list strong { font-size: 9px; }
+.log-list small { margin-top: 4px; color: var(--muted); font-size: 7px; line-height: 1.55; }
 .victory-panel { margin-top: 14px; padding: 24px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; background: #fff4df; }
 .victory-seal { display: grid; width: 65px; height: 65px; place-items: center; border: 4px solid white; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 35px; box-shadow: 0 0 0 3px var(--gold); }
 .victory-panel.han .victory-seal { background: var(--han); }
