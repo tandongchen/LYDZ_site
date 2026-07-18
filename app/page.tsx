@@ -482,7 +482,9 @@ export default function HorseRaceGame() {
                     <span className="section-kicker">
                       {currentCardSource === "hurdle" ? "CHECKPOINT CARD" : "NEXT CARD"}
                     </span>
-                    <h3>{currentCard ? `${currentCard.symbol}${currentCard.rank}` : "等待第一张牌"}</h3>
+                    <h3 className={currentCard?.red ? "red-card-title" : ""}>
+                      {currentCard ? `${currentCard.symbol}${currentCard.rank}` : "等待第一张牌"}
+                    </h3>
                     <p>{message}</p>
                     <button
                       className="primary-button draw-button"

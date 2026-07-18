@@ -695,6 +695,7 @@ main {
   font-size: 29px;
   font-weight: 400;
 }
+.draw-action h3.red-card-title { color: var(--red-dark); }
 .draw-action p {
   min-height: 34px;
   margin: 0 0 15px;
