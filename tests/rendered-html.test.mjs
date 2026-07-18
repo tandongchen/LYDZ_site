@@ -47,3 +47,10 @@ test("keeps the AI rock-paper-scissors result visible until confirmation", async
   assert.match(source, /确认结果，继续开战/);
   assert.match(source, /phase:\s*"playing"/);
 });
+
+test("prevents Han swaps from using completed battlefields", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /if \(field\.winner\) return;/);
+  assert.match(source, /fieldA\.winner \|\| fieldB\.winner/);
+  assert.match(source, /两个未结束战场/);
+});

@@ -440,6 +440,7 @@ function maybeUseAiSkill(game: GameState) {
 
   const refs: SwapRef[] = [];
   next.battlefields.forEach((field, fieldIndex) => {
+    if (field.winner) return;
     (["player", "ai"] as Actor[]).forEach((actor) => {
       field.troops[actor].forEach((_, cardIndex) => refs.push({ field: fieldIndex, actor, card: cardIndex }));
     });
@@ -646,6 +647,10 @@ export default function ChuHanGame() {
     () => game.battlefields.length > 0 && game.battlefields.every((field) => field.winner || field.troops.player.length >= 3),
     [game.battlefields],
   );
+  const canConfirmHanSwap =
+    swapSelection.length === 2 &&
+    swapSelection[0].field !== swapSelection[1].field &&
+    swapSelection.every((item) => !game.battlefields[item.field]?.winner);
 
   useEffect(() => {
     if (game.phase !== "playing" || game.turn !== "ai" || game.aiThinking) return;
@@ -812,6 +817,7 @@ export default function ChuHanGame() {
 
   function toggleSwap(ref: SwapRef) {
     if (!playerCanAct || game.hasPlayed || game.usedSkill.player || game.playerFaction !== "han") return;
+    if (game.battlefields[ref.field]?.winner) return;
     setSwapSelection((current) => {
       const exists = current.findIndex(
         (item) => item.field === ref.field && item.actor === ref.actor && item.card === ref.card,
@@ -823,15 +829,18 @@ export default function ChuHanGame() {
   }
 
   function confirmHanSkill() {
-    if (swapSelection.length !== 2 || swapSelection[0].field === swapSelection[1].field) return;
+    if (!canConfirmHanSwap) return;
     setGame((current) => {
       const next = cloneGame(current);
       const [a, b] = swapSelection;
-      const cardA = next.battlefields[a.field].troops[a.actor][a.card];
-      const cardB = next.battlefields[b.field].troops[b.actor][b.card];
+      const fieldA = next.battlefields[a.field];
+      const fieldB = next.battlefields[b.field];
+      if (!fieldA || !fieldB || fieldA.winner || fieldB.winner) return current;
+      const cardA = fieldA.troops[a.actor][a.card];
+      const cardB = fieldB.troops[b.actor][b.card];
       if (!cardA || !cardB) return current;
-      next.battlefields[a.field].troops[a.actor][a.card] = cardB;
-      next.battlefields[b.field].troops[b.actor][b.card] = cardA;
+      fieldA.troops[a.actor][a.card] = cardB;
+      fieldB.troops[b.actor][b.card] = cardA;
       next.usedSkill.player = true;
       next.message = `「运筹帷幄」发动：第 ${a.field + 1} 与第 ${b.field + 1} 战场各调换一张牌。`;
       next.logs.unshift({
@@ -922,7 +931,7 @@ export default function ChuHanGame() {
                   <span className="faction-seal">汉</span>
                   <small>汉王入关 · 谋定后动</small>
                   <strong>运筹帷幄</strong>
-                  <p>一次机会：在出牌前，调换不同战场上各一张明牌。</p>
+                  <p>一次机会：在出牌前，调换两个未结束战场上各一张明牌。</p>
                 </button>
               </div>
               <div className="difficulty-picker" aria-label="难度选择">
@@ -1015,7 +1024,7 @@ export default function ChuHanGame() {
                         <div className={`troop-row ai-troops ${field.winner === "ai" ? "advanced" : ""}`}>
                           {[0, 1, 2].map((slot) => {
                             const ref = { field: fieldIndex, actor: "ai" as Actor, card: slot };
-                            return <TroopSlot key={slot} card={field.troops.ai[slot]} selectable={game.playerFaction === "han" && playerCanAct && !game.hasPlayed && !game.usedSkill.player} selected={swapSelection.some((item) => item.field === fieldIndex && item.actor === "ai" && item.card === slot)} onClick={() => toggleSwap(ref)} />;
+                            return <TroopSlot key={slot} card={field.troops.ai[slot]} selectable={game.playerFaction === "han" && playerCanAct && !game.hasPlayed && !game.usedSkill.player && !field.winner} selected={swapSelection.some((item) => item.field === fieldIndex && item.actor === "ai" && item.card === slot)} onClick={() => toggleSwap(ref)} />;
                           })}
                           {aiFormation && <span className="formation-tag">{aiFormation.name} · {aiFormation.sum}</span>}
                         </div>
@@ -1045,7 +1054,7 @@ export default function ChuHanGame() {
                           <span className={`troop-row player-troops ${field.winner === "player" ? "advanced" : ""}`}>
                             {[0, 1, 2].map((slot) => {
                               const ref = { field: fieldIndex, actor: "player" as Actor, card: slot };
-                              return <TroopSlot key={slot} card={field.troops.player[slot]} selectable={game.playerFaction === "han" && playerCanAct && !game.hasPlayed && !game.usedSkill.player} selected={swapSelection.some((item) => item.field === fieldIndex && item.actor === "player" && item.card === slot)} onClick={() => toggleSwap(ref)} />;
+                              return <TroopSlot key={slot} card={field.troops.player[slot]} selectable={game.playerFaction === "han" && playerCanAct && !game.hasPlayed && !game.usedSkill.player && !field.winner} selected={swapSelection.some((item) => item.field === fieldIndex && item.actor === "player" && item.card === slot)} onClick={() => toggleSwap(ref)} />;
                             })}
                           </span>
                         </div>
@@ -1072,11 +1081,11 @@ export default function ChuHanGame() {
                 <div className="skill-panel">
                   <span className="section-kicker">ONCE PER GAME</span>
                   <h3>{game.playerFaction === "chu" ? "乱世枭雄" : "运筹帷幄"}</h3>
-                  <p>{game.playerFaction === "chu" ? "出牌前交换双方全部手牌。" : "出牌前先后点选不同战场上的两张明牌，再确认调换。"}</p>
+                  <p>{game.playerFaction === "chu" ? "出牌前交换双方全部手牌。" : "出牌前先后点选两个未结束战场上的明牌，再确认调换。"}</p>
                   {game.playerFaction === "chu" ? (
                     <button className="skill-button" type="button" disabled={!playerCanAct || game.hasPlayed || game.usedSkill.player} onClick={useChuSkill}>{game.usedSkill.player ? "本局已发动" : "发动技能"}</button>
                   ) : (
-                    <div className="han-skill-actions"><button className="skill-button" type="button" disabled={!playerCanAct || game.hasPlayed || game.usedSkill.player || swapSelection.length !== 2} onClick={confirmHanSkill}>{game.usedSkill.player ? "本局已发动" : `确认调换 ${swapSelection.length}/2`}</button>{swapSelection.length > 0 && !game.usedSkill.player && <button className="clear-selection" type="button" onClick={() => setSwapSelection([])}>清除</button>}</div>
+                    <div className="han-skill-actions"><button className="skill-button" type="button" disabled={!playerCanAct || game.hasPlayed || game.usedSkill.player || !canConfirmHanSwap} onClick={confirmHanSkill}>{game.usedSkill.player ? "本局已发动" : `确认调换 ${swapSelection.length}/2`}</button>{swapSelection.length > 0 && !game.usedSkill.player && <button className="clear-selection" type="button" onClick={() => setSwapSelection([])}>清除</button>}</div>
                   )}
                 </div>
 
