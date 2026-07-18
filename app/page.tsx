@@ -5,9 +5,20 @@ import { useMemo, useState } from "react";
 type PlayerId = "p1" | "p2";
 type TeamId = "argentina" | "spain" | "france" | "england" | "portugal";
 type StatKey = "attack" | "defense" | "control";
-type Phase = "setup" | "prep" | "firstHalf" | "halftime" | "secondHalf" | "finished";
+type Phase =
+  | "setup"
+  | "prep"
+  | "firstHalf"
+  | "halftime"
+  | "secondHalf"
+  | "extraFirstHalf"
+  | "extraSecondHalf"
+  | "penalties"
+  | "suddenDeath"
+  | "finished";
 
 type Stats = Record<StatKey, number>;
+type Score = Record<PlayerId, number>;
 type PlayingCard = {
   id: string;
   rank: string;
@@ -74,86 +85,133 @@ function copyStats(stats: Stats): Stats {
   return { attack: stats.attack, defense: stats.defense, control: stats.control };
 }
 
+function isOpenPlayPhase(phase: Phase) {
+  return (
+    phase === "firstHalf" ||
+    phase === "secondHalf" ||
+    phase === "extraFirstHalf" ||
+    phase === "extraSecondHalf"
+  );
+}
+
+function isPenaltyPhase(phase: Phase) {
+  return phase === "penalties" || phase === "suddenDeath";
+}
+
 export default function WorldCupGame() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [teams, setTeams] = useState<Record<PlayerId, TeamId>>({ p1: "spain", p2: "france" });
   const [stats, setStats] = useState<Record<PlayerId, Stats>>(DEFAULT_STATS);
   const [deck, setDeck] = useState<PlayingCard[]>([]);
   const [current, setCurrent] = useState<PlayerId>("p1");
-  const [prepStarter, setPrepStarter] = useState<PlayerId>("p1");
   const [firstHalfStarter, setFirstHalfStarter] = useState<PlayerId>("p1");
-  const [prepTurn, setPrepTurn] = useState(0);
-  const [matchTurn, setMatchTurn] = useState(0);
+  const [extraStarter, setExtraStarter] = useState<PlayerId>("p1");
+  const [penaltyStarter, setPenaltyStarter] = useState<PlayerId>("p1");
+  const [prepAction, setPrepAction] = useState(0);
+  const [roundInPhase, setRoundInPhase] = useState(0);
+  const [roundSlot, setRoundSlot] = useState<0 | 1>(0);
   const [drawnCard, setDrawnCard] = useState<PlayingCard | null>(null);
   const [boostLeft, setBoostLeft] = useState(0);
   const [sabotageLeft, setSabotageLeft] = useState(0);
-  const [score, setScore] = useState<Record<PlayerId, number>>({ p1: 0, p2: 0 });
-  const [attacks, setAttacks] = useState<Record<PlayerId, number>>({ p1: 0, p2: 0 });
-  const [defenseActiveAt, setDefenseActiveAt] = useState<Record<PlayerId, number | null>>({
-    p1: null,
-    p2: null,
+  const [score, setScore] = useState<Score>({ p1: 0, p2: 0 });
+  const [penaltyScore, setPenaltyScore] = useState<Score>({ p1: 0, p2: 0 });
+  const [attacks, setAttacks] = useState<Score>({ p1: 0, p2: 0 });
+  const [defenseReady, setDefenseReady] = useState<Record<PlayerId, boolean>>({
+    p1: false,
+    p2: false,
   });
   const [bonusTurns, setBonusTurns] = useState(0);
   const [halftimeOrder, setHalftimeOrder] = useState<PlayerId[]>(["p1", "p2"]);
   const [halftimeIndex, setHalftimeIndex] = useState(0);
   const [halftimePoints, setHalftimePoints] = useState(3);
+  const [winnerPlayer, setWinnerPlayer] = useState<PlayerId | null>(null);
+  const [decidedByPenalties, setDecidedByPenalties] = useState(false);
+  const [actionLocked, setActionLocked] = useState(false);
   const [message, setMessage] = useState("双方选择球队后，由系统掷硬币决定准备阶段先手。");
-  const [formula, setFormula] = useState("17 回合 · 5 回合准备 · 12 回合对决");
+  const [formula, setFormula] = useState("五回合准备 · 常规比赛十二回合");
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const activeTeam = TEAM_DATA[teams[current]];
   const opponent = otherPlayer(current);
-  const isMatchPhase = phase === "firstHalf" || phase === "secondHalf";
-  const halfTurn = phase === "firstHalf" ? matchTurn + 1 : matchTurn - 5;
-  const winner =
-    score.p1 === score.p2 ? null : score.p1 > score.p2 ? ("p1" as const) : ("p2" as const);
+  const openPlay = isOpenPlayPhase(phase);
+  const penaltyPlay = isPenaltyPhase(phase);
+  const actionPhase = openPlay || penaltyPlay;
+  const prepRound = Math.floor(prepAction / 2) + 1;
+  const prepSlot = (prepAction % 2) + 1;
+  const showPenaltyScore = penaltyPlay || decidedByPenalties;
 
   const phaseLabel = useMemo(() => {
     if (phase === "setup") return "赛前选队";
-    if (phase === "prep") return `准备阶段 ${prepTurn + 1} / 5`;
-    if (phase === "firstHalf") return `上半场 ${halfTurn} / 6`;
+    if (phase === "prep") return `准备阶段 ${prepRound} / 5 · 抽牌 ${prepSlot} / 2`;
+    if (phase === "firstHalf") return `上半场 ${roundInPhase + 1} / 6 · 行动 ${roundSlot + 1} / 2`;
     if (phase === "halftime") return "中场休息";
-    if (phase === "secondHalf") return `下半场 ${halfTurn} / 6`;
-    return "全场结束";
-  }, [phase, prepTurn, halfTurn]);
+    if (phase === "secondHalf") return `下半场 ${roundInPhase + 1} / 6 · 行动 ${roundSlot + 1} / 2`;
+    if (phase === "extraFirstHalf") return `加时上半场 ${roundInPhase + 1} / 3 · 行动 ${roundSlot + 1} / 2`;
+    if (phase === "extraSecondHalf") return `加时下半场 ${roundInPhase + 1} / 3 · 行动 ${roundSlot + 1} / 2`;
+    if (phase === "penalties") return `点球大战 ${roundInPhase + 1} / 5 · 点球 ${roundSlot + 1} / 2`;
+    if (phase === "suddenDeath") return `点球突然死亡 第 ${roundInPhase + 1} 回合 · 点球 ${roundSlot + 1} / 2`;
+    return decidedByPenalties ? "点球大战结束" : "全场结束";
+  }, [phase, prepRound, prepSlot, roundInPhase, roundSlot, decidedByPenalties]);
 
   function pushLog(entry: Omit<LogEntry, "id">) {
-    setLogs((previous) => [{ ...entry, id: Date.now() + Math.random() }, ...previous].slice(0, 12));
+    setLogs((previous) => [{ ...entry, id: Date.now() + Math.random() }, ...previous].slice(0, 16));
   }
 
   function updateTeam(player: PlayerId, team: TeamId) {
     setTeams((previous) => {
       if (previous[otherPlayer(player)] === team) return previous;
-      const next = { ...previous, [player]: team };
       setStats((oldStats) => ({ ...oldStats, [player]: copyStats(TEAM_DATA[team].stats) }));
-      return next;
+      return { ...previous, [player]: team };
     });
   }
 
+  function starterForPhase(targetPhase: Phase): PlayerId {
+    if (targetPhase === "firstHalf") return firstHalfStarter;
+    if (targetPhase === "secondHalf") return otherPlayer(firstHalfStarter);
+    if (targetPhase === "extraFirstHalf") return extraStarter;
+    if (targetPhase === "extraSecondHalf") return otherPlayer(extraStarter);
+    return penaltyStarter;
+  }
+
+  function beginActionPhase(targetPhase: Phase, starter: PlayerId, text: string) {
+    setPhase(targetPhase);
+    setCurrent(starter);
+    setRoundInPhase(0);
+    setRoundSlot(0);
+    setBonusTurns(0);
+    setDefenseReady({ p1: false, p2: false });
+    setActionLocked(false);
+    setMessage(text);
+    setFormula(isPenaltyPhase(targetPhase) ? "进攻 − 对方防守 ÷ 3" : "双方各行动一次才完成一回合");
+  }
+
   function startGame() {
-    const starter: PlayerId = Math.random() < 0.5 ? "p1" : "p2";
-    const nextStats = {
+    const prepStarter: PlayerId = Math.random() < 0.5 ? "p1" : "p2";
+    setStats({
       p1: copyStats(TEAM_DATA[teams.p1].stats),
       p2: copyStats(TEAM_DATA[teams.p2].stats),
-    };
-    setStats(nextStats);
+    });
     setDeck(createDeck());
-    setPrepStarter(starter);
-    setCurrent(starter);
-    setPrepTurn(0);
-    setMatchTurn(0);
+    setCurrent(prepStarter);
+    setPrepAction(0);
+    setRoundInPhase(0);
+    setRoundSlot(0);
     setScore({ p1: 0, p2: 0 });
+    setPenaltyScore({ p1: 0, p2: 0 });
     setAttacks({ p1: 0, p2: 0 });
-    setDefenseActiveAt({ p1: null, p2: null });
+    setDefenseReady({ p1: false, p2: false });
     setBonusTurns(0);
     setDrawnCard(null);
+    setWinnerPlayer(null);
+    setDecidedByPenalties(false);
+    setActionLocked(false);
     setLogs([]);
     setPhase("prep");
-    setMessage(`${playerLabel(starter)} · ${TEAM_DATA[teams[starter]].name} 获得准备阶段先手。`);
-    setFormula("点击球场中央的牌堆，抽取第一张牌");
+    setMessage(`${playerLabel(prepStarter)} · ${TEAM_DATA[teams[prepStarter]].name} 获得准备阶段先手。`);
+    setFormula("每个准备回合双方各抽一张牌");
     pushLog({
       title: `${TEAM_DATA[teams.p1].name} VS ${TEAM_DATA[teams.p2].name}`,
-      detail: `${playerLabel(starter)}获得准备阶段先手，双方轮流完成五次抽牌。`,
+      detail: `${playerLabel(prepStarter)}获得准备阶段先手，双方将在五个回合中各抽五张牌。`,
       tone: "system",
     });
   }
@@ -201,113 +259,261 @@ export default function WorldCupGame() {
       tone: current,
     });
     setDrawnCard(null);
-    if (prepTurn === 4) {
+    if (prepAction === 9) {
       const starter: PlayerId = Math.random() < 0.5 ? "p1" : "p2";
       setFirstHalfStarter(starter);
-      setCurrent(starter);
-      setPhase("firstHalf");
-      setMessage(`${playerLabel(starter)} · ${TEAM_DATA[teams[starter]].name} 获得上半场先手。`);
-      setFormula("选择进攻、防守或控制");
+      beginActionPhase(
+        "firstHalf",
+        starter,
+        `${playerLabel(starter)} · ${TEAM_DATA[teams[starter]].name}获得上半场先手。`,
+      );
       pushLog({
         title: "准备阶段结束",
-        detail: `${playerLabel(starter)}获得上半场先手，六回合对决开始。`,
+        detail: `${playerLabel(starter)}获得上半场先手。每回合双方各行动一次，上半场共六回合。`,
         tone: "system",
       });
       return;
     }
     const next = otherPlayer(current);
-    setPrepTurn((value) => value + 1);
+    const nextAction = prepAction + 1;
+    setPrepAction(nextAction);
     setCurrent(next);
-    setMessage(`轮到${playerLabel(next)} · ${TEAM_DATA[teams[next]].name}抽牌。`);
-    setFormula(`准备阶段 ${prepTurn + 2} / 5`);
+    setMessage(`准备阶段第 ${Math.floor(nextAction / 2) + 1} 回合，轮到${playerLabel(next)}抽牌。`);
+    setFormula(`本回合抽牌 ${(nextAction % 2) + 1} / 2`);
   }
 
-  function finishMatchAction(
-    controlAward = 0,
-    scoreSnapshot: Record<PlayerId, number> = score,
-    attacksSnapshot: Record<PlayerId, number> = attacks,
+  function finishGame(
+    scoreSnapshot: Score,
+    penaltySnapshot: Score,
+    byPenalties: boolean,
   ) {
-    const nextTurn = matchTurn + 1;
-    if (nextTurn === 6) {
-      const first =
-        scoreSnapshot.p1 !== scoreSnapshot.p2
-          ? scoreSnapshot.p1 > scoreSnapshot.p2
+    const source = byPenalties ? penaltySnapshot : scoreSnapshot;
+    const resultWinner: PlayerId = source.p1 > source.p2 ? "p1" : "p2";
+    setScore(scoreSnapshot);
+    setPenaltyScore(penaltySnapshot);
+    setWinnerPlayer(resultWinner);
+    setDecidedByPenalties(byPenalties);
+    setBonusTurns(0);
+    setActionLocked(false);
+    setPhase("finished");
+    setMessage(`${playerLabel(resultWinner)} · ${TEAM_DATA[teams[resultWinner]].name}赢得世界杯风云！`);
+    setFormula(
+      byPenalties
+        ? `比赛 ${scoreSnapshot.p1} : ${scoreSnapshot.p2} · 点球 ${penaltySnapshot.p1} : ${penaltySnapshot.p2}`
+        : `全场比分 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
+    );
+    pushLog({
+      title: byPenalties ? "点球大战结束" : "全场比赛结束",
+      detail: byPenalties
+        ? `${TEAM_DATA[teams[resultWinner]].name}在点球大战中以 ${penaltySnapshot[resultWinner]} : ${penaltySnapshot[otherPlayer(resultWinner)]} 获胜。`
+        : `${TEAM_DATA[teams[resultWinner]].name}以 ${scoreSnapshot[resultWinner]} : ${scoreSnapshot[otherPlayer(resultWinner)]} 获胜。`,
+      tone: "goal",
+    });
+  }
+
+  function startExtraTime(scoreSnapshot: Score) {
+    const starter: PlayerId = Math.random() < 0.5 ? "p1" : "p2";
+    setExtraStarter(starter);
+    beginActionPhase(
+      "extraFirstHalf",
+      starter,
+      `常规时间战平，${playerLabel(starter)}获得加时赛上半场先手。`,
+    );
+    setFormula("加时赛上下半场各三个完整回合");
+    pushLog({
+      title: `常规时间战平 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
+      detail: "进入加时赛。上下半场各三个回合，每回合双方各行动一次。",
+      tone: "system",
+    });
+  }
+
+  function startPenaltyShootout(scoreSnapshot: Score) {
+    const starter: PlayerId = Math.random() < 0.5 ? "p1" : "p2";
+    setPenaltyStarter(starter);
+    setPenaltyScore({ p1: 0, p2: 0 });
+    beginActionPhase(
+      "penalties",
+      starter,
+      `加时赛仍然战平，${playerLabel(starter)}先罚点球。`,
+    );
+    setFormula("点球进球率 = 进攻 − 对方防守 ÷ 3");
+    pushLog({
+      title: `加时赛战平 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
+      detail: "进入五回合点球大战，点球比分单独计算。",
+      tone: "system",
+    });
+  }
+
+  function enterHalftime(scoreSnapshot: Score, attacksSnapshot: Score) {
+    const first: PlayerId =
+      scoreSnapshot.p1 !== scoreSnapshot.p2
+        ? scoreSnapshot.p1 > scoreSnapshot.p2
+          ? "p1"
+          : "p2"
+        : attacksSnapshot.p1 !== attacksSnapshot.p2
+          ? attacksSnapshot.p1 > attacksSnapshot.p2
             ? "p1"
             : "p2"
-          : attacksSnapshot.p1 !== attacksSnapshot.p2
-            ? attacksSnapshot.p1 > attacksSnapshot.p2
-              ? "p1"
-              : "p2"
-            : firstHalfStarter;
-      const order: PlayerId[] = [first, otherPlayer(first)];
-      setMatchTurn(nextTurn);
-      setHalftimeOrder(order);
-      setHalftimeIndex(0);
-      setHalftimePoints(3);
-      setCurrent(first);
-      setBonusTurns(0);
-      setDefenseActiveAt({ p1: null, p2: null });
-      setPhase("halftime");
-      setMessage(`${playerLabel(first)}先分配 3 点中场能力值。`);
-      setFormula("进球数优先 · 若相同则进攻次数优先");
+          : firstHalfStarter;
+    setHalftimeOrder([first, otherPlayer(first)]);
+    setHalftimeIndex(0);
+    setHalftimePoints(3);
+    setCurrent(first);
+    setBonusTurns(0);
+    setDefenseReady({ p1: false, p2: false });
+    setActionLocked(false);
+    setPhase("halftime");
+    setMessage(`${playerLabel(first)}先分配 3 点中场能力值。`);
+    setFormula("进球数优先 · 若相同则进攻次数优先");
+    pushLog({
+      title: `半场比分 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
+      detail: `${playerLabel(first)}获得中场加点先手，双方各有 3 点。`,
+      tone: "system",
+    });
+  }
+
+  function handleCompletedRound(
+    completedRounds: number,
+    scoreSnapshot: Score,
+    attacksSnapshot: Score,
+    penaltySnapshot: Score,
+  ) {
+    if (phase === "firstHalf" && completedRounds === 6) {
+      enterHalftime(scoreSnapshot, attacksSnapshot);
+      return;
+    }
+    if (phase === "secondHalf" && completedRounds === 6) {
+      if (scoreSnapshot.p1 === scoreSnapshot.p2) startExtraTime(scoreSnapshot);
+      else finishGame(scoreSnapshot, penaltySnapshot, false);
+      return;
+    }
+    if (phase === "extraFirstHalf" && completedRounds === 3) {
+      const starter = otherPlayer(extraStarter);
+      beginActionPhase(
+        "extraSecondHalf",
+        starter,
+        `加时赛易边，${playerLabel(starter)}获得加时下半场先手。`,
+      );
       pushLog({
-        title: `半场比分 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
-        detail: `${playerLabel(first)}获得中场加点先手。双方各有 3 点。`,
+        title: `加时半场 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
+        detail: `${playerLabel(starter)}作为加时上半场后手，在加时下半场先行动。`,
         tone: "system",
       });
       return;
     }
-    if (nextTurn >= 12) {
-      setMatchTurn(nextTurn);
-      setBonusTurns(0);
-      setPhase("finished");
-      const finalScore = { ...scoreSnapshot };
-      const resultWinner =
-        finalScore.p1 === finalScore.p2 ? null : finalScore.p1 > finalScore.p2 ? "p1" : "p2";
-      setMessage(resultWinner ? `${playerLabel(resultWinner)}赢得世界杯风云！` : "双方战成平局。");
-      setFormula(`全场比分 ${finalScore.p1} : ${finalScore.p2}`);
-      pushLog({
-        title: "全场比赛结束",
-        detail: resultWinner
-          ? `${TEAM_DATA[teams[resultWinner]].name}以 ${finalScore[resultWinner]} : ${finalScore[otherPlayer(resultWinner)]} 获胜。`
-          : `双方以 ${finalScore.p1} : ${finalScore.p2} 战平。`,
-        tone: "goal",
-      });
+    if (phase === "extraSecondHalf" && completedRounds === 3) {
+      if (scoreSnapshot.p1 === scoreSnapshot.p2) startPenaltyShootout(scoreSnapshot);
+      else finishGame(scoreSnapshot, penaltySnapshot, false);
+      return;
+    }
+    if (phase === "penalties" && completedRounds === 5) {
+      if (penaltySnapshot.p1 !== penaltySnapshot.p2) {
+        finishGame(scoreSnapshot, penaltySnapshot, true);
+      } else {
+        beginActionPhase(
+          "suddenDeath",
+          penaltyStarter,
+          "五回合点球仍然战平，进入突然死亡。",
+        );
+        setFormula("双方各罚一球；一方进球而另一方未进球，比赛立即结束");
+        pushLog({
+          title: `五轮点球战平 ${penaltySnapshot.p1} : ${penaltySnapshot.p2}`,
+          detail: "进入点球突然死亡，每个完整回合后比较点球比分。",
+          tone: "system",
+        });
+      }
+      return;
+    }
+    if (phase === "suddenDeath" && penaltySnapshot.p1 !== penaltySnapshot.p2) {
+      finishGame(scoreSnapshot, penaltySnapshot, true);
       return;
     }
 
-    setMatchTurn(nextTurn);
+    setRoundInPhase(completedRounds);
+    setRoundSlot(0);
+    const starter = starterForPhase(phase);
+    setCurrent(starter);
+    setActionLocked(false);
+    setMessage(`${phase === "suddenDeath" ? "突然死亡" : "下一"}回合开始，${playerLabel(starter)}先行动。`);
+    setFormula(penaltyPlay ? "点球进球率 = 进攻 − 对方防守 ÷ 3" : "双方各行动一次才完成一回合");
+  }
+
+  function advanceScheduledAction(
+    scoreSnapshot: Score,
+    attacksSnapshot: Score,
+    penaltySnapshot: Score,
+  ) {
+    if (roundSlot === 0) {
+      const next = otherPlayer(current);
+      setRoundSlot(1);
+      setCurrent(next);
+      setActionLocked(false);
+      setMessage(`本回合还未结束，轮到${playerLabel(next)}行动。`);
+      setFormula(`本回合行动 2 / 2`);
+      return;
+    }
+    handleCompletedRound(roundInPhase + 1, scoreSnapshot, attacksSnapshot, penaltySnapshot);
+  }
+
+  function finishAction(
+    controlAward = 0,
+    scoreSnapshot: Score = score,
+    attacksSnapshot: Score = attacks,
+    penaltySnapshot: Score = penaltyScore,
+  ) {
+    setDefenseReady((previous) => ({ ...previous, [otherPlayer(current)]: false }));
     if (controlAward > 0) {
       setBonusTurns(controlAward);
-      setMessage(`${playerLabel(current)}获得连续两个行动回合，期间不能再次选择控制。`);
-      setFormula("额外行动 1 / 2");
+      setActionLocked(false);
+      setMessage(`${playerLabel(current)}获得两次额外行动，期间不能再次选择控制。`);
+      setFormula("额外行动 1 / 2 · 不占用双方的正常行动位置");
       return;
     }
     if (bonusTurns > 1) {
       setBonusTurns((value) => value - 1);
-      setMessage(`${playerLabel(current)}继续额外行动。`);
-      setFormula("额外行动 2 / 2");
+      setActionLocked(false);
+      setMessage(`${playerLabel(current)}继续第二次额外行动。`);
+      setFormula("额外行动 2 / 2 · 控制按钮仍然禁用");
       return;
     }
-    setBonusTurns(0);
-    const next = otherPlayer(current);
-    setCurrent(next);
-    setMessage(`轮到${playerLabel(next)} · ${TEAM_DATA[teams[next]].name}行动。`);
-    setFormula("选择进攻、防守或控制");
+    if (bonusTurns === 1) setBonusTurns(0);
+    advanceScheduledAction(scoreSnapshot, attacksSnapshot, penaltySnapshot);
   }
 
   function attack() {
-    if (!isMatchPhase) return;
+    if (!actionPhase || actionLocked) return;
+    setActionLocked(true);
     const defender = otherPlayer(current);
-    const defended = defenseActiveAt[defender] === matchTurn;
+
+    if (penaltyPlay) {
+      const rawChance = stats[current].attack - stats[defender].defense / 3;
+      const chance = clampChance(rawChance);
+      const goal = Math.random() < chance / 10;
+      const nextPenaltyScore = goal
+        ? { ...penaltyScore, [current]: penaltyScore[current] + 1 }
+        : penaltyScore;
+      setPenaltyScore(nextPenaltyScore);
+      const expression = `${stats[current].attack} − ${stats[defender].defense} ÷ 3`;
+      setMessage(goal ? `${TEAM_DATA[teams[current]].name}点球命中！` : `${TEAM_DATA[teams[current]].name}罚失点球。`);
+      setFormula(`${expression} = ${chance} · ${chance * 10}% 进球率`);
+      pushLog({
+        title: goal ? `${TEAM_DATA[teams[current]].name}点球命中` : `${TEAM_DATA[teams[current]].name}点球未进`,
+        detail: `${expression} = ${chance}，本次点球进球率 ${chance * 10}%。`,
+        tone: goal ? "goal" : current,
+      });
+      window.setTimeout(() => finishAction(0, score, attacks, nextPenaltyScore), 260);
+      return;
+    }
+
+    const defended = defenseReady[defender];
     const rawChance = stats[current].attack - stats[defender].defense / (defended ? 1 : 2);
     const chance = clampChance(rawChance);
     const goal = Math.random() < chance / 10;
     const nextScore = goal ? { ...score, [current]: score[current] + 1 } : score;
     const nextAttacks = { ...attacks, [current]: attacks[current] + 1 };
+    setScore(nextScore);
     setAttacks(nextAttacks);
-    setDefenseActiveAt((previous) => ({ ...previous, [defender]: null }));
-    if (goal) setScore(nextScore);
+    setDefenseReady((previous) => ({ ...previous, [defender]: false }));
     const expression = defended
       ? `${stats[current].attack} − ${stats[defender].defense}`
       : `${stats[current].attack} − ${stats[defender].defense} ÷ 2`;
@@ -315,39 +521,40 @@ export default function WorldCupGame() {
     setFormula(`${expression} = ${chance} · ${chance * 10}% 进球率`);
     pushLog({
       title: goal ? `${TEAM_DATA[teams[current]].name}进球` : `${TEAM_DATA[teams[current]].name}进攻未果`,
-      detail: `${defended ? "对手上回合已防守，" : ""}${expression} = ${chance}，本次进球率 ${chance * 10}%。`,
+      detail: `${defended ? "对手此前已防守，" : ""}${expression} = ${chance}，本次进球率 ${chance * 10}%。`,
       tone: goal ? "goal" : current,
     });
-    setScore(nextScore);
-    window.setTimeout(() => finishMatchAction(0, nextScore, nextAttacks), 260);
+    window.setTimeout(() => finishAction(0, nextScore, nextAttacks, penaltyScore), 260);
   }
 
   function defend() {
-    if (!isMatchPhase) return;
-    setDefenseActiveAt((previous) => ({ ...previous, [current]: matchTurn + 1 }));
+    if (!openPlay || actionLocked) return;
+    setActionLocked(true);
+    setDefenseReady((previous) => ({ ...previous, [current]: true }));
     setMessage(`${TEAM_DATA[teams[current]].name}进入防守姿态。`);
-    setFormula(`对手下一回合进攻时：进攻 − ${stats[current].defense}`);
+    setFormula(`对手下一次进攻时：进攻 − ${stats[current].defense}`);
     pushLog({
       title: `${TEAM_DATA[teams[current]].name}稳固防线`,
-      detail: `若对手下一回合进攻，将使用“进攻 − 防守”计算，不再除以 2。`,
+      detail: "若对手下一次行动选择进攻，将使用“进攻 − 防守”计算，不再除以 2。",
       tone: current,
     });
-    window.setTimeout(() => finishMatchAction(), 260);
+    window.setTimeout(() => finishAction(), 260);
   }
 
   function control() {
-    if (!isMatchPhase || bonusTurns > 0) return;
+    if (!openPlay || bonusTurns > 0 || actionLocked) return;
+    setActionLocked(true);
     const rival = otherPlayer(current);
-    const chance = clampChance(stats[current].control - stats[rival].control);
+    const chance = clampChance(stats[current].control - stats[rival].control / 2);
     const success = Math.random() < chance / 10;
-    setMessage(success ? `${TEAM_DATA[teams[current]].name}掌控节奏，赢得连续两个行动回合！` : "控制未成功，本回合直接结束。");
-    setFormula(`${stats[current].control} − ${stats[rival].control} = ${chance} · ${chance * 10}% 成功率`);
+    setMessage(success ? `${TEAM_DATA[teams[current]].name}掌控节奏，赢得两次额外行动！` : "控制未成功，本次行动直接结束。");
+    setFormula(`${stats[current].control} − ${stats[rival].control} ÷ 2 = ${chance} · ${chance * 10}% 成功率`);
     pushLog({
       title: success ? `${TEAM_DATA[teams[current]].name}掌控比赛` : `${TEAM_DATA[teams[current]].name}争夺控制失败`,
-      detail: `控制差为 ${chance}，成功率 ${chance * 10}%。${success ? "获得连续两个行动回合。" : "本回合跳过。"}`,
+      detail: `控制公式结果为 ${chance}，成功率 ${chance * 10}%。${success ? "获得两次额外行动。" : "本次行动跳过。"}`,
       tone: current,
     });
-    window.setTimeout(() => finishMatchAction(success ? 2 : 0), 260);
+    window.setTimeout(() => finishAction(success ? 2 : 0), 260);
   }
 
   function confirmHalftime() {
@@ -366,10 +573,11 @@ export default function WorldCupGame() {
       return;
     }
     const lowerStarter = otherPlayer(firstHalfStarter);
-    setCurrent(lowerStarter);
-    setPhase("secondHalf");
-    setMessage(`${playerLabel(lowerStarter)} · ${TEAM_DATA[teams[lowerStarter]].name}获得下半场先手。`);
-    setFormula("上半场后手在下半场先行动");
+    beginActionPhase(
+      "secondHalf",
+      lowerStarter,
+      `${playerLabel(lowerStarter)} · ${TEAM_DATA[teams[lowerStarter]].name}获得下半场先手。`,
+    );
     pushLog({
       title: "下半场开始",
       detail: `${playerLabel(lowerStarter)}作为上半场后手，获得下半场先手。`,
@@ -382,16 +590,20 @@ export default function WorldCupGame() {
     setTeams({ p1: "spain", p2: "france" });
     setStats(DEFAULT_STATS);
     setScore({ p1: 0, p2: 0 });
+    setPenaltyScore({ p1: 0, p2: 0 });
     setAttacks({ p1: 0, p2: 0 });
     setLogs([]);
     setDrawnCard(null);
+    setWinnerPlayer(null);
+    setDecidedByPenalties(false);
+    setActionLocked(false);
     setMessage("双方选择球队后，由系统掷硬币决定准备阶段先手。");
-    setFormula("17 回合 · 5 回合准备 · 12 回合对决");
+    setFormula("五回合准备 · 常规比赛十二回合");
   }
 
   function teamZone(player: PlayerId, position: "top" | "bottom") {
     const team = TEAM_DATA[teams[player]];
-    const canAct = isMatchPhase && current === player;
+    const canAct = actionPhase && current === player && !actionLocked;
     return (
       <section className={`team-zone ${position} ${player} ${canAct ? "active" : ""}`}>
         <div className="team-identity">
@@ -411,13 +623,13 @@ export default function WorldCupGame() {
         </div>
         <div className="action-row">
           <button className="attack-action" disabled={!canAct} onClick={attack}>
-            <span>↗</span><b>进攻</b><small>概率进球</small>
+            <span>↗</span><b>进攻</b><small>{penaltyPlay ? "点球射门" : "概率进球"}</small>
           </button>
-          <button className="defense-action" disabled={!canAct} onClick={defend}>
-            <span>◆</span><b>防守</b><small>加强下回合</small>
+          <button className="defense-action" disabled={!canAct || penaltyPlay} onClick={defend}>
+            <span>◆</span><b>防守</b><small>{penaltyPlay ? "点球阶段禁用" : "加强下次防守"}</small>
           </button>
-          <button className="control-action" disabled={!canAct || bonusTurns > 0} onClick={control}>
-            <span>◎</span><b>控制</b><small>{bonusTurns > 0 ? "额外回合禁用" : "争取两回合"}</small>
+          <button className="control-action" disabled={!canAct || penaltyPlay || bonusTurns > 0} onClick={control}>
+            <span>◎</span><b>控制</b><small>{penaltyPlay ? "点球阶段禁用" : bonusTurns > 0 ? "额外行动禁用" : "争取两次行动"}</small>
           </button>
         </div>
       </section>
@@ -429,9 +641,9 @@ export default function WorldCupGame() {
       <header className="site-header">
         <a className="brand" href="#game">
           <span className="brand-mark magic-hat"><span>✦</span></span>
-          <span>魔法帽游戏实验室</span>
+          <span>魔法数学</span>
         </a>
-        <span className="issue-tag">双人游戏 · 第 04 期</span>
+        <span className="issue-tag">双人博弈</span>
       </header>
 
       <section className="hero">
@@ -442,10 +654,10 @@ export default function WorldCupGame() {
         <div className="hero-copy">
           <p className="hero-lead">一座球场，<em>三种选择</em>。</p>
           <p className="hero-description">
-            从扑克牌增益到上下半场攻防，用进攻、防守与控制塑造十二回合的世界杯对决。
+            从扑克牌增益到上下半场攻防，用进攻、防守与控制塑造一场充满变数的世界杯对决。
             每一个百分比都公开，每一个决定都由两位玩家亲手作出。
           </p>
-          <div className="hero-tags"><span>本地 1V1</span><span>17 回合</span><span>概率攻防</span><span>扑克牌增益</span></div>
+          <div className="hero-tags"><span>本地 1V1</span><span>概率攻防</span></div>
         </div>
         <div className="hero-art" aria-hidden="true">
           <span className="sun-disc" />
@@ -483,13 +695,18 @@ export default function WorldCupGame() {
               <strong>{score.p1}<i>:</i>{score.p2}</strong>
               <span>{TEAM_DATA[teams.p2].code}</span>
             </div>
+            {showPenaltyScore && (
+              <div className="penalty-scoreboard">
+                <span>点球</span><strong>{penaltyScore.p1}<i>:</i>{penaltyScore.p2}</strong>
+              </div>
+            )}
 
             {phase === "setup" && (
               <div className="pitch-panel setup-panel">
                 <span className="panel-kicker">SELECT YOUR TEAMS</span>
                 <h3>选择对阵球队</h3>
                 <label>
-                  <span>玩家一 · 上半场</span>
+                  <span>玩家一 · 球场上方</span>
                   <select value={teams.p1} onChange={(event) => updateTeam("p1", event.target.value as TeamId)}>
                     {(Object.keys(TEAM_DATA) as TeamId[]).map((team) => (
                       <option key={team} value={team} disabled={teams.p2 === team}>
@@ -499,7 +716,7 @@ export default function WorldCupGame() {
                   </select>
                 </label>
                 <label>
-                  <span>玩家二 · 下半场</span>
+                  <span>玩家二 · 球场下方</span>
                   <select value={teams.p2} onChange={(event) => updateTeam("p2", event.target.value as TeamId)}>
                     {(Object.keys(TEAM_DATA) as TeamId[]).map((team) => (
                       <option key={team} value={team} disabled={teams.p1 === team}>
@@ -514,7 +731,7 @@ export default function WorldCupGame() {
 
             {phase === "prep" && (
               <div className="pitch-panel card-panel">
-                <span className="panel-kicker">PRE-MATCH DRAW · {prepTurn + 1}/5</span>
+                <span className="panel-kicker">PRE-MATCH DRAW · {prepRound}/5 · {prepSlot}/2</span>
                 {!drawnCard ? (
                   <>
                     <div className="deck-stack" aria-hidden="true"><span>⚽</span></div>
@@ -548,15 +765,13 @@ export default function WorldCupGame() {
                         </div>
                       )}
                     </div>
-                    <button className="primary-button gold-button" disabled={boostLeft > 0 || sabotageLeft > 0} onClick={confirmPrepCard}>
-                      完成分配
-                    </button>
+                    <button className="primary-button gold-button" disabled={boostLeft > 0 || sabotageLeft > 0} onClick={confirmPrepCard}>完成分配</button>
                   </>
                 )}
               </div>
             )}
 
-            {isMatchPhase && (
+            {actionPhase && (
               <div className="pitch-status" aria-live="polite">
                 <span>{phaseLabel}</span>
                 <strong>{message}</strong>
@@ -581,13 +796,14 @@ export default function WorldCupGame() {
               </div>
             )}
 
-            {phase === "finished" && (
+            {phase === "finished" && winnerPlayer && (
               <div className="pitch-panel final-panel">
-                <span className="panel-kicker">FULL TIME</span>
+                <span className="panel-kicker">{decidedByPenalties ? "PENALTY RESULT" : "FULL TIME"}</span>
                 <div className="cup-mark">♛</div>
-                <h3>{winner ? `${TEAM_DATA[teams[winner]].name}获胜` : "握手言和"}</h3>
+                <h3>{TEAM_DATA[teams[winnerPlayer]].name}获胜</h3>
                 <strong className="final-score">{score.p1} <i>:</i> {score.p2}</strong>
-                <p>{winner ? `${playerLabel(winner)}赢得本场世界杯风云。` : "双方进球数相同，本场比赛为平局。"}</p>
+                {decidedByPenalties && <strong className="final-penalty-score">点球 {penaltyScore.p1} : {penaltyScore.p2}</strong>}
+                <p>{playerLabel(winnerPlayer)}赢得本场世界杯风云。</p>
                 <button className="primary-button gold-button" onClick={resetGame}>再来一场</button>
               </div>
             )}
@@ -599,7 +815,7 @@ export default function WorldCupGame() {
         <div className="match-ribbon">
           <div><span>比赛阶段</span><b>{phaseLabel}</b></div>
           <div className="live-message"><span>场上播报</span><b>{message}</b><small>{formula}</small></div>
-          <div><span>进攻次数</span><b>{attacks.p1} : {attacks.p2}</b></div>
+          <div><span>{penaltyPlay ? "点球比分" : "进攻次数"}</span><b>{penaltyPlay ? `${penaltyScore.p1} : ${penaltyScore.p2}` : `${attacks.p1} : ${attacks.p2}`}</b></div>
         </div>
 
         <div className="battle-log">
@@ -622,19 +838,22 @@ export default function WorldCupGame() {
 
       <section className="rules-section" id="rules">
         <div className="rules-heading">
-          <div><span className="section-kicker">RULE BOOK / 17 ROUNDS</span><h2>从抽牌到终场哨</h2></div>
-          <p>所有能力值始终限制在 0—15。概率公式的结果限制在 0—10，再换算为 0%—100%。</p>
+          <div><span className="section-kicker">RULE BOOK / FULL MATCH</span><h2>从抽牌到点球决胜</h2></div>
+          <p>一个回合必须由双方各完成一次行动。所有能力值限制在 0—15，概率公式结果限制在 0—10。</p>
         </div>
         <div className="formula-board">
           <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 2</strong><p>结果 × 10% = 本次进球率</p></div></article>
-          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>仅影响对手紧接着的下一回合</p></div></article>
-          <article><span>◎</span><div><small>争夺控制</small><strong>己方控制 − 对方控制</strong><p>成功可连续行动两回合，期间不能再控制</p></div></article>
+          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守令对方下一次进攻不再除以 2</p></div></article>
+          <article><span>◎</span><div><small>争夺控制</small><strong>控制 − 对方控制 ÷ 2</strong><p>成功得到两次额外行动，期间不能再控制</p></div></article>
+          <article><span>●</span><div><small>点球大战</small><strong>进攻 − 防守 ÷ 3</strong><p>点球比分独立于常规及加时赛比分</p></div></article>
         </div>
         <div className="rule-grid">
-          <article><span>01</span><div><strong>五回合准备</strong><p>双方轮流抽牌。红牌给本队 2 点；黑牌给本队 1 点，并让对手任一能力减 1。</p></div></article>
-          <article><span>02</span><div><strong>上半场六回合</strong><p>系统重新决定先手，双方依次从进攻、防守、控制中选择行动。</p></div></article>
-          <article><span>03</span><div><strong>中场各加三点</strong><p>进球领先者先加；若比分相同，进攻次数更多者先加；仍相同则由上半场先手先加。</p></div></article>
-          <article><span>04</span><div><strong>下半场六回合</strong><p>上半场后手改为下半场先手。终场时进球更多者获胜，相同则平局。</p></div></article>
+          <article><span>01</span><div><strong>五回合准备</strong><p>每回合双方各抽一张牌。红牌为本队加 2；黑牌为本队加 1，并令对手任一能力减 1。</p></div></article>
+          <article><span>02</span><div><strong>上下半场各六回合</strong><p>每回合双方各行动一次；上半场后手在下半场先行动。</p></div></article>
+          <article><span>03</span><div><strong>中场各加三点</strong><p>领先者先加；比分相同则进攻次数更多者先加；仍相同则上半场先手先加。</p></div></article>
+          <article><span>04</span><div><strong>加时赛六回合</strong><p>常规时间战平后进入加时赛，上下半场各三个完整回合。</p></div></article>
+          <article><span>05</span><div><strong>五轮点球大战</strong><p>加时仍平则双方各罚五球，只能选择进攻，并在主比分下方独立计分。</p></div></article>
+          <article><span>06</span><div><strong>点球突然死亡</strong><p>五轮后仍平，每回合双方各罚一球；一方进球而另一方未进球时立即决出胜负。</p></div></article>
         </div>
         <div className="team-table">
           {(Object.keys(TEAM_DATA) as TeamId[]).map((team) => (
@@ -644,7 +863,7 @@ export default function WorldCupGame() {
       </section>
 
       <footer className="site-footer">
-        <span>MAGIC HAT GAME LAB</span>
+        <span>MAGIC MATH</span>
         <p>把规则变成一场看得见的比赛。</p>
       </footer>
     </main>
