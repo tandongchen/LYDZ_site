@@ -464,7 +464,9 @@ export default function HorseRaceGame() {
                 <span className={`winner-seal ${winningHorse.red ? "red-seal" : "black-seal"}`}>♞</span>
                 <div>
                   <span className="section-kicker">RACE OVER</span>
-                  <h3>{winningHorse.owner} 驾驭{winningHorse.name}夺冠！</h3>
+                  <h3 className={winningHorse.red ? "red-winner-title" : ""}>
+                    {winningHorse.owner} 驾驭{winningHorse.name}夺冠！
+                  </h3>
                   <p>率先越过第五张赛道牌，冲过终点线。</p>
                 </div>
                 <button className="primary-button" type="button" onClick={restartSameMode}>

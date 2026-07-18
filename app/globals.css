@@ -791,6 +791,7 @@ main {
 }
 .winner-seal.red-seal { background: var(--red); }
 .winner-panel h3 { margin: 4px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
+.winner-panel h3.red-winner-title { color: var(--red-dark); }
 .winner-panel p { margin: 0; color: var(--muted); font-size: 10px; }
 
 .rules-section {
