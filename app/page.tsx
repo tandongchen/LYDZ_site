@@ -7,6 +7,7 @@ type Faction = "chu" | "han";
 type Actor = "player" | "ai";
 type Phase = "setup" | "rps" | "playing" | "finished";
 type Gesture = "rock" | "scissors" | "paper";
+type Difficulty = "beginner" | "advanced";
 
 type Card = {
   id: string;
@@ -48,6 +49,7 @@ type RpsState = {
 type GameState = {
   phase: Phase;
   playerFaction: Faction;
+  difficulty: Difficulty;
   hands: Record<Actor, Card[]>;
   deck: Card[];
   battlefields: Battlefield[];
@@ -85,8 +87,12 @@ function randomGesture() {
   return options[Math.floor(Math.random() * options.length)];
 }
 
-function aiPrefersFirst() {
-  return Math.random() > 0.38;
+function aiPrefersFirst(difficulty: Difficulty) {
+  return Math.random() > (difficulty === "advanced" ? 0.2 : 0.62);
+}
+
+function randomChance(chance: number) {
+  return Math.random() < chance;
 }
 
 function shuffled<T>(items: T[]) {
@@ -131,10 +137,11 @@ function createBattle() {
   };
 }
 
-function initialGame(playerFaction: Faction = "chu"): GameState {
+function initialGame(playerFaction: Faction = "chu", difficulty: Difficulty = "beginner"): GameState {
   return {
     phase: "setup",
     playerFaction,
+    difficulty,
     hands: { player: [], ai: [] },
     deck: [],
     battlefields: [],
@@ -327,17 +334,78 @@ function partialPotential(cards: Card[]) {
   return score;
 }
 
+const VICTORY_ROUTES = [
+  [0, 1],
+  [6, 7],
+  [0, 1, 2],
+  [1, 2, 3],
+  [2, 3, 4],
+  [3, 4, 5],
+  [4, 5, 6],
+  [5, 6, 7],
+];
+
+function strategicBoardScore(game: GameState, actor: Actor) {
+  const opponent: Actor = actor === "ai" ? "player" : "ai";
+  let score = 0;
+  game.battlefields.forEach((field, fieldIndex) => {
+    if (field.winner === actor) score += 5200;
+    if (field.winner === opponent) score -= 5600;
+    if (!field.winner) {
+      score += partialPotential(field.troops[actor]) * 0.72;
+      score -= partialPotential(field.troops[opponent]) * 0.28;
+      if (field.troops[actor].length === 3 && attackVerdict(game, field, actor).success) score += 3100;
+      if (field.troops[opponent].length === 3 && attackVerdict(game, field, opponent).success) score -= 3500;
+      if (fieldIndex <= 1 || fieldIndex >= 6) score += field.troops[actor].length * 42;
+    }
+  });
+
+  VICTORY_ROUTES.forEach((route) => {
+    const ownWins = route.filter((index) => game.battlefields[index].winner === actor).length;
+    const opponentWins = route.filter((index) => game.battlefields[index].winner === opponent).length;
+    if (opponentWins === 0) score += ownWins * ownWins * (route.length === 2 ? 760 : 540);
+    if (ownWins === 0) score -= opponentWins * opponentWins * (route.length === 2 ? 820 : 590);
+  });
+
+  const ownTotal = game.battlefields.filter((field) => field.winner === actor).length;
+  const opponentTotal = game.battlefields.filter((field) => field.winner === opponent).length;
+  score += ownTotal * ownTotal * 850;
+  score -= opponentTotal * opponentTotal * 920;
+  return score;
+}
+
+function handPlanQuality(game: GameState) {
+  let score = game.hands.ai.reduce((sum, card) => sum + card.value, 0);
+  for (let first = 0; first < game.hands.ai.length; first += 1) {
+    for (let second = first + 1; second < game.hands.ai.length; second += 1) {
+      const a = game.hands.ai[first];
+      const b = game.hands.ai[second];
+      if (a.value === b.value) score += 12;
+      if (a.suit === b.suit) score += 4;
+      if (Math.abs(a.value - b.value) <= 2) score += 5;
+    }
+  }
+  return score;
+}
+
 function maybeUseAiSkill(game: GameState) {
   if (game.usedSkill.ai) return game;
   const faction = factionOf(game, "ai");
   const next = cloneGame(game);
   if (faction === "chu") {
-    const aiValue = next.hands.ai.reduce((sum, card) => sum + card.value, 0);
-    const playerValue = next.hands.player.reduce((sum, card) => sum + card.value, 0);
-    if (playerValue <= aiValue + 7) return game;
+    const shouldUse =
+      game.difficulty === "advanced"
+        ? handPlanQuality(next) < 64 || game.round >= 4
+        : game.round >= 6 && randomChance(0.18);
+    if (!shouldUse) return game;
     [next.hands.ai, next.hands.player] = [next.hands.player, next.hands.ai];
     next.usedSkill.ai = true;
-    next.logs.unshift({ id: Date.now(), title: "我发动「乱世枭雄」", detail: "双方交换全部手牌。", actor: "ai" });
+    next.logs.unshift({
+      id: Date.now(),
+      title: "我发动「乱世枭雄」",
+      detail: game.difficulty === "advanced" ? "手牌计划收益偏低，主动交换双方手牌。" : "双方交换全部手牌。",
+      actor: "ai",
+    });
     return next;
   }
 
@@ -347,8 +415,8 @@ function maybeUseAiSkill(game: GameState) {
       field.troops[actor].forEach((_, cardIndex) => refs.push({ field: fieldIndex, actor, card: cardIndex }));
     });
   });
-  const baseline = next.battlefields.reduce((sum, field) => sum + partialPotential(field.troops.ai), 0);
-  let bestGain = 0;
+  const baseline = strategicBoardScore(next, "ai");
+  let bestGain = Number.NEGATIVE_INFINITY;
   let bestPair: [SwapRef, SwapRef] | null = null;
   for (let first = 0; first < refs.length; first += 1) {
     for (let second = first + 1; second < refs.length; second += 1) {
@@ -360,14 +428,19 @@ function maybeUseAiSkill(game: GameState) {
       const cardB = trial.battlefields[b.field].troops[b.actor][b.card];
       trial.battlefields[a.field].troops[a.actor][a.card] = cardB;
       trial.battlefields[b.field].troops[b.actor][b.card] = cardA;
-      const score = trial.battlefields.reduce((sum, field) => sum + partialPotential(field.troops.ai), 0);
+      const score = strategicBoardScore(trial, "ai");
       if (score - baseline > bestGain) {
         bestGain = score - baseline;
         bestPair = [a, b];
       }
     }
   }
-  if (!bestPair || bestGain < 25) return game;
+  const shouldUse =
+    !!bestPair &&
+    (game.difficulty === "advanced"
+      ? bestGain >= 18 || game.round >= 5
+      : game.round >= 6 && bestGain >= 900 && randomChance(0.22));
+  if (!bestPair || !shouldUse) return game;
   const [a, b] = bestPair;
   const cardA = next.battlefields[a.field].troops[a.actor][a.card];
   const cardB = next.battlefields[b.field].troops[b.actor][b.card];
@@ -384,19 +457,43 @@ function maybeUseAiSkill(game: GameState) {
 }
 
 function aiPlayChoice(game: GameState) {
-  let best: { cardIndex: number; fieldIndex: number; score: number } | null = null;
+  const choices: Array<{ cardIndex: number; fieldIndex: number; score: number }> = [];
   game.hands.ai.forEach((card, cardIndex) => {
     game.battlefields.forEach((field, fieldIndex) => {
       if (field.winner || field.troops.ai.length >= 3) return;
-      let score = partialPotential([...field.troops.ai, card]);
-      if (field.troops.player.length === 2) score += 42;
-      if (fieldIndex <= 1 || fieldIndex >= 6) score += 10;
-      const ownWins = game.battlefields.filter((item) => item.winner === "ai").length;
-      if (ownWins >= 3) score += 18;
-      if (!best || score > best.score) best = { cardIndex, fieldIndex, score };
+      const trial = cloneGame(game);
+      trial.hands.ai.splice(cardIndex, 1);
+      trial.actionSeq += 1;
+      trial.battlefields[fieldIndex].troops.ai.push(card);
+      if (trial.battlefields[fieldIndex].troops.ai.length === 3) {
+        trial.battlefields[fieldIndex].completedAt.ai = trial.actionSeq;
+      }
+
+      let score = strategicBoardScore(trial, "ai");
+      const playedField = trial.battlefields[fieldIndex];
+      if (playedField.troops.ai.length === 3 && attackVerdict(trial, playedField, "ai").success) {
+        const attacked = resolveAttack(trial, fieldIndex, "ai");
+        score += attacked.phase === "finished" ? 25000 : 4200;
+      }
+
+      let secondStep = 0;
+      trial.hands.ai.forEach((nextCard) => {
+        trial.battlefields.forEach((nextField) => {
+          if (nextField.winner || nextField.troops.ai.length >= 3) return;
+          secondStep = Math.max(secondStep, partialPotential([...nextField.troops.ai, nextCard]));
+        });
+      });
+      score += secondStep * 0.2;
+      choices.push({ cardIndex, fieldIndex, score });
     });
   });
-  return best as { cardIndex: number; fieldIndex: number; score: number } | null;
+  if (choices.length === 0) return null;
+  choices.sort((a, b) => a.score - b.score);
+  if (game.difficulty === "beginner") {
+    const forgivingPool = choices.slice(0, Math.max(1, Math.ceil(choices.length * 0.55)));
+    return forgivingPool[Math.floor(Math.random() * forgivingPool.length)];
+  }
+  return choices[choices.length - 1];
 }
 
 function aiAttackProvableFields(game: GameState) {
@@ -405,7 +502,10 @@ function aiAttackProvableFields(game: GameState) {
     if (next.phase === "finished") break;
     const field = next.battlefields[index];
     if (field.winner || field.troops.ai.length !== 3) continue;
-    if (attackVerdict(next, field, "ai").success) next = resolveAttack(next, index, "ai");
+    const canWin = attackVerdict(next, field, "ai").success;
+    if (!canWin) continue;
+    if (next.difficulty === "beginner" && !randomChance(0.38)) continue;
+    next = resolveAttack(next, index, "ai");
   }
   return next;
 }
@@ -474,7 +574,10 @@ function TroopSlot({
       type="button"
       className={`troop-slot ${card ? "filled" : ""} ${selectable ? "selectable" : ""} ${selected ? "swap-selected" : ""}`}
       disabled={!card || !selectable}
-      onClick={onClick}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick?.();
+      }}
       aria-label={card ? `${card.symbol}${card.rank}${selected ? "，已选中" : ""}` : "空位"}
     >
       {card ? <CardFace card={card} small /> : <span>+</span>}
@@ -485,6 +588,7 @@ function TroopSlot({
 export default function ChuHanGame() {
   const [game, setGame] = useState<GameState>(() => initialGame());
   const [swapSelection, setSwapSelection] = useState<SwapRef[]>([]);
+  const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
 
   const aiFaction = game.playerFaction === "chu" ? "han" : "chu";
   const playerCanAct = game.phase === "playing" && game.turn === "player" && !game.aiThinking;
@@ -507,11 +611,23 @@ export default function ChuHanGame() {
     }));
   }
 
+  function chooseDifficulty(difficulty: Difficulty) {
+    setGame((current) => ({
+      ...current,
+      difficulty,
+      message:
+        difficulty === "beginner"
+          ? "初级：我会采用更直接、宽松的策略。"
+          : "高级：我会计算胜利路线、技能时机与后续出牌。",
+    }));
+  }
+
   function prepareGame() {
     const battle = createBattle();
     setSwapSelection([]);
+    setDraggedCardId(null);
     setGame({
-      ...initialGame(game.playerFaction),
+      ...initialGame(game.playerFaction, game.difficulty),
       phase: "rps",
       hands: { player: battle.playerHand, ai: battle.aiHand },
       deck: battle.deck,
@@ -546,7 +662,7 @@ export default function ChuHanGame() {
       }));
       return;
     }
-    const aiChoosesFirst = aiPrefersFirst();
+    const aiChoosesFirst = aiPrefersFirst(game.difficulty);
     setGame((current) => ({
       ...current,
       phase: "playing",
@@ -574,13 +690,14 @@ export default function ChuHanGame() {
     }));
   }
 
-  function playToField(fieldIndex: number) {
-    if (!playerCanAct || game.hasPlayed || !game.selectedCardId) return;
+  function playToField(fieldIndex: number, explicitCardId?: string) {
+    const requestedCardId = explicitCardId ?? game.selectedCardId;
+    if (!playerCanAct || game.hasPlayed || !requestedCardId) return;
     setGame((current) => {
       const next = cloneGame(current);
       const field = next.battlefields[fieldIndex];
       if (!field || field.winner || field.troops.player.length >= 3) return current;
-      const cardIndex = next.hands.player.findIndex((card) => card.id === next.selectedCardId);
+      const cardIndex = next.hands.player.findIndex((card) => card.id === requestedCardId);
       if (cardIndex < 0) return current;
       const [card] = next.hands.player.splice(cardIndex, 1);
       field.troops.player.push(card);
@@ -670,18 +787,20 @@ export default function ChuHanGame() {
 
   function restart() {
     const faction = game.playerFaction;
+    const difficulty = game.difficulty;
     setSwapSelection([]);
-    setGame(initialGame(faction));
+    setDraggedCardId(null);
+    setGame(initialGame(faction, difficulty));
   }
 
   return (
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark battle-mark" aria-hidden="true">楚</span>
+          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="issue-tag">纸牌兵法 · 双人对决</span>
+        <span className="issue-tag">博弈游戏</span>
       </header>
 
       <section className="hero" id="top">
@@ -693,7 +812,7 @@ export default function ChuHanGame() {
             你选楚或汉，我执掌另一方。以三张牌结成战斗队形，判断时机、主动进攻，
             率先打穿中路或奇袭边关。
           </p>
-          <div className="hero-tags"><span>玩家 VS 我</span><span>一副扑克牌</span><span>15–25 分钟</span></div>
+          <div className="hero-tags"><span>智慧谋略</span><span>扑克桌游</span></div>
         </div>
         <div className="hero-art" aria-hidden="true">
           <span className="sun-disc" />
@@ -718,25 +837,56 @@ export default function ChuHanGame() {
 
         {game.phase === "setup" && (
           <div className="faction-setup">
-            <div className="faction-picker">
-              <button type="button" className={`faction-card chu ${game.playerFaction === "chu" ? "selected" : ""}`} onClick={() => chooseFaction("chu")}>
-                <span className="faction-seal">楚</span>
-                <small>西楚霸王 · 正面强攻</small>
-                <strong>乱世枭雄</strong>
-                <p>一次机会：在出牌前，将你与我的全部手牌互换。</p>
-              </button>
-              <span className="versus">VS</span>
-              <button type="button" className={`faction-card han ${game.playerFaction === "han" ? "selected" : ""}`} onClick={() => chooseFaction("han")}>
-                <span className="faction-seal">汉</span>
-                <small>汉王入关 · 谋定后动</small>
-                <strong>运筹帷幄</strong>
-                <p>一次机会：在出牌前，调换不同战场上各一张明牌。</p>
-              </button>
+            <div className="setup-main">
+              <div className="faction-picker">
+                <button type="button" className={`faction-card chu ${game.playerFaction === "chu" ? "selected" : ""}`} onClick={() => chooseFaction("chu")}>
+                  <span className="faction-seal">楚</span>
+                  <small>西楚霸王 · 正面强攻</small>
+                  <strong>乱世枭雄</strong>
+                  <p>一次机会：在出牌前，将你与我的全部手牌互换。</p>
+                </button>
+                <span className="versus">VS</span>
+                <button type="button" className={`faction-card han ${game.playerFaction === "han" ? "selected" : ""}`} onClick={() => chooseFaction("han")}>
+                  <span className="faction-seal">汉</span>
+                  <small>汉王入关 · 谋定后动</small>
+                  <strong>运筹帷幄</strong>
+                  <p>一次机会：在出牌前，调换不同战场上各一张明牌。</p>
+                </button>
+              </div>
+              <div className="difficulty-picker" aria-label="难度选择">
+                <div>
+                  <span className="section-kicker">DIFFICULTY</span>
+                  <h3>选择难度</h3>
+                </div>
+                <button
+                  type="button"
+                  className={game.difficulty === "beginner" ? "selected" : ""}
+                  aria-pressed={game.difficulty === "beginner"}
+                  onClick={() => chooseDifficulty("beginner")}
+                >
+                  <strong>初级</strong>
+                  <span>直接宽松的策略</span>
+                  <small>玩家目标胜率 70%+</small>
+                </button>
+                <button
+                  type="button"
+                  className={game.difficulty === "advanced" ? "selected" : ""}
+                  aria-pressed={game.difficulty === "advanced"}
+                  onClick={() => chooseDifficulty("advanced")}
+                >
+                  <strong>高级</strong>
+                  <span>计算路线与技能时机</span>
+                  <small>挑战玩家胜率 30%-</small>
+                </button>
+              </div>
             </div>
             <aside className="setup-brief">
               <span className="section-kicker">YOUR SIDE</span>
               <h3>你执掌{factionName(game.playerFaction)}</h3>
-              <p>我将自动成为{factionName(aiFaction)}。系统会把大小王、四张 A 与随机两张牌洗成八座隐藏战场，再各发六张手牌。</p>
+              <p>
+                我将自动成为{factionName(aiFaction)}，以{game.difficulty === "beginner" ? "初级" : "高级"}策略迎战。
+                系统会把大小王、四张 A 与随机两张牌洗成八座隐藏战场，再各发六张手牌。
+              </p>
               <button className="primary-button" type="button" onClick={prepareGame}>列阵开战 <span>→</span></button>
             </aside>
           </div>
@@ -772,7 +922,7 @@ export default function ChuHanGame() {
           <div className="war-console">
             <div className="status-strip">
               <div className={`army-chip ${aiFaction}`}><span>我</span><b>{factionName(aiFaction)}军</b><small>{game.hands.ai.length} 张手牌 · 技能{game.usedSkill.ai ? "已用" : "可用"}</small></div>
-              <div className="turn-message" role="status"><span>{game.turn === "player" ? "YOUR TURN" : "MY TURN"}</span><p>{game.message}</p></div>
+              <div className="turn-message" role="status"><span>{game.turn === "player" ? "YOUR TURN" : "MY TURN"} · {game.difficulty === "beginner" ? "初级" : "高级"}</span><p>{game.message}</p></div>
               <div className={`army-chip player ${game.playerFaction}`}><span>你</span><b>{factionName(game.playerFaction)}军</b><small>{game.hands.player.length} 张手牌 · 技能{game.usedSkill.player ? "已用" : "可用"}</small></div>
             </div>
 
@@ -783,7 +933,7 @@ export default function ChuHanGame() {
                   {game.battlefields.map((field, fieldIndex) => {
                     const playerFormation = getFormation(field.troops.player);
                     const aiFormation = getFormation(field.troops.ai);
-                    const canPlace = playerCanAct && !game.hasPlayed && !!game.selectedCardId && !field.winner && field.troops.player.length < 3;
+                    const canPlace = playerCanAct && !game.hasPlayed && !!(game.selectedCardId || draggedCardId) && !field.winner && field.troops.player.length < 3;
                     const canAttack = playerCanAct && !field.winner && field.troops.player.length === 3;
                     return (
                       <article className={`battlefield ${field.winner ? `won-${field.winner}` : ""}`} key={field.id}>
@@ -800,10 +950,19 @@ export default function ChuHanGame() {
                           <CardFace hidden small />
                         </div>
                         <div
-                          className={`player-field-target ${canPlace ? "ready" : ""}`}
+                          className={`player-field-target ${canPlace ? "ready" : ""} ${draggedCardId && canPlace ? "drop-ready" : ""}`}
                           role={canPlace ? "button" : undefined}
                           tabIndex={canPlace ? 0 : -1}
                           onClick={() => canPlace && playToField(fieldIndex)}
+                          onDragOver={(event) => {
+                            if (canPlace) event.preventDefault();
+                          }}
+                          onDrop={(event) => {
+                            event.preventDefault();
+                            const cardId = event.dataTransfer.getData("text/plain") || draggedCardId;
+                            if (canPlace && cardId) playToField(fieldIndex, cardId);
+                            setDraggedCardId(null);
+                          }}
                           onKeyDown={(event) => {
                             if (canPlace && (event.key === "Enter" || event.key === " ")) playToField(fieldIndex);
                           }}
@@ -849,9 +1008,27 @@ export default function ChuHanGame() {
 
                 <div className="hand-panel">
                   <div className="hand-heading"><div><span className="section-kicker">YOUR HAND</span><h3>你的手牌</h3></div><small>牌堆余 {game.deck.length} 张</small></div>
+                  <p className="hand-hint">点击手牌后选择战场，或直接把牌拖到战场。</p>
                   <div className="player-hand">
                     {game.hands.player.map((card) => (
-                      <button type="button" key={card.id} className={game.selectedCardId === card.id ? "selected" : ""} disabled={!playerCanAct || game.hasPlayed} onClick={() => selectHand(card.id)} aria-label={`选择${card.symbol}${card.rank}`}><CardFace card={card} /></button>
+                      <button
+                        type="button"
+                        key={card.id}
+                        className={`${game.selectedCardId === card.id ? "selected" : ""} ${draggedCardId === card.id ? "dragging" : ""}`}
+                        disabled={!playerCanAct || game.hasPlayed}
+                        draggable={playerCanAct && !game.hasPlayed}
+                        onClick={() => selectHand(card.id)}
+                        onDragStart={(event) => {
+                          event.dataTransfer.effectAllowed = "move";
+                          event.dataTransfer.setData("text/plain", card.id);
+                          setDraggedCardId(card.id);
+                          setGame((current) => ({ ...current, selectedCardId: card.id, message: "将这张牌拖到任意高亮战场。" }));
+                        }}
+                        onDragEnd={() => setDraggedCardId(null)}
+                        aria-label={`选择或拖动${card.symbol}${card.rank}`}
+                      >
+                        <CardFace card={card} />
+                      </button>
                     ))}
                     {game.hands.player.length === 0 && <p>手牌已全部打出。</p>}
                   </div>
@@ -860,7 +1037,7 @@ export default function ChuHanGame() {
                 <div className="turn-panel">
                   <span className="section-kicker">COMMAND</span>
                   <h3>{game.turn === "player" ? (game.hasPlayed ? "整军完毕" : noLegalSlot ? "无位可下" : "等待落子") : "我方推演中"}</h3>
-                  <p>{game.turn === "player" ? (game.hasPlayed ? "可以继续发起进攻，或结束回合。" : noLegalSlot ? "跳过出牌，但仍可发起进攻。" : "选手牌，再点战场；系统自动补牌。") : "我会自动使用技能、出牌并判断进攻。"}</p>
+                  <p>{game.turn === "player" ? (game.hasPlayed ? "可以继续发起进攻，或结束回合。" : noLegalSlot ? "跳过出牌，但仍可发起进攻。" : "点击或拖动手牌到战场；系统自动补牌。") : game.difficulty === "advanced" ? "我正在计算胜利路线、技能收益和后续出牌。" : "我会采用较直接的出牌和进攻方式。"}</p>
                   <button className="primary-button end-turn" type="button" disabled={!playerCanAct || (!game.hasPlayed && !noLegalSlot)} onClick={endTurn}>{noLegalSlot && !game.hasPlayed ? "跳过出牌" : "结束回合"} <span>→</span></button>
                 </div>
               </div>

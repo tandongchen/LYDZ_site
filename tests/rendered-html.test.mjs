@@ -22,6 +22,14 @@ test("server-renders the Chu-Han Contention game", async () => {
   assert.match(html, /<title>楚汉之争｜玩家与 AI 的双人扑克牌战术游戏<\/title>/i);
   assert.match(html, /楚汉之争/);
   assert.match(html, /选择你的阵营/);
+  assert.match(html, /博弈游戏/);
+  assert.match(html, /智慧谋略/);
+  assert.match(html, /扑克桌游/);
+  assert.match(html, /选择难度/);
+  assert.match(html, /初级/);
+  assert.match(html, /高级/);
+  assert.match(html, /玩家目标胜率 70%\+/);
+  assert.match(html, /挑战玩家胜率 30%-/);
   assert.match(html, /乱世枭雄/);
   assert.match(html, /运筹帷幄/);
   assert.match(html, /列阵开战/);
@@ -31,6 +39,5 @@ test("server-renders the Chu-Han Contention game", async () => {
   assert.match(html, /势如破竹/);
   assert.match(html, /边路突袭/);
   assert.match(html, /魔法数学/);
-  assert.match(html, /纸牌兵法 · 双人对决/);
-  assert.doesNotMatch(html, /御马狂飙|数字炸弹|codex-preview|SkeletonPreview/i);
+  assert.doesNotMatch(html, /纸牌兵法 · 双人对决|15–25 分钟|玩家 VS 我|御马狂飙|数字炸弹|codex-preview|SkeletonPreview/i);
 });
