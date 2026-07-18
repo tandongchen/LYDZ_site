@@ -206,6 +206,10 @@ function actorName(actor: Actor) {
   return actor === "player" ? "你" : "我";
 }
 
+function armyName(game: GameState, actor: Actor) {
+  return `${factionName(factionOf(game, actor))}军`;
+}
+
 function cardLabel(card: Card) {
   return `${card.symbol}${card.rank}`;
 }
@@ -221,12 +225,8 @@ function formationDetail(cards: Card[]) {
     : `${cards.length}/3 布阵（${cardList(cards)}）`;
 }
 
-function troopSideName(actor: Actor) {
-  return actor === "player" ? "你方" : "我方";
-}
-
-function swapCardDetail(ref: SwapRef, card: Card) {
-  return `第 ${ref.field + 1} 战场${troopSideName(ref.actor)}的 ${cardLabel(card)}`;
+function swapCardDetail(game: GameState, ref: SwapRef, card: Card) {
+  return `第 ${ref.field + 1} 战场${armyName(game, ref.actor)}的 ${cardLabel(card)}`;
 }
 
 function logKindName(kind: BattleLogKind) {
@@ -357,8 +357,8 @@ function resolveAttack(game: GameState, fieldIndex: number, attacker: Actor) {
     const defender: Actor = attacker === "player" ? "ai" : "player";
     next.logs.unshift({
       id: Date.now() + fieldIndex,
-      title: `${actorName(attacker)}进攻第 ${fieldIndex + 1} 战场受阻`,
-      detail: `${troopSideName(attacker)}以${formationDetail(field.troops[attacker])}试攻，对阵${formationDetail(field.troops[defender])}。${verdict.text}`,
+      title: `${armyName(next, attacker)}进攻第 ${fieldIndex + 1} 战场受阻`,
+      detail: `${armyName(next, attacker)}以${formationDetail(field.troops[attacker])}试攻，对阵${armyName(next, defender)}的${formationDetail(field.troops[defender])}。${verdict.text}`,
       round: next.round,
       kind: "attack",
       actor: attacker,
@@ -369,8 +369,8 @@ function resolveAttack(game: GameState, fieldIndex: number, attacker: Actor) {
   field.winner = attacker;
   next.logs.unshift({
     id: Date.now() + fieldIndex,
-    title: `${actorName(attacker)}夺下第 ${fieldIndex + 1} 战场`,
-    detail: `${troopSideName(attacker)}以${formationDetail(field.troops[attacker])}进攻，对阵${formationDetail(field.troops[attacker === "player" ? "ai" : "player"])}。${verdict.text}`,
+    title: `${armyName(next, attacker)}夺下第 ${fieldIndex + 1} 战场`,
+    detail: `${armyName(next, attacker)}以${formationDetail(field.troops[attacker])}进攻，对阵${armyName(next, attacker === "player" ? "ai" : "player")}的${formationDetail(field.troops[attacker === "player" ? "ai" : "player"])}。${verdict.text}`,
     round: next.round,
     kind: "attack",
     actor: attacker,
@@ -458,6 +458,17 @@ function routeFocusBonus(game: GameState, fieldIndex: number) {
   return best;
 }
 
+function emptyLaneThreatScore(game: GameState, fieldIndex: number) {
+  const field = game.battlefields[fieldIndex];
+  if (!field || field.winner || field.troops.ai.length > 0 || field.troops.player.length < 2) return 0;
+  const threatenedFields = game.battlefields.map((current, index) =>
+    index === fieldIndex ? { ...current, winner: "player" as Actor } : current,
+  );
+  const wouldEndGame = !!victoryFor(threatenedFields, "player");
+  const completionPressure = field.troops.player.length === 3 ? 15000 : 10500;
+  return completionPressure + (wouldEndGame ? 30000 : 0);
+}
+
 function strategicBoardScore(game: GameState, actor: Actor) {
   const opponent: Actor = actor === "ai" ? "player" : "ai";
   let score = 0;
@@ -515,8 +526,8 @@ function maybeUseAiSkill(game: GameState) {
     next.usedSkill.ai = true;
     next.logs.unshift({
       id: Date.now(),
-      title: "我发动「乱世枭雄」",
-      detail: `第 ${next.round} 回合出牌前发动；我方 ${game.hands.ai.length} 张手牌与玩家 ${game.hands.player.length} 张手牌全部互换。${game.difficulty === "advanced" ? "原因：当前手牌难以形成高等级队形。" : ""}`,
+      title: `${armyName(next, "ai")}发动「乱世枭雄」`,
+      detail: `第 ${next.round} 回合出牌前发动；${armyName(next, "ai")} ${game.hands.ai.length} 张手牌与${armyName(next, "player")} ${game.hands.player.length} 张手牌全部互换。${game.difficulty === "advanced" ? "原因：当前手牌难以形成高等级队形。" : ""}`,
       round: next.round,
       kind: "skill",
       actor: "ai",
@@ -560,13 +571,13 @@ function maybeUseAiSkill(game: GameState) {
   const [a, b] = bestPair;
   const cardA = next.battlefields[a.field].troops[a.actor][a.card];
   const cardB = next.battlefields[b.field].troops[b.actor][b.card];
-  const swapDetail = `${swapCardDetail(a, cardA)}与${swapCardDetail(b, cardB)}对调`;
+  const swapDetail = `${swapCardDetail(next, a, cardA)}与${swapCardDetail(next, b, cardB)}对调`;
   next.battlefields[a.field].troops[a.actor][a.card] = cardB;
   next.battlefields[b.field].troops[b.actor][b.card] = cardA;
   next.usedSkill.ai = true;
   next.logs.unshift({
     id: Date.now(),
-    title: "我发动「运筹帷幄」",
+    title: `${armyName(next, "ai")}发动「运筹帷幄」`,
     detail: `第 ${next.round} 回合出牌前发动；${swapDetail}。`,
     round: next.round,
     kind: "skill",
@@ -576,10 +587,11 @@ function maybeUseAiSkill(game: GameState) {
 }
 
 function aiPlayChoice(game: GameState) {
-  const choices: Array<{ cardIndex: number; fieldIndex: number; score: number }> = [];
+  const choices: Array<{ cardIndex: number; fieldIndex: number; score: number; urgentBlockScore: number }> = [];
   game.hands.ai.forEach((card, cardIndex) => {
     game.battlefields.forEach((field, fieldIndex) => {
       if (field.winner || field.troops.ai.length >= 3) return;
+      const urgentBlockScore = emptyLaneThreatScore(game, fieldIndex);
       const trial = cloneGame(game);
       trial.hands.ai.splice(cardIndex, 1);
       trial.actionSeq += 1;
@@ -588,7 +600,7 @@ function aiPlayChoice(game: GameState) {
         trial.battlefields[fieldIndex].completedAt.ai = trial.actionSeq;
       }
 
-      let score = strategicBoardScore(trial, "ai");
+      let score = strategicBoardScore(trial, "ai") + urgentBlockScore;
       const playedField = trial.battlefields[fieldIndex];
       const plannedFormation = bestReachableFormation(playedField.troops.ai, trial.hands.ai);
       const plannedLevel = getFormation(playedField.troops.ai)?.level ?? plannedFormation?.level ?? 1;
@@ -621,10 +633,15 @@ function aiPlayChoice(game: GameState) {
           }
         });
       }
-      choices.push({ cardIndex, fieldIndex, score });
+      choices.push({ cardIndex, fieldIndex, score, urgentBlockScore });
     });
   });
   if (choices.length === 0) return null;
+  const urgentBlocks = choices.filter((choice) => choice.urgentBlockScore > 0);
+  if (urgentBlocks.length > 0) {
+    urgentBlocks.sort((a, b) => a.score - b.score);
+    return urgentBlocks[urgentBlocks.length - 1];
+  }
   if (game.difficulty === "beginner") {
     const lastField = game.aiRecentFields[0];
     const variedChoices = choices.some((choice) => choice.fieldIndex !== lastField)
@@ -670,7 +687,7 @@ function runAiTurn(game: GameState) {
     if (drawn) next.hands.ai.push(drawn);
     next.logs.unshift({
       id: Date.now() + 7,
-      title: `我向第 ${choice.fieldIndex + 1} 战场出牌`,
+      title: `${armyName(next, "ai")}向第 ${choice.fieldIndex + 1} 战场出牌`,
       detail: `投入 ${cardLabel(card)}；当前为${formationDetail(field.troops.ai)}；${drawn ? "从牌堆补入一张暗牌。" : "牌堆已空，不再补牌。"}`,
       round: next.round,
       kind: "play",
@@ -679,8 +696,8 @@ function runAiTurn(game: GameState) {
   } else {
     next.logs.unshift({
       id: Date.now() + 8,
-      title: "我跳过出牌",
-      detail: "所有未结束战场的我方阵位均已放满，保留进攻阶段。",
+      title: `${armyName(next, "ai")}跳过出牌`,
+      detail: `所有未结束战场的${armyName(next, "ai")}阵位均已放满，保留进攻阶段。`,
       round: next.round,
       kind: "system",
       actor: "ai",
@@ -893,7 +910,7 @@ export default function ChuHanGame() {
         : `你向第 ${fieldIndex + 1} 战场投入 ${card.symbol}${card.rank}。牌堆已耗尽，仍可进攻。`;
       next.logs.unshift({
         id: Date.now(),
-        title: `你向第 ${fieldIndex + 1} 战场出牌`,
+        title: `${armyName(next, "player")}向第 ${fieldIndex + 1} 战场出牌`,
         detail: `投入 ${cardLabel(card)}；当前为${formationDetail(field.troops.player)}；${drawn ? `补入 ${cardLabel(drawn)}。` : "牌堆已空，不再补牌。"}`,
         round: next.round,
         kind: "play",
@@ -918,8 +935,8 @@ export default function ChuHanGame() {
       next.message = "「乱世枭雄」发动：你与我的全部手牌已经互换。";
       next.logs.unshift({
         id: Date.now(),
-        title: "你发动「乱世枭雄」",
-        detail: `第 ${next.round} 回合出牌前发动；你方 ${current.hands.player.length} 张手牌与我方 ${current.hands.ai.length} 张手牌全部互换。`,
+        title: `${armyName(next, "player")}发动「乱世枭雄」`,
+        detail: `第 ${next.round} 回合出牌前发动；${armyName(next, "player")} ${current.hands.player.length} 张手牌与${armyName(next, "ai")} ${current.hands.ai.length} 张手牌全部互换。`,
         round: next.round,
         kind: "skill",
         actor: "player",
@@ -952,14 +969,14 @@ export default function ChuHanGame() {
       const cardA = fieldA.troops[a.actor][a.card];
       const cardB = fieldB.troops[b.actor][b.card];
       if (!cardA || !cardB) return current;
-      const swapDetail = `${swapCardDetail(a, cardA)}与${swapCardDetail(b, cardB)}对调`;
+      const swapDetail = `${swapCardDetail(next, a, cardA)}与${swapCardDetail(next, b, cardB)}对调`;
       fieldA.troops[a.actor][a.card] = cardB;
       fieldB.troops[b.actor][b.card] = cardA;
       next.usedSkill.player = true;
       next.message = `「运筹帷幄」发动：第 ${a.field + 1} 与第 ${b.field + 1} 战场各调换一张牌。`;
       next.logs.unshift({
         id: Date.now(),
-        title: "你发动「运筹帷幄」",
+        title: `${armyName(next, "player")}发动「运筹帷幄」`,
         detail: `第 ${next.round} 回合出牌前发动；${swapDetail}。`,
         round: next.round,
         kind: "skill",
@@ -1001,9 +1018,11 @@ export default function ChuHanGame() {
       </header>
 
       <section className="hero" id="top">
-        <div className="hero-copy">
+        <div className="hero-title-lockup">
           <p className="eyebrow"><span />CHU–HAN CONTENTION<span /></p>
           <h1><span>楚</span><span>汉</span><span>之</span><span>争</span></h1>
+        </div>
+        <div className="hero-copy">
           <p className="hero-lead">一纸鸿沟，<br /><em>八座战场定天下。</em></p>
           <p className="hero-description">
             你选楚或汉，我执掌另一方。以三张牌结成战斗队形，判断时机、主动进攻，
@@ -1026,7 +1045,7 @@ export default function ChuHanGame() {
           <div>
             <span className="section-kicker">BATTLE TABLE · 八阵图</span>
             <h2 id="game-title">
-              {game.phase === "setup" ? "选择你的阵营" : game.phase === "rps" ? "猜拳定先后" : game.phase === "finished" ? "天下已定" : `第 ${game.round} 回合 · ${game.turn === "player" ? "你方行动" : "我方行动"}`}
+              {game.phase === "setup" ? "选择你的阵营" : game.phase === "rps" ? "猜拳定先后" : game.phase === "finished" ? "天下已定" : `第 ${game.round} 回合 · ${armyName(game, game.turn)}行动`}
             </h2>
           </div>
           {game.phase !== "setup" && <button className="text-button" type="button" onClick={restart}>重开战局</button>}

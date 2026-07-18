@@ -72,3 +72,21 @@ test("advanced AI prioritizes high-level formations and penalizes scattered form
   assert.match(source, /formationPlanScore/);
   assert.match(source, /bestReachableFormation/);
 });
+
+test("uses Chu and Han army names in turn headings and battle reports", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /armyName\(game, game\.turn\).*行动/);
+  assert.match(source, /armyName\(next, "ai"\).*向第/);
+  assert.match(source, /armyName\(next, "player"\).*向第/);
+  assert.doesNotMatch(source, /你方行动|我方行动/);
+});
+
+test("blocks imminent empty-lane captures and centers the hero title across the page", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(source, /emptyLaneThreatScore/);
+  assert.match(source, /urgentBlocks/);
+  assert.match(source, /wouldEndGame/);
+  assert.match(source, /className="hero-title-lockup"/);
+  assert.match(styles, /\.hero-title-lockup\s*\{[^}]*width:\s*100%/s);
+});
