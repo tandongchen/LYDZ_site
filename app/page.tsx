@@ -73,6 +73,10 @@ function horseForCard(card: Card, mode: Mode): HorseId {
   return card.suit;
 }
 
+function hurdleRevealThreshold(hurdleIndex: number) {
+  return hurdleIndex === 4 ? 5 : hurdleIndex + 2;
+}
+
 function PlayingCard({
   card,
   hidden = false,
@@ -141,7 +145,10 @@ export default function HorseRaceGame() {
   const canRevealNextHurdle =
     phase === "playing" &&
     revealedHurdles < hurdles.length &&
-    horses.every((horse) => (positions[horse.id] ?? 0) >= revealedHurdles + 1);
+    horses.every(
+      (horse) =>
+        (positions[horse.id] ?? 0) >= hurdleRevealThreshold(revealedHurdles),
+    );
 
   function updatePlayerName(index: number, value: string) {
     setPlayerNames((names) => names.map((name, nameIndex) => (nameIndex === index ? value : name)));
@@ -208,10 +215,16 @@ export default function HorseRaceGame() {
     setLogs(nextLogs);
     const everyoneCrossedNextGate =
       revealedHurdles < hurdles.length &&
-      horses.every((horse) => (nextPositions[horse.id] ?? 0) >= revealedHurdles + 1);
+      horses.every(
+        (horse) =>
+          (nextPositions[horse.id] ?? 0) >= hurdleRevealThreshold(revealedHurdles),
+      );
+    const nextGateIsFinish = revealedHurdles === hurdles.length - 1;
     setMessage(
       everyoneCrossedNextGate
-        ? `所有马已共同越过第 ${revealedHurdles + 1} 道关卡，请点击赛道上的关卡牌手动翻开。`
+        ? nextGateIsFinish
+          ? "所有马已到达第 5 道关卡，请点击赛道上的关卡牌手动翻开。"
+          : `所有马已完全越过第 ${revealedHurdles + 1} 道关卡，请点击赛道上的关卡牌手动翻开。`
         : `${card.symbol}${card.rank} 翻开，${movingHorse.name}前进 1 格。`,
     );
   }
@@ -522,7 +535,7 @@ export default function HorseRaceGame() {
           </article>
           <article>
             <span>03</span>
-            <div><strong>手动揭晓关卡</strong><p>当所有马都共同越过同一道关卡，由玩家点击赛道上的关卡牌手动翻开。双人版同色马后退 1 格，四人版同花色马后退 1 格。</p></div>
+            <div><strong>手动揭晓关卡</strong><p>第 1—4 关必须等所有马完全越过后，才由玩家点击翻开；第 5 关只需所有马到达即可翻开。双人版同色马后退 1 格，四人版同花色马后退 1 格。</p></div>
           </article>
           <article>
             <span>04</span>

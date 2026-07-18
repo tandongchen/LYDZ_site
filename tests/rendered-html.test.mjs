@@ -29,7 +29,8 @@ test("server-renders the Wild Horse Race game", async () => {
   assert.match(html, /发牌开赛/);
   assert.match(html, /一副牌，两种赛制/);
   assert.match(html, /手动揭晓关卡/);
-  assert.match(html, /由玩家点击赛道上的关卡牌手动翻开/);
+  assert.match(html, /第 1—4 关必须等所有马完全越过后/);
+  assert.match(html, /第 5 关只需所有马到达即可翻开/);
   assert.match(html, /率先越线夺冠/);
   assert.match(html, /魔法数学/);
   assert.match(html, />博弈</);
