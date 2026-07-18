@@ -82,6 +82,15 @@ test("uses a readable vertical match-report timeline", async () => {
   assert.doesNotMatch(styles, /\.log-list\s*\{[^}]*overflow-x:\s*auto/s);
 });
 
+test("carries a second-action defense into the next round", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const roundResolver = source.match(/function handleCompletedRound[\s\S]*?function advanceScheduledAction/)?.[0] ?? "";
+  assert.match(source, /setDefenseReady\(\(previous\) => \(\{ \.\.\.previous, \[current\]: true \}\)\)/);
+  assert.match(source, /\[otherPlayer\(current\)\]: false/);
+  assert.doesNotMatch(roundResolver, /setDefenseReady/);
+  assert.match(source, /防守待生效/);
+});
+
 test("keeps ability and probability limits", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /Math\.max\(0, Math\.min\(10, value\)\)/);

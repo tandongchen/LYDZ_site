@@ -626,6 +626,7 @@ export default function WorldCupGame() {
           <div>
             <small>{playerLabel(player)}</small>
             <strong>{team.name}</strong>
+            {openPlay && defenseReady[player] && <em className="defense-ready-chip">防守待生效</em>}
           </div>
         </div>
         <div className="ability-strip" aria-label={`${team.name}能力值`}>
