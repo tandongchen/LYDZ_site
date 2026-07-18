@@ -839,7 +839,12 @@ export default function ChuHanGame() {
     if (outcome === "player") {
       setGame((current) => ({
         ...current,
-        rps: { player: playerGesture, ai: aiGesture, chooser: "player", text: "你赢了，请决定先手或后手。" },
+        rps: {
+          player: playerGesture,
+          ai: aiGesture,
+          chooser: "player",
+          text: `${armyName(current, "player")}赢了，请决定先手或后手。`,
+        },
       }));
       return;
     }
@@ -851,7 +856,7 @@ export default function ChuHanGame() {
         ai: aiGesture,
         chooser: "ai",
         aiOpeningTurn: aiChoosesFirst ? "ai" : "player",
-        text: `我赢了，并选择${aiChoosesFirst ? "先手" : "后手"}。`,
+        text: `${armyName(current, "ai")}赢了，并选择${aiChoosesFirst ? "先手" : "后手"}。`,
       },
       message: "猜拳结果已经揭晓，确认后正式开战。",
     }));
@@ -865,8 +870,8 @@ export default function ChuHanGame() {
       turn: openingTurn,
       message:
         openingTurn === "ai"
-          ? "我赢得猜拳并选择先手，由我先行。"
-          : "我赢得猜拳并选择后手，由你先出牌。",
+          ? `${armyName(current, "ai")}赢得猜拳并选择先手，由${armyName(current, "ai")}先行。`
+          : `${armyName(current, "ai")}赢得猜拳并选择后手，由${armyName(current, "player")}先出牌。`,
     }));
   }
 
@@ -875,7 +880,10 @@ export default function ChuHanGame() {
       ...current,
       phase: "playing",
       turn,
-      message: turn === "player" ? "你选择先手。请选择一张手牌，再选择战场。" : "你选择后手，由我先行。",
+      message:
+        turn === "player"
+          ? `${armyName(current, "player")}选择先手。请选择一张手牌，再选择战场。`
+          : `${armyName(current, "player")}选择后手，由${armyName(current, "ai")}先行。`,
     }));
   }
 
@@ -1107,9 +1115,9 @@ export default function ChuHanGame() {
         {game.phase === "rps" && (
           <div className="rps-stage">
             <div className="rps-result">
-              <div><small>你 · {factionName(game.playerFaction)}</small><strong>{game.rps.player ? GESTURES[game.rps.player].icon : "?"}</strong><span>{game.rps.player ? GESTURES[game.rps.player].label : "尚未出拳"}</span></div>
+              <div><small>{armyName(game, "player")}</small><strong>{game.rps.player ? GESTURES[game.rps.player].icon : "?"}</strong><span>{game.rps.player ? GESTURES[game.rps.player].label : "尚未出拳"}</span></div>
               <b>对</b>
-              <div><small>我 · {factionName(aiFaction)}</small><strong>{game.rps.ai ? GESTURES[game.rps.ai].icon : "?"}</strong><span>{game.rps.ai ? GESTURES[game.rps.ai].label : "等待你"}</span></div>
+              <div><small>{armyName(game, "ai")}</small><strong>{game.rps.ai ? GESTURES[game.rps.ai].icon : "?"}</strong><span>{game.rps.ai ? GESTURES[game.rps.ai].label : `等待${armyName(game, "player")}`}</span></div>
             </div>
             <div className="rps-controls">
               <span className="section-kicker">ROCK · PAPER · SCISSORS</span>

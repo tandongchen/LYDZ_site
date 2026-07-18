@@ -90,3 +90,12 @@ test("blocks imminent empty-lane captures and centers the hero title across the 
   assert.match(source, /className="hero-title-lockup"/);
   assert.match(styles, /\.hero-title-lockup\s*\{[^}]*width:\s*100%/s);
 });
+
+test("uses Chu and Han army names for rock-paper-scissors results", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /armyName\(current, "player"\).*赢了/);
+  assert.match(source, /armyName\(current, "ai"\).*赢了/);
+  assert.match(source, /<small>\{armyName\(game, "player"\)\}<\/small>/);
+  assert.match(source, /<small>\{armyName\(game, "ai"\)\}<\/small>/);
+  assert.doesNotMatch(source, /你赢了|我赢了/);
+});
