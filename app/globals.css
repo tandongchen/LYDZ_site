@@ -108,10 +108,11 @@ main {
   display: flex;
   align-items: flex-start;
 }
-.hero-copy { position: relative; z-index: 2; width: 64%; }
+.hero-copy { position: relative; z-index: 2; width: 100%; }
 .eyebrow {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   margin: 0 0 18px;
   color: var(--teal);
@@ -124,9 +125,10 @@ main {
 .hero h1 {
   margin: 0 0 20px;
   display: flex;
+  justify-content: center;
   gap: clamp(2px,.6vw,8px);
   font-family: "STKaiti", "KaiTi", serif;
-  font-size: clamp(58px,7.6vw,96px);
+  font-size: clamp(48px,6.4vw,86px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: -.045em;
@@ -156,7 +158,7 @@ main {
 }
 .hero-lead em { color: var(--red-dark); font-style: normal; }
 .hero-description {
-  width: min(650px, 100%);
+  width: min(650px, calc(100% - 340px));
   margin: 0;
   color: var(--muted);
   font-size: 15px;
@@ -456,6 +458,37 @@ main {
   font-size: 7px;
   font-weight: 700;
 }
+.hurdle-card-button {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.hurdle-card-button:disabled { opacity: 1; cursor: default; }
+.gate-marker.ready-to-flip .hurdle-card-button {
+  cursor: pointer;
+  animation: gate-ready 1s ease-in-out infinite alternate;
+}
+.gate-marker.ready-to-flip .playing-card {
+  box-shadow: 0 0 0 4px var(--gold), 0 7px 0 rgba(0,0,0,.2);
+}
+.flip-hint {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: -18px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 7px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+@keyframes gate-ready {
+  to { transform: translateY(-4px); }
+}
 .finish-marker { position: relative; gap: 8px; }
 .finish-marker i {
   width: 32px;
@@ -670,6 +703,12 @@ main {
   line-height: 1.7;
 }
 .draw-button { background: var(--red); box-shadow: 0 6px 0 var(--red-dark); }
+.draw-button:disabled {
+  background: var(--muted);
+  cursor: not-allowed;
+  box-shadow: 0 4px 0 #4c565e;
+  transform: none;
+}
 .current-card { display: grid; place-items: center; }
 .current-card .playing-card { animation: card-flip .38s ease both; }
 .card-placeholder {
@@ -788,11 +827,11 @@ footer {
   color: var(--muted);
 }
 footer > span { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: .1em; }
-footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 16px; }
+footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 13px; }
 
 @media (max-width: 960px) {
   .hero { min-height: 465px; }
-  .hero-copy { width: 68%; }
+  .hero-copy { width: 100%; }
   .hero-race { right: -60px; transform: translateY(-52%) scale(.86); }
   .setup-form { grid-template-columns: 1fr 1.2fr; }
   .setup-note { grid-column: 1 / -1; min-height: 120px; display: grid; grid-template-columns: 1fr 2fr auto; align-items: center; gap: 18px; }
@@ -805,7 +844,7 @@ footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif;
   .site-header { height: 70px; }
   .hero { min-height: 0; padding: 50px 0 42px; }
   .hero-copy { width: 100%; }
-  .hero h1 { font-size: clamp(52px,13vw,75px); }
+  .hero h1 { font-size: clamp(44px,10vw,62px); }
   .hero-race { right: -155px; opacity: .12; transform: translateY(-52%) scale(.9); }
   .game-shell { padding: 24px 18px; }
   .setup-form { grid-template-columns: 1fr; gap: 22px; }
@@ -828,7 +867,7 @@ footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif;
   .site-header, .hero, .game-shell, .rules-section, footer { width: min(100% - 24px, 1160px); }
   .brand { font-size: 16px; }
   .issue-tag { display: none; }
-  .hero h1 { font-size: clamp(48px,15vw,68px); }
+  .hero h1 { font-size: clamp(40px,12vw,54px); }
   .hero-lead { font-size: 32px; }
   .hero-description { font-size: 13px; }
   .mode-picker > div { grid-template-columns: 1fr; }
@@ -841,7 +880,7 @@ footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif;
   .rule-grid { grid-template-columns: 1fr; gap: 23px; }
   .rules-section { padding: 28px 22px; }
   footer { grid-template-columns: 1fr auto; }
-  footer p { max-width: 190px; font-size: 13px; text-align: right; }
+  footer p { max-width: 190px; font-size: 12px; text-align: right; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -138,6 +138,10 @@ export default function HorseRaceGame() {
   }, [mode, playerNames, twoHorseOrder]);
 
   const winningHorse = horses.find((horse) => horse.id === winner) ?? null;
+  const canRevealNextHurdle =
+    phase === "playing" &&
+    revealedHurdles < hurdles.length &&
+    horses.every((horse) => (positions[horse.id] ?? 0) >= revealedHurdles + 1);
 
   function updatePlayerName(index: number, value: string) {
     setPlayerNames((names) => names.map((name, nameIndex) => (nameIndex === index ? value : name)));
@@ -167,7 +171,7 @@ export default function HorseRaceGame() {
   }
 
   function drawNextCard() {
-    if (phase !== "playing" || deck.length === 0) return;
+    if (phase !== "playing" || deck.length === 0 || canRevealNextHurdle) return;
 
     const [card, ...remainingDeck] = deck;
     const movingHorseId = horseForCard(card, mode);
@@ -200,36 +204,44 @@ export default function HorseRaceGame() {
       return;
     }
 
-    const nextGate = revealedHurdles;
-    const everyoneCrossedGate =
-      nextGate < hurdles.length &&
-      horses.every((horse) => (nextPositions[horse.id] ?? 0) >= nextGate + 1);
-
-    if (everyoneCrossedGate) {
-      const hurdle = hurdles[nextGate];
-      const penalizedHorseId = horseForCard(hurdle, mode);
-      const penalizedHorse = horses.find((horse) => horse.id === penalizedHorseId);
-      nextPositions[penalizedHorseId] = Math.max(0, (nextPositions[penalizedHorseId] ?? 0) - 1);
-
-      if (penalizedHorse) {
-        nextLogs.unshift({
-          id: Date.now() + 1,
-          card: hurdle,
-          title: `第 ${nextGate + 1} 道关卡揭晓`,
-          detail: `${hurdle.symbol}${hurdle.rank} 命中${penalizedHorse.name}，后退 1 格`,
-          penalty: true,
-        });
-        setMessage(
-          `全员越过第 ${nextGate + 1} 道关卡：${hurdle.symbol}${hurdle.rank}，${penalizedHorse.name}后退 1 格。`,
-        );
-      }
-      setRevealedHurdles(nextGate + 1);
-    } else {
-      setMessage(`${card.symbol}${card.rank} 翻开，${movingHorse.name}前进 1 格。`);
-    }
-
     setPositions(nextPositions);
     setLogs(nextLogs);
+    const everyoneCrossedNextGate =
+      revealedHurdles < hurdles.length &&
+      horses.every((horse) => (nextPositions[horse.id] ?? 0) >= revealedHurdles + 1);
+    setMessage(
+      everyoneCrossedNextGate
+        ? `所有马已共同越过第 ${revealedHurdles + 1} 道关卡，请点击赛道上的关卡牌手动翻开。`
+        : `${card.symbol}${card.rank} 翻开，${movingHorse.name}前进 1 格。`,
+    );
+  }
+
+  function revealNextHurdle() {
+    if (!canRevealNextHurdle) return;
+
+    const hurdle = hurdles[revealedHurdles];
+    const penalizedHorseId = horseForCard(hurdle, mode);
+    const penalizedHorse = horses.find((horse) => horse.id === penalizedHorseId);
+    if (!penalizedHorse) return;
+
+    setPositions((current) => ({
+      ...current,
+      [penalizedHorseId]: Math.max(0, (current[penalizedHorseId] ?? 0) - 1),
+    }));
+    setLogs((current) => [
+      {
+        id: Date.now(),
+        card: hurdle,
+        title: `第 ${revealedHurdles + 1} 道关卡揭晓`,
+        detail: `${hurdle.symbol}${hurdle.rank} 命中${penalizedHorse.name}，后退 1 格`,
+        penalty: true,
+      },
+      ...current,
+    ]);
+    setRevealedHurdles((count) => count + 1);
+    setMessage(
+      `第 ${revealedHurdles + 1} 道关卡是 ${hurdle.symbol}${hurdle.rank}，${penalizedHorse.name}后退 1 格。`,
+    );
   }
 
   function restartSameMode() {
@@ -252,7 +264,7 @@ export default function HorseRaceGame() {
           <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="issue-tag">派对游戏 · 赛马篇</span>
+        <span className="issue-tag">博弈</span>
       </header>
 
       <section className="hero" id="top">
@@ -265,7 +277,7 @@ export default function HorseRaceGame() {
             但藏在赛道里的五张关卡牌，随时可能让领先者退回一步。
           </p>
           <div className="hero-tags" aria-label="游戏特点">
-            <span>2 / 4 人可玩</span><span>一副扑克牌</span><span>约 10 分钟</span>
+            <span>2 / 4 人可玩</span><span>一副扑克牌</span>
           </div>
         </div>
         <div className="hero-race" aria-hidden="true">
@@ -370,12 +382,31 @@ export default function HorseRaceGame() {
                 <span className="axis-label">赛道</span>
                 <div className="axis-grid">
                   <div className="start-marker"><span>START</span></div>
-                  {hurdles.map((card, index) => (
-                    <div className="gate-marker" key={card.id}>
-                      <small>关卡 {index + 1}</small>
-                      <PlayingCard card={card} hidden={index >= revealedHurdles} small />
-                    </div>
-                  ))}
+                  {hurdles.map((card, index) => {
+                    const isRevealed = index < revealedHurdles;
+                    const isReadyToReveal = index === revealedHurdles && canRevealNextHurdle;
+                    return (
+                      <div className={`gate-marker ${isReadyToReveal ? "ready-to-flip" : ""}`} key={card.id}>
+                        <small>关卡 {index + 1}</small>
+                        <button
+                          className="hurdle-card-button"
+                          type="button"
+                          disabled={!isReadyToReveal}
+                          onClick={revealNextHurdle}
+                          aria-label={
+                            isReadyToReveal
+                              ? `翻开第 ${index + 1} 道关卡牌`
+                              : isRevealed
+                                ? `第 ${index + 1} 道关卡已翻开`
+                                : `第 ${index + 1} 道关卡尚未到达`
+                          }
+                        >
+                          <PlayingCard card={card} hidden={!isRevealed} small />
+                          {isReadyToReveal && <b className="flip-hint">点击翻开</b>}
+                        </button>
+                      </div>
+                    );
+                  })}
                   <div className="finish-marker"><i /><span>FINISH</span></div>
                 </div>
               </div>
@@ -430,8 +461,13 @@ export default function HorseRaceGame() {
                     <span className="section-kicker">NEXT CARD</span>
                     <h3>{currentCard ? `${currentCard.symbol}${currentCard.rank}` : "等待第一张牌"}</h3>
                     <p>{message}</p>
-                    <button className="primary-button draw-button" type="button" onClick={drawNextCard}>
-                      翻开下一张 <span>→</span>
+                    <button
+                      className="primary-button draw-button"
+                      type="button"
+                      onClick={drawNextCard}
+                      disabled={canRevealNextHurdle}
+                    >
+                      {canRevealNextHurdle ? "请先翻开关卡" : "翻开下一张"} <span>→</span>
                     </button>
                   </div>
                   <div className="current-card">
@@ -486,7 +522,7 @@ export default function HorseRaceGame() {
           </article>
           <article>
             <span>03</span>
-            <div><strong>揭晓关卡惩罚</strong><p>当所有马都越过同一道关卡，翻开该赛道牌。双人版同色马后退 1 格，四人版同花色马后退 1 格。</p></div>
+            <div><strong>手动揭晓关卡</strong><p>当所有马都共同越过同一道关卡，由玩家点击赛道上的关卡牌手动翻开。双人版同色马后退 1 格，四人版同花色马后退 1 格。</p></div>
           </article>
           <article>
             <span>04</span>

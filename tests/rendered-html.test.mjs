@@ -28,8 +28,10 @@ test("server-renders the Wild Horse Race game", async () => {
   assert.match(html, /系统会自动洗牌/);
   assert.match(html, /发牌开赛/);
   assert.match(html, /一副牌，两种赛制/);
-  assert.match(html, /揭晓关卡惩罚/);
+  assert.match(html, /手动揭晓关卡/);
+  assert.match(html, /由玩家点击赛道上的关卡牌手动翻开/);
   assert.match(html, /率先越线夺冠/);
   assert.match(html, /魔法数学/);
-  assert.doesNotMatch(html, /数字炸弹|codex-preview|SkeletonPreview/i);
+  assert.match(html, />博弈</);
+  assert.doesNotMatch(html, /约 10 分钟|数字炸弹|codex-preview|SkeletonPreview/i);
 });
