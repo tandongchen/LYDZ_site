@@ -12,28 +12,24 @@ async function render() {
   );
 }
 
-test("server-renders the Number Bomb game", async () => {
+test("server-renders the Wild Horse Race game", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /<title>数字炸弹｜多人猜数字派对游戏<\/title>/i);
-  assert.match(html, /召集你的队伍/);
-  assert.match(html, /选择参加人数/);
-  assert.match(html, /每位玩家代表一支队伍/);
+  assert.match(html, /<title>御马狂飙｜2 人 \/ 4 人扑克牌赛马游戏<\/title>/i);
+  assert.match(html, /御马狂飙/);
+  assert.match(html, /选择你的比赛阵容/);
+  assert.match(html, /双马对决/);
+  assert.match(html, /四马争霸/);
+  assert.match(html, /交换红马与黑马/);
+  assert.match(html, /系统会自动洗牌/);
+  assert.match(html, /发牌开赛/);
+  assert.match(html, /一副牌，两种赛制/);
+  assert.match(html, /揭晓关卡惩罚/);
+  assert.match(html, /率先越线夺冠/);
   assert.match(html, /魔法数学/);
-  assert.match(html, /格兰芬多/);
-  assert.match(html, /斯莱特林/);
-  assert.match(html, /拉文克劳/);
-  assert.match(html, /赫奇帕奇/);
-  assert.match(html, /埋下炸弹/);
-  assert.match(html, /别猜中它/);
-  assert.match(html, /让范围越来越小/);
-  assert.match(html, /2—4 名玩家/);
-  assert.doesNotMatch(html, /数字实验室|NO\. 03|NUMBER BOMB · 2026/);
-  assert.match(html, /缩小范围/);
-  assert.match(html, /猜中系统随机生成的秘密数字/);
-  assert.doesNotMatch(html, /层叠消融|目标图形|codex-preview|SkeletonPreview/i);
+  assert.doesNotMatch(html, /数字炸弹|codex-preview|SkeletonPreview/i);
 });

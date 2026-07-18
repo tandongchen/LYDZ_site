@@ -1,111 +1,248 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { CSSProperties, FormEvent } from "react";
 
-type Phase = "setup" | "playing" | "exploded";
+type Mode = 2 | 4;
+type Phase = "setup" | "playing" | "finished";
+type Suit = "heart" | "diamond" | "spade" | "club";
+type HorseId = "red" | "black" | Suit;
 
-type GuessRecord = {
-  team: string;
-  teamIndex: number;
-  guess: number;
-  hint: string;
+type Card = {
+  id: string;
+  rank: string;
+  suit: Suit;
+  symbol: string;
+  red: boolean;
 };
 
-const TEAM_COLORS = ["#b63a3a", "#2f7a52", "#315e91", "#d09a2d"];
-const DEFAULT_TEAMS = ["格兰芬多", "斯莱特林", "拉文克劳", "赫奇帕奇"];
+type Horse = {
+  id: HorseId;
+  owner: string;
+  name: string;
+  mark: string;
+  red: boolean;
+};
 
-function makeSecret() {
-  return Math.floor(Math.random() * 100) + 1;
+type RaceLog = {
+  id: number;
+  card: Card;
+  title: string;
+  detail: string;
+  penalty?: boolean;
+};
+
+const SUITS: Array<Pick<Card, "suit" | "symbol" | "red">> = [
+  { suit: "heart", symbol: "♥", red: true },
+  { suit: "diamond", symbol: "♦", red: true },
+  { suit: "spade", symbol: "♠", red: false },
+  { suit: "club", symbol: "♣", red: false },
+];
+
+const RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+const DEFAULT_NAMES = ["玩家一", "玩家二", "玩家三", "玩家四"];
+const FINISH_STEP = 6;
+
+function shuffled<T>(items: T[]) {
+  const next = [...items];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[randomIndex]] = [next[randomIndex], next[index]];
+  }
+  return next;
 }
 
-export default function NumberBombGame() {
-  const [phase, setPhase] = useState<Phase>("setup");
-  const [teamCount, setTeamCount] = useState(4);
-  const [teamNames, setTeamNames] = useState(DEFAULT_TEAMS);
-  const [secret, setSecret] = useState<number | null>(null);
-  const [lower, setLower] = useState(1);
-  const [upper, setUpper] = useState(100);
-  const [turn, setTurn] = useState(0);
-  const [guess, setGuess] = useState("");
-  const [records, setRecords] = useState<GuessRecord[]>([]);
-  const [message, setMessage] = useState("炸弹已经埋好，等你来缩小范围。");
-  const [error, setError] = useState("");
-  const [loser, setLoser] = useState<string | null>(null);
-
-  const activeTeams = useMemo(
-    () => teamNames.slice(0, teamCount).map((name, index) => name.trim() || `玩家 ${index + 1}`),
-    [teamCount, teamNames],
+function createDeck() {
+  return SUITS.flatMap(({ suit, symbol, red }) =>
+    RANKS.map((rank) => ({
+      id: `${suit}-${rank}`,
+      rank,
+      suit,
+      symbol,
+      red,
+    })),
   );
-  const currentTeam = activeTeams[turn] ?? activeTeams[0];
-  const lowerWasGuessed = records.some((record) => record.guess === lower);
-  const upperWasGuessed = records.some((record) => record.guess === upper);
-  const playableLower = lower + (lowerWasGuessed ? 1 : 0);
-  const playableUpper = upper - (upperWasGuessed ? 1 : 0);
-  const remainingPossibilities = playableUpper - playableLower + 1;
+}
 
-  function resetRound() {
-    setSecret(makeSecret());
-    setLower(1);
-    setUpper(100);
-    setTurn(0);
-    setGuess("");
-    setRecords([]);
-    setMessage("炸弹已经埋好，范围是 1—100。");
-    setError("");
-    setLoser(null);
+function cleanName(name: string, index: number) {
+  return name.trim() || `玩家${index + 1}`;
+}
+
+function horseForCard(card: Card, mode: Mode): HorseId {
+  if (mode === 2) return card.red ? "red" : "black";
+  return card.suit;
+}
+
+function PlayingCard({
+  card,
+  hidden = false,
+  small = false,
+}: {
+  card?: Card;
+  hidden?: boolean;
+  small?: boolean;
+}) {
+  if (hidden || !card) {
+    return (
+      <span className={`playing-card card-back ${small ? "small" : ""}`} aria-label="未翻开的赛道牌">
+        <i />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={`playing-card card-front ${card.red ? "red-card" : "black-card"} ${small ? "small" : ""}`}
+      aria-label={`${card.symbol}${card.rank}`}
+    >
+      <b>{card.rank}</b>
+      <em>{card.symbol}</em>
+      <small>{card.symbol}</small>
+    </span>
+  );
+}
+
+export default function HorseRaceGame() {
+  const [mode, setMode] = useState<Mode>(2);
+  const [phase, setPhase] = useState<Phase>("setup");
+  const [playerNames, setPlayerNames] = useState(DEFAULT_NAMES);
+  const [twoHorseOrder, setTwoHorseOrder] = useState<["red", "black"]>(["red", "black"]);
+  const [positions, setPositions] = useState<Record<string, number>>({});
+  const [hurdles, setHurdles] = useState<Card[]>([]);
+  const [revealedHurdles, setRevealedHurdles] = useState(0);
+  const [deck, setDeck] = useState<Card[]>([]);
+  const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [logs, setLogs] = useState<RaceLog[]>([]);
+  const [winner, setWinner] = useState<HorseId | null>(null);
+  const [message, setMessage] = useState("选择比赛模式，准备让马匹冲出起跑线。");
+
+  const horses = useMemo<Horse[]>(() => {
+    if (mode === 2) {
+      const horseDetails = {
+        red: { id: "red" as const, name: "红马", mark: "JOKER", red: true },
+        black: { id: "black" as const, name: "黑马", mark: "JOKER", red: false },
+      };
+      return twoHorseOrder.map((horseId, index) => ({
+        ...horseDetails[horseId],
+        owner: cleanName(playerNames[index], index),
+      }));
+    }
+
+    return SUITS.map(({ suit, symbol, red }, index) => ({
+      id: suit,
+      owner: cleanName(playerNames[index], index),
+      name: `${symbol} ${["红桃", "方块", "黑桃", "梅花"][index]}马`,
+      mark: "A",
+      red,
+    }));
+  }, [mode, playerNames, twoHorseOrder]);
+
+  const winningHorse = horses.find((horse) => horse.id === winner) ?? null;
+
+  function updatePlayerName(index: number, value: string) {
+    setPlayerNames((names) => names.map((name, nameIndex) => (nameIndex === index ? value : name)));
+  }
+
+  function chooseMode(nextMode: Mode) {
+    setMode(nextMode);
+    setMessage(nextMode === 2 ? "两匹马按红黑颜色冲刺。" : "四匹马按花色各自冲刺。");
+  }
+
+  function startRace(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const raceCards = shuffled(createDeck());
+    const nextHurdles = raceCards.slice(0, 5);
+    const nextDeck = raceCards.slice(5);
+    const nextPositions = Object.fromEntries(horses.map((horse) => [horse.id, 0]));
+
+    setPositions(nextPositions);
+    setHurdles(nextHurdles);
+    setRevealedHurdles(0);
+    setDeck(nextDeck);
+    setCurrentCard(null);
+    setLogs([]);
+    setWinner(null);
+    setMessage("赛道已经铺好。翻开第一张牌，让比赛开始！");
     setPhase("playing");
   }
 
-  function startGame(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    resetRound();
+  function drawNextCard() {
+    if (phase !== "playing" || deck.length === 0) return;
+
+    const [card, ...remainingDeck] = deck;
+    const movingHorseId = horseForCard(card, mode);
+    const movingHorse = horses.find((horse) => horse.id === movingHorseId);
+    if (!movingHorse) return;
+
+    const nextPositions = {
+      ...positions,
+      [movingHorseId]: Math.min(FINISH_STEP, (positions[movingHorseId] ?? 0) + 1),
+    };
+    const nextLogs: RaceLog[] = [
+      {
+        id: Date.now(),
+        card,
+        title: `${movingHorse.name} 前进 1 格`,
+        detail: `${movingHorse.owner} 的马匹冲向下一段赛道`,
+      },
+      ...logs,
+    ];
+
+    setDeck(remainingDeck);
+    setCurrentCard(card);
+
+    if (nextPositions[movingHorseId] >= FINISH_STEP) {
+      setPositions(nextPositions);
+      setLogs(nextLogs);
+      setWinner(movingHorseId);
+      setMessage(`${movingHorse.owner} 驾驭${movingHorse.name}率先冲线！`);
+      setPhase("finished");
+      return;
+    }
+
+    const nextGate = revealedHurdles;
+    const everyoneCrossedGate =
+      nextGate < hurdles.length &&
+      horses.every((horse) => (nextPositions[horse.id] ?? 0) >= nextGate + 1);
+
+    if (everyoneCrossedGate) {
+      const hurdle = hurdles[nextGate];
+      const penalizedHorseId = horseForCard(hurdle, mode);
+      const penalizedHorse = horses.find((horse) => horse.id === penalizedHorseId);
+      nextPositions[penalizedHorseId] = Math.max(0, (nextPositions[penalizedHorseId] ?? 0) - 1);
+
+      if (penalizedHorse) {
+        nextLogs.unshift({
+          id: Date.now() + 1,
+          card: hurdle,
+          title: `第 ${nextGate + 1} 道关卡揭晓`,
+          detail: `${hurdle.symbol}${hurdle.rank} 命中${penalizedHorse.name}，后退 1 格`,
+          penalty: true,
+        });
+        setMessage(
+          `全员越过第 ${nextGate + 1} 道关卡：${hurdle.symbol}${hurdle.rank}，${penalizedHorse.name}后退 1 格。`,
+        );
+      }
+      setRevealedHurdles(nextGate + 1);
+    } else {
+      setMessage(`${card.symbol}${card.rank} 翻开，${movingHorse.name}前进 1 格。`);
+    }
+
+    setPositions(nextPositions);
+    setLogs(nextLogs);
   }
 
-  function updateTeamName(index: number, value: string) {
-    setTeamNames((names) => names.map((name, teamIndex) => (teamIndex === index ? value : name)));
-  }
-
-  function submitGuess(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (phase !== "playing" || secret === null) return;
-
-    const value = Number(guess);
-    if (!guess.trim() || !Number.isInteger(value)) {
-      setError("请输入一个整数。");
-      return;
-    }
-    if (value < playableLower || value > playableUpper) {
-      setError(`请输入 ${playableLower} 到 ${playableUpper} 之间的数字。`);
-      return;
-    }
-    if (records.some((record) => record.guess === value)) {
-      setError("这个数字已经猜过了，换一个试试。");
-      return;
-    }
-
-    setError("");
-    if (value === secret) {
-      setLoser(currentTeam);
-      setRecords((items) => [
-        { team: currentTeam, teamIndex: turn, guess: value, hint: "砰！炸弹爆炸" },
-        ...items,
-      ]);
-      setMessage(`${currentTeam} 猜中了 ${secret}，炸弹爆炸！`);
-      setPhase("exploded");
-      setGuess("");
-      return;
-    }
-
-    const nextLower = value < secret ? value : lower;
-    const nextUpper = value > secret ? value : upper;
-    const hint = `炸弹在 ${nextLower}—${nextUpper} 之间`;
-    setLower(nextLower);
-    setUpper(nextUpper);
-    setRecords((items) => [{ team: currentTeam, teamIndex: turn, guess: value, hint }, ...items]);
-    setMessage(`${currentTeam} 安全，${hint}。`);
-    setTurn((turn + 1) % teamCount);
-    setGuess("");
+  function restartSameMode() {
+    const raceCards = shuffled(createDeck());
+    setPositions(Object.fromEntries(horses.map((horse) => [horse.id, 0])));
+    setHurdles(raceCards.slice(0, 5));
+    setDeck(raceCards.slice(5));
+    setRevealedHurdles(0);
+    setCurrentCard(null);
+    setLogs([]);
+    setWinner(null);
+    setMessage("新赛道已经铺好。翻开第一张牌！");
+    setPhase("playing");
   }
 
   return (
@@ -115,187 +252,253 @@ export default function NumberBombGame() {
           <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="issue-tag">派对游戏</span>
+        <span className="issue-tag">派对游戏 · 赛马篇</span>
       </header>
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow"><span />THE NUMBER BOMB<span /></p>
-          <h1><span>数</span><span>字</span><span>炸</span><span>弹</span></h1>
-          <p className="hero-lead">别猜中它，<br /><em>让范围越来越小。</em></p>
+          <p className="eyebrow"><span />THE WILD HORSE RACE<span /></p>
+          <h1><span>御</span><span>马</span><span>狂</span><span>飙</span></h1>
+          <p className="hero-lead">翻一张牌，<br /><em>让你的马再快一步。</em></p>
           <p className="hero-description">
-            一个秘密数字，一场轮流试探。每一次安全猜测都会压缩炸弹区间，
-            直到某位玩家亲手按下那个危险的数字。
+            红黑对决，或四种花色同场竞速。每次翻牌都推动一匹马向前，
+            但藏在赛道里的五张关卡牌，随时可能让领先者退回一步。
           </p>
+          <div className="hero-tags" aria-label="游戏特点">
+            <span>2 / 4 人可玩</span><span>一副扑克牌</span><span>约 10 分钟</span>
+          </div>
         </div>
-        <div className="hero-bomb" aria-hidden="true">
-          <span className="spark spark-one" />
-          <span className="spark spark-two" />
-          <span className="fuse" />
-          <span className="bomb-body"><i>?</i></span>
-          <span className="bomb-shadow" />
+        <div className="hero-race" aria-hidden="true">
+          <span className="sun-disc" />
+          <span className="speed-line line-one" />
+          <span className="speed-line line-two" />
+          <span className="speed-line line-three" />
+          <span className="hero-horse horse-red">♞</span>
+          <span className="hero-horse horse-black">♞</span>
+          <span className="dust dust-one" />
+          <span className="dust dust-two" />
         </div>
       </section>
 
       <section className="game-shell" aria-labelledby="game-title">
         <div className="shell-heading">
           <div>
-            <span className="section-kicker">GAME CONSOLE</span>
-            <h2 id="game-title">{phase === "setup" ? "召集你的队伍" : "炸弹搜索区"}</h2>
+            <span className="section-kicker">RACE TABLE</span>
+            <h2 id="game-title">
+              {phase === "setup" ? "选择你的比赛阵容" : phase === "finished" ? "胜负已经揭晓" : "赛道正在疾驰"}
+            </h2>
           </div>
           {phase !== "setup" && (
             <button className="text-button" type="button" onClick={() => setPhase("setup")}>
-              重新组队
+              重新选模式
             </button>
           )}
         </div>
 
         {phase === "setup" ? (
-          <form className="setup-form" onSubmit={startGame}>
-            <fieldset className="count-picker">
-              <legend>选择参加人数</legend>
+          <form className="setup-form" onSubmit={startRace}>
+            <fieldset className="mode-picker">
+              <legend>01 · 选择比赛模式</legend>
               <div>
-                {[2, 3, 4].map((count) => (
-                  <button
-                    type="button"
-                    className={teamCount === count ? "selected" : ""}
-                    aria-pressed={teamCount === count}
-                    key={count}
-                    onClick={() => setTeamCount(count)}
-                  >
-                    <strong>{count}</strong><span>人 / 队</span>
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  className={mode === 2 ? "selected" : ""}
+                  aria-pressed={mode === 2}
+                  onClick={() => chooseMode(2)}
+                >
+                  <strong>双马对决</strong>
+                  <span>红马 vs 黑马</span>
+                  <small>按牌面颜色前进</small>
+                </button>
+                <button
+                  type="button"
+                  className={mode === 4 ? "selected" : ""}
+                  aria-pressed={mode === 4}
+                  onClick={() => chooseMode(4)}
+                >
+                  <strong>四马争霸</strong>
+                  <span>♥ ♦ ♠ ♣</span>
+                  <small>按牌面花色前进</small>
+                </button>
               </div>
             </fieldset>
 
-            <div className="team-editor">
-              <div className="field-label"><span>设置队伍名称</span><small>每位玩家代表一支队伍</small></div>
-              <div className="team-fields">
-                {activeTeams.map((_, index) => (
-                  <label key={index}>
-                    <span style={{ background: TEAM_COLORS[index] }}>{index + 1}</span>
-                    <input
-                      value={teamNames[index]}
-                      onChange={(event) => updateTeamName(index, event.target.value)}
-                      maxLength={10}
-                      aria-label={`第 ${index + 1} 支队伍名称`}
-                    />
+            <div className="player-setup">
+              <div className="field-label">
+                <span>02 · 填写玩家名称</span>
+                <small>{mode === 2 ? "点击下方按钮可交换马匹" : "每位玩家对应一种花色"}</small>
+              </div>
+              <div className={`player-fields mode-${mode}`}>
+                {horses.map((horse, index) => (
+                  <label key={horse.id}>
+                    <span className={horse.red ? "red-suit" : "black-suit"}>{horse.mark === "A" ? horse.name.charAt(0) : "♞"}</span>
+                    <div>
+                      <small>{horse.name}</small>
+                      <input
+                        value={playerNames[index]}
+                        onChange={(event) => updatePlayerName(index, event.target.value)}
+                        maxLength={10}
+                        aria-label={`${horse.name}玩家名称`}
+                      />
+                    </div>
                   </label>
+                ))}
+              </div>
+              {mode === 2 && (
+                <button
+                  className="swap-button"
+                  type="button"
+                  onClick={() => setTwoHorseOrder(([first, second]) => [second, first])}
+                >
+                  ⇄ 交换红马与黑马
+                </button>
+              )}
+            </div>
+
+            <aside className="setup-note">
+              <span className="section-kicker">READY?</span>
+              <p>系统会自动洗牌，并随机抽出 5 张牌铺成隐藏赛道。</p>
+              <button className="primary-button start-button" type="submit">
+                发牌开赛 <span>→</span>
+              </button>
+            </aside>
+          </form>
+        ) : (
+          <div className="race-console">
+            <div className="course-board">
+              <div className="course-axis">
+                <span className="axis-label">赛道</span>
+                <div className="axis-grid">
+                  <div className="start-marker"><span>START</span></div>
+                  {hurdles.map((card, index) => (
+                    <div className="gate-marker" key={card.id}>
+                      <small>关卡 {index + 1}</small>
+                      <PlayingCard card={card} hidden={index >= revealedHurdles} small />
+                    </div>
+                  ))}
+                  <div className="finish-marker"><i /><span>FINISH</span></div>
+                </div>
+              </div>
+
+              <div className="lanes">
+                {horses.map((horse) => (
+                  <div className="lane-row" key={horse.id}>
+                    <div className="lane-meta">
+                      <span className={horse.red ? "red-suit" : "black-suit"}>{horse.name.split(" ")[0]}</span>
+                      <div><strong>{horse.name}</strong><small>{horse.owner}</small></div>
+                    </div>
+                    <div className="lane-track">
+                      {Array.from({ length: 7 }, (_, step) => (
+                        <div className={`track-cell step-${step}`} key={step}>
+                          {(positions[horse.id] ?? 0) === step && (
+                            <span
+                              className={`horse-token ${horse.red ? "red-horse" : "black-horse"} ${winner === horse.id ? "winner" : ""}`}
+                              style={{ "--horse-delay": `${Number(horse.id.length) * 20}ms` } as CSSProperties}
+                              aria-label={`${horse.owner}的${horse.name}在第${step}格`}
+                            >
+                              <b>{horse.mark}</b><em>{horse.mark === "A" ? horse.name.charAt(0) : "♞"}</em>
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            <button className="primary-button start-button" type="submit">
-              埋下炸弹 <span>→</span>
-            </button>
-          </form>
-        ) : (
-          <div className="play-area">
-            <div className="turn-strip" aria-label="玩家顺序">
-              {activeTeams.map((team, index) => (
-                <div
-                  className={`team-chip ${phase === "playing" && turn === index ? "active" : ""} ${loser === team ? "lost" : ""}`}
-                  key={`${team}-${index}`}
-                  style={{ "--team-color": TEAM_COLORS[index] } as React.CSSProperties}
-                >
-                  <span>{index + 1}</span>
-                  <div><small>{phase === "playing" && turn === index ? "正在猜" : "等待"}</small><strong>{team}</strong></div>
-                </div>
-              ))}
-            </div>
-
-            <div className={`range-stage ${phase === "exploded" ? "is-exploded" : ""}`}>
-              <div className="range-copy">
-                <span className="section-kicker">DANGER ZONE</span>
-                <p>{phase === "exploded" ? "炸弹数字揭晓" : "炸弹就在这个范围内"}</p>
-                <strong>{phase === "exploded" ? secret : `${lower} — ${upper}`}</strong>
-                <small>{phase === "exploded" ? `${loser} 引爆了炸弹` : `还剩 ${remainingPossibilities} 个可能`}</small>
-              </div>
-              <div className="range-bomb" aria-hidden="true">
-                <span className="mini-fuse" />
-                <span className="mini-bomb">{phase === "exploded" ? "!" : "?"}</span>
-              </div>
-              <div className="range-track" aria-hidden="true">
-                <span>1</span>
-                <div><i style={{ left: `${lower - 1}%`, right: `${100 - upper}%` }} /></div>
-                <span>100</span>
-              </div>
-            </div>
-
-            {phase === "exploded" ? (
-              <div className="result-panel" role="status">
-                <span className="result-icon">砰</span>
+            {phase === "finished" && winningHorse ? (
+              <div className="winner-panel" role="status">
+                <span className={`winner-seal ${winningHorse.red ? "red-seal" : "black-seal"}`}>♞</span>
                 <div>
-                  <small>ROUND OVER</small>
-                  <h3>{loser} 踩中了数字炸弹</h3>
-                  <p>秘密数字是 <strong>{secret}</strong>，其余队伍成功幸存。</p>
+                  <span className="section-kicker">RACE OVER</span>
+                  <h3>{winningHorse.owner} 驾驭{winningHorse.name}夺冠！</h3>
+                  <p>率先越过第五张赛道牌，冲过终点线。</p>
                 </div>
-                <button className="primary-button" type="button" onClick={resetRound}>再来一局 <span>↻</span></button>
+                <button className="primary-button" type="button" onClick={restartSameMode}>
+                  再赛一局 <span>→</span>
+                </button>
               </div>
             ) : (
-              <div className="play-grid">
-                <div className="guess-card">
-                  <span className="section-kicker">YOUR TURN</span>
-                  <h3>轮到 <em>{currentTeam}</em></h3>
-                  <p>输入当前范围内的一个整数。猜中炸弹的人输掉本轮。</p>
-                  <form className="guess-form" onSubmit={submitGuess}>
-                    <label htmlFor="guess-input">你的数字</label>
-                    <div>
-                      <input
-                        id="guess-input"
-                        type="number"
-                        inputMode="numeric"
-                        min={playableLower}
-                        max={playableUpper}
-                        value={guess}
-                        onChange={(event) => setGuess(event.target.value)}
-                        placeholder={`${Math.round((playableLower + playableUpper) / 2)}`}
-                        autoComplete="off"
-                      />
-                      <button className="primary-button" type="submit">确认猜测 <span>→</span></button>
-                    </div>
-                    <p className="form-error" aria-live="polite">{error || `可输入 ${playableLower} 到 ${playableUpper}`}</p>
-                  </form>
+              <div className="draw-grid">
+                <div className="draw-stage">
+                  <div className="deck-stack" aria-hidden="true">
+                    <span /><span /><PlayingCard hidden />
+                    <small>剩余 {deck.length} 张</small>
+                  </div>
+                  <div className="draw-action">
+                    <span className="section-kicker">NEXT CARD</span>
+                    <h3>{currentCard ? `${currentCard.symbol}${currentCard.rank}` : "等待第一张牌"}</h3>
+                    <p>{message}</p>
+                    <button className="primary-button draw-button" type="button" onClick={drawNextCard}>
+                      翻开下一张 <span>→</span>
+                    </button>
+                  </div>
+                  <div className="current-card">
+                    {currentCard ? <PlayingCard card={currentCard} /> : <span className="card-placeholder">?</span>}
+                  </div>
                 </div>
 
-                <aside className="history-card" aria-label="猜测记录">
-                  <div className="history-heading">
-                    <div><span className="section-kicker">ROUND LOG</span><h3>本轮记录</h3></div>
-                    <strong>{records.length}<small>次猜测</small></strong>
+                <aside className="race-log" aria-label="比赛记录">
+                  <div className="log-heading">
+                    <div><span className="section-kicker">RACE LOG</span><h3>赛况播报</h3></div>
+                    <strong>{logs.filter((log) => !log.penalty).length}<small>次翻牌</small></strong>
                   </div>
-                  <div className="history-list" aria-live="polite">
-                    {records.length === 0 ? (
-                      <p className="empty-history">还没有人出手。<br />第一猜，也许就是最危险的一猜。</p>
-                    ) : records.map((record, index) => (
-                      <div className="history-item" key={`${record.team}-${record.guess}-${index}`}>
-                        <span style={{ background: TEAM_COLORS[record.teamIndex] }}>{record.guess}</span>
-                        <div><strong>{record.team}</strong><small>{record.hint}</small></div>
-                      </div>
-                    ))}
+                  <div className="log-list" aria-live="polite">
+                    {logs.length === 0 ? (
+                      <p className="empty-log">还没有翻牌。<br />第一匹出发的马，会是谁？</p>
+                    ) : (
+                      logs.map((log) => (
+                        <div className={`log-item ${log.penalty ? "penalty" : ""}`} key={log.id}>
+                          <span className={log.card.red ? "red-suit" : "black-suit"}>{log.card.symbol}{log.card.rank}</span>
+                          <div><strong>{log.title}</strong><small>{log.detail}</small></div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </aside>
               </div>
             )}
 
-            <p className="game-message" aria-live="polite"><span>●</span>{message}</p>
+            <p className="game-message" aria-live="polite">
+              <span>●</span>{message}
+            </p>
           </div>
         )}
       </section>
 
-      <section className="rules-section">
+      <section className="rules-section" aria-labelledby="rules-title">
         <div className="rules-heading">
-          <span className="section-kicker">HOW TO PLAY</span>
-          <h2>三步开始，越猜越刺激</h2>
+          <div>
+            <span className="section-kicker">HOW TO PLAY</span>
+            <h2 id="rules-title">一副牌，两种赛制</h2>
+          </div>
+          <p>先让所有马越过关卡，再揭晓它的惩罚牌。</p>
         </div>
-        <ol>
-          <li><span>01</span><div><strong>组建队伍</strong><p>选择 2—4 名玩家，每人代表一支队伍，按顺序轮流猜数。</p></div></li>
-          <li><span>02</span><div><strong>缩小范围</strong><p>系统会根据猜测提示新区间。下一位只能在当前范围内继续猜。</p></div></li>
-          <li><span>03</span><div><strong>避开炸弹</strong><p>谁猜中系统随机生成的秘密数字，谁就引爆炸弹并输掉本轮。</p></div></li>
-        </ol>
+        <div className="rule-grid">
+          <article>
+            <span>01</span>
+            <div><strong>选马与铺赛道</strong><p>双人版用大小王作为红、黑两匹马；四人版用四张 A 代表四种花色。随机抽 5 张牌背面朝上排成赛道。</p></div>
+          </article>
+          <article>
+            <span>02</span>
+            <div><strong>翻牌向前冲</strong><p>双人版按红黑颜色前进；四人版按红桃、方块、黑桃、梅花的具体花色前进。每翻一张，对应马匹前进 1 格。</p></div>
+          </article>
+          <article>
+            <span>03</span>
+            <div><strong>揭晓关卡惩罚</strong><p>当所有马都越过同一道关卡，翻开该赛道牌。双人版同色马后退 1 格，四人版同花色马后退 1 格。</p></div>
+          </article>
+          <article>
+            <span>04</span>
+            <div><strong>率先越线夺冠</strong><p>继续翻牌并逐道处理关卡。任何一匹马率先越过第 5 张赛道牌、抵达终点，比赛立即结束。</p></div>
+          </article>
+        </div>
       </section>
 
-      <footer><span>魔法数学</span><p>在 1 和 100 之间，藏着一次心跳。</p></footer>
+      <footer>
+        <span>魔法数学</span>
+        <p>牌面决定步伐，关卡改变胜负。</p>
+      </footer>
     </main>
   );
 }
