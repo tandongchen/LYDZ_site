@@ -53,13 +53,33 @@ test("implements regular time, extra time, penalties, and sudden death", async (
   assert.match(source, /beginActionPhase\(\s*"suddenDeath"/s);
 });
 
-test("uses a separate penalty score and the attack minus defense over three formula", async () => {
+test("uses the revised open-play and penalty attack formulas", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const \[penaltyScore, setPenaltyScore\]/);
-  assert.match(source, /stats\[current\]\.attack - stats\[defender\]\.defense \/ 3/);
+  assert.match(source, /stats\[current\]\.attack - stats\[defender\]\.defense \/ 2/);
+  assert.match(source, /stats\[current\]\.attack - stats\[defender\]\.defense \/ \(defended \? 1 : 1\.5\)/);
+  assert.match(source, /进攻 − 防守 ÷ 1\.5/);
+  assert.match(source, /进攻 − 防守 ÷ 2/);
   assert.match(source, /className="penalty-scoreboard"/);
   assert.match(source, /disabled=\{!canAct \|\| penaltyPlay\}/);
   assert.match(source, /点球比分独立于常规及加时赛比分/);
+});
+
+test("formats fractional probabilities without long decimal noise", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /function formatChance/);
+  assert.match(source, /value\.toFixed\(2\)/);
+  assert.match(source, /function formatPercent/);
+  assert.match(source, /percent\.toFixed\(1\)/);
+  assert.doesNotMatch(source, /\$\{chance \* 10\}%/);
+});
+
+test("uses a readable vertical match-report timeline", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.log-list\s*\{[^}]*display:\s*grid;[^}]*overflow-y:\s*auto/s);
+  assert.match(styles, /\.log-list article\s*\{[^}]*grid-template-columns:\s*34px minmax\(0,\s*1fr\)/s);
+  assert.match(styles, /overflow-wrap:\s*anywhere/);
+  assert.doesNotMatch(styles, /\.log-list\s*\{[^}]*overflow-x:\s*auto/s);
 });
 
 test("keeps ability and probability limits", async () => {

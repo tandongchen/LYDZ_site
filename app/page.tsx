@@ -63,6 +63,15 @@ function clampChance(value: number) {
   return Math.max(0, Math.min(10, value));
 }
 
+function formatChance(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function formatPercent(value: number) {
+  const percent = value * 10;
+  return Number.isInteger(percent) ? String(percent) : percent.toFixed(1).replace(/\.0$/, "");
+}
+
 function createDeck(): PlayingCard[] {
   const suits: PlayingCard["suit"][] = ["♥", "♦", "♠", "♣"];
   const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -182,7 +191,7 @@ export default function WorldCupGame() {
     setDefenseReady({ p1: false, p2: false });
     setActionLocked(false);
     setMessage(text);
-    setFormula(isPenaltyPhase(targetPhase) ? "进攻 − 对方防守 ÷ 3" : "双方各行动一次才完成一回合");
+    setFormula(isPenaltyPhase(targetPhase) ? "进攻 − 对方防守 ÷ 2" : "双方各行动一次才完成一回合");
   }
 
   function startGame() {
@@ -336,7 +345,7 @@ export default function WorldCupGame() {
       starter,
       `加时赛仍然战平，${playerLabel(starter)}先罚点球。`,
     );
-    setFormula("点球进球率 = 进攻 − 对方防守 ÷ 3");
+    setFormula("点球进球率 = 进攻 − 对方防守 ÷ 2");
     pushLog({
       title: `加时赛战平 ${scoreSnapshot.p1} : ${scoreSnapshot.p2}`,
       detail: "进入五回合点球大战，点球比分单独计算。",
@@ -435,7 +444,7 @@ export default function WorldCupGame() {
     setCurrent(starter);
     setActionLocked(false);
     setMessage(`${phase === "suddenDeath" ? "突然死亡" : "下一"}回合开始，${playerLabel(starter)}先行动。`);
-    setFormula(penaltyPlay ? "点球进球率 = 进攻 − 对方防守 ÷ 3" : "双方各行动一次才完成一回合");
+    setFormula(penaltyPlay ? "点球进球率 = 进攻 − 对方防守 ÷ 2" : "双方各行动一次才完成一回合");
   }
 
   function advanceScheduledAction(
@@ -486,19 +495,21 @@ export default function WorldCupGame() {
     const defender = otherPlayer(current);
 
     if (penaltyPlay) {
-      const rawChance = stats[current].attack - stats[defender].defense / 3;
+      const rawChance = stats[current].attack - stats[defender].defense / 2;
       const chance = clampChance(rawChance);
+      const chanceText = formatChance(chance);
+      const percentText = formatPercent(chance);
       const goal = Math.random() < chance / 10;
       const nextPenaltyScore = goal
         ? { ...penaltyScore, [current]: penaltyScore[current] + 1 }
         : penaltyScore;
       setPenaltyScore(nextPenaltyScore);
-      const expression = `${stats[current].attack} − ${stats[defender].defense} ÷ 3`;
+      const expression = `${stats[current].attack} − ${stats[defender].defense} ÷ 2`;
       setMessage(goal ? `${TEAM_DATA[teams[current]].name}点球命中！` : `${TEAM_DATA[teams[current]].name}罚失点球。`);
-      setFormula(`${expression} = ${chance} · ${chance * 10}% 进球率`);
+      setFormula(`${expression} = ${chanceText} · ${percentText}% 进球率`);
       pushLog({
         title: goal ? `${TEAM_DATA[teams[current]].name}点球命中` : `${TEAM_DATA[teams[current]].name}点球未进`,
-        detail: `${expression} = ${chance}，本次点球进球率 ${chance * 10}%。`,
+        detail: `${expression} = ${chanceText}，本次点球进球率 ${percentText}%。`,
         tone: goal ? "goal" : current,
       });
       window.setTimeout(() => finishAction(0, score, attacks, nextPenaltyScore), 260);
@@ -506,8 +517,10 @@ export default function WorldCupGame() {
     }
 
     const defended = defenseReady[defender];
-    const rawChance = stats[current].attack - stats[defender].defense / (defended ? 1 : 2);
+    const rawChance = stats[current].attack - stats[defender].defense / (defended ? 1 : 1.5);
     const chance = clampChance(rawChance);
+    const chanceText = formatChance(chance);
+    const percentText = formatPercent(chance);
     const goal = Math.random() < chance / 10;
     const nextScore = goal ? { ...score, [current]: score[current] + 1 } : score;
     const nextAttacks = { ...attacks, [current]: attacks[current] + 1 };
@@ -516,12 +529,12 @@ export default function WorldCupGame() {
     setDefenseReady((previous) => ({ ...previous, [defender]: false }));
     const expression = defended
       ? `${stats[current].attack} − ${stats[defender].defense}`
-      : `${stats[current].attack} − ${stats[defender].defense} ÷ 2`;
+      : `${stats[current].attack} − ${stats[defender].defense} ÷ 1.5`;
     setMessage(goal ? `进球！${TEAM_DATA[teams[current]].name}改写比分。` : "射门未能转化为进球。");
-    setFormula(`${expression} = ${chance} · ${chance * 10}% 进球率`);
+    setFormula(`${expression} = ${chanceText} · ${percentText}% 进球率`);
     pushLog({
       title: goal ? `${TEAM_DATA[teams[current]].name}进球` : `${TEAM_DATA[teams[current]].name}进攻未果`,
-      detail: `${defended ? "对手此前已防守，" : ""}${expression} = ${chance}，本次进球率 ${chance * 10}%。`,
+      detail: `${defended ? "对手此前已防守，" : ""}${expression} = ${chanceText}，本次进球率 ${percentText}%。`,
       tone: goal ? "goal" : current,
     });
     window.setTimeout(() => finishAction(0, nextScore, nextAttacks, penaltyScore), 260);
@@ -546,12 +559,14 @@ export default function WorldCupGame() {
     setActionLocked(true);
     const rival = otherPlayer(current);
     const chance = clampChance(stats[current].control - stats[rival].control / 2);
+    const chanceText = formatChance(chance);
+    const percentText = formatPercent(chance);
     const success = Math.random() < chance / 10;
     setMessage(success ? `${TEAM_DATA[teams[current]].name}掌控节奏，赢得两次额外行动！` : "控制未成功，本次行动直接结束。");
-    setFormula(`${stats[current].control} − ${stats[rival].control} ÷ 2 = ${chance} · ${chance * 10}% 成功率`);
+    setFormula(`${stats[current].control} − ${stats[rival].control} ÷ 2 = ${chanceText} · ${percentText}% 成功率`);
     pushLog({
       title: success ? `${TEAM_DATA[teams[current]].name}掌控比赛` : `${TEAM_DATA[teams[current]].name}争夺控制失败`,
-      detail: `控制公式结果为 ${chance}，成功率 ${chance * 10}%。${success ? "获得两次额外行动。" : "本次行动跳过。"}`,
+      detail: `控制公式结果为 ${chanceText}，成功率 ${percentText}%。${success ? "获得两次额外行动。" : "本次行动跳过。"}`,
       tone: current,
     });
     window.setTimeout(() => finishAction(success ? 2 : 0), 260);
@@ -842,10 +857,10 @@ export default function WorldCupGame() {
           <p>一个回合必须由双方各完成一次行动。所有能力值限制在 0—15，概率公式结果限制在 0—10。</p>
         </div>
         <div className="formula-board">
-          <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 2</strong><p>结果 × 10% = 本次进球率</p></div></article>
+          <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 1.5</strong><p>结果 × 10% = 本次进球率</p></div></article>
           <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守令对方下一次进攻不再除以 2</p></div></article>
           <article><span>◎</span><div><small>争夺控制</small><strong>控制 − 对方控制 ÷ 2</strong><p>成功得到两次额外行动，期间不能再控制</p></div></article>
-          <article><span>●</span><div><small>点球大战</small><strong>进攻 − 防守 ÷ 3</strong><p>点球比分独立于常规及加时赛比分</p></div></article>
+          <article><span>●</span><div><small>点球大战</small><strong>进攻 − 防守 ÷ 2</strong><p>点球比分独立于常规及加时赛比分</p></div></article>
         </div>
         <div className="rule-grid">
           <article><span>01</span><div><strong>五回合准备</strong><p>每回合双方各抽一张牌。红牌为本队加 2；黑牌为本队加 1，并令对手任一能力减 1。</p></div></article>
