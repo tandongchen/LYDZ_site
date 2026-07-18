@@ -202,10 +202,6 @@ function factionName(faction: Faction) {
   return faction === "chu" ? "楚" : "汉";
 }
 
-function actorName(actor: Actor) {
-  return actor === "player" ? "你" : "我";
-}
-
 function armyName(game: GameState, actor: Actor) {
   return `${factionName(factionOf(game, actor))}军`;
 }
@@ -345,7 +341,7 @@ function settleVictory(game: GameState, actor: Actor) {
     winner: actor,
     winReason: reason,
     aiThinking: false,
-    message: `${actorName(actor)}以“${reason.split(" · ")[0]}”结束楚汉之争。`,
+    message: `${armyName(game, actor)}以“${reason.split(" · ")[0]}”结束楚汉之争。`,
   };
 }
 
@@ -1163,7 +1159,7 @@ export default function ChuHanGame() {
                     const canAttack = playerCanAct && !field.winner && field.troops.player.length === 3;
                     return (
                       <article className={`battlefield ${field.winner ? `won-${field.winner}` : ""}`} key={field.id}>
-                        <header><span>战场 {fieldIndex + 1}</span>{field.winner && <b>{field.winner === "player" ? "你方占领" : "我方占领"}</b>}</header>
+                        <header><span>战场 {fieldIndex + 1}</span>{field.winner && <b>{armyName(game, field.winner)}占据</b>}</header>
                         <div className={`troop-row ai-troops ${field.winner === "ai" ? "advanced" : ""}`}>
                           {[0, 1, 2].map((slot) => {
                             const ref = { field: fieldIndex, actor: "ai" as Actor, card: slot };
@@ -1216,7 +1212,7 @@ export default function ChuHanGame() {
             {game.phase === "finished" ? (
               <div className={`victory-panel ${game.winner === "player" ? game.playerFaction : aiFaction}`}>
                 <span className="victory-seal">{factionName(game.winner === "player" ? game.playerFaction : aiFaction)}</span>
-                <div><span className="section-kicker">THE REALM IS DECIDED</span><h3>{game.winner === "player" ? "你赢下了楚汉之争" : "这一局由我拿下"}</h3><p>{game.winReason}</p></div>
+                <div><span className="section-kicker">THE REALM IS DECIDED</span><h3>{game.winner === "player" ? `你赢了 · 这一局由${armyName(game, "player")}拿下` : `你输了 · 这一局由${armyName(game, "ai")}拿下`}</h3><p>{game.winReason}</p></div>
                 <button className="primary-button" type="button" onClick={restart}>再战一局</button>
               </div>
             ) : (

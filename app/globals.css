@@ -41,34 +41,34 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   justify-content: space-between;
   border-bottom: 1px solid rgba(23, 32, 38, .22);
 }
-.brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: .11em; text-decoration: none; }
-.brand-mark { display: grid; width: 35px; height: 35px; place-items: center; border-radius: 50%; color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 18px; }
-.magic-hat { position: relative; overflow: visible; border-radius: 0; background: transparent; }
+.brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: .05em; text-decoration: none; }
+.brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
 .magic-hat::before {
   content: "";
   position: absolute;
-  left: 7px;
   top: 1px;
-  width: 23px;
-  height: 27px;
-  border-radius: 70% 10% 42% 30%;
-  background: linear-gradient(145deg, var(--han), #112e43 78%);
-  clip-path: polygon(52% 0, 100% 83%, 72% 100%, 0 84%);
-  transform: rotate(-8deg);
+  left: 10px;
+  width: 0;
+  height: 0;
+  border-left: 13px solid transparent;
+  border-right: 13px solid transparent;
+  border-bottom: 31px solid var(--ink);
+  transform: skewX(-10deg) rotate(-10deg);
+  transform-origin: bottom center;
 }
 .magic-hat::after {
   content: "";
   position: absolute;
-  left: 1px;
-  bottom: 2px;
-  width: 35px;
-  height: 8px;
+  left: 2px;
+  bottom: 3px;
+  width: 41px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--chu);
-  transform: rotate(-6deg);
-  box-shadow: 0 3px 0 rgba(23,32,38,.15);
+  background: var(--ink);
+  box-shadow: 0 4px 0 var(--gold);
+  transform: rotate(-5deg);
 }
-.magic-hat > span { position: relative; z-index: 2; margin: -3px 0 0 5px; color: var(--gold); font-size: 11px; }
+.magic-hat > span { position: absolute; z-index: 1; top: 15px; left: 20px; color: var(--chu); font-size: 10px; transform: rotate(-10deg); }
 .issue-tag { padding: 6px 10px; border: 1px solid var(--ink); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
 
 .hero {

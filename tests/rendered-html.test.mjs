@@ -97,5 +97,17 @@ test("uses Chu and Han army names for rock-paper-scissors results", async () => 
   assert.match(source, /armyName\(current, "ai"\).*赢了/);
   assert.match(source, /<small>\{armyName\(game, "player"\)\}<\/small>/);
   assert.match(source, /<small>\{armyName\(game, "ai"\)\}<\/small>/);
-  assert.doesNotMatch(source, /你赢了|我赢了/);
+  assert.doesNotMatch(source, /你赢了，请决定|我赢了，并选择/);
+});
+
+test("uses the shared magic hat and faction-specific battlefield outcomes", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.brand-mark\s*\{[^}]*width:\s*45px;[^}]*height:\s*42px/s);
+  assert.match(styles, /border-bottom:\s*31px solid var\(--ink\)/);
+  assert.match(styles, /box-shadow:\s*0 4px 0 var\(--gold\)/);
+  assert.match(source, /armyName\(game, field\.winner\).*占据/);
+  assert.match(source, /你赢了 · 这一局由/);
+  assert.match(source, /你输了 · 这一局由/);
+  assert.doesNotMatch(source, /你方占领|我方占领|这一局由我拿下/);
 });
