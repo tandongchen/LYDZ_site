@@ -33,6 +33,6 @@ test("server-renders the Wild Horse Race game", async () => {
   assert.match(html, /第 5 关只需所有马到达即可翻开/);
   assert.match(html, /率先越线夺冠/);
   assert.match(html, /魔法数学/);
-  assert.match(html, />博弈</);
+  assert.match(html, />数学思维小游戏</);
   assert.doesNotMatch(html, /约 10 分钟|数字炸弹|codex-preview|SkeletonPreview/i);
 });

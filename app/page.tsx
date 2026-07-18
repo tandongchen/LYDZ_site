@@ -69,7 +69,9 @@ function cleanName(name: string, index: number) {
 }
 
 function horseForCard(card: Card, mode: Mode): HorseId {
-  if (mode === 2) return card.red ? "red" : "black";
+  if (mode === 2) {
+    return card.suit === "heart" || card.suit === "diamond" ? "red" : "black";
+  }
   return card.suit;
 }
 
@@ -116,6 +118,7 @@ export default function HorseRaceGame() {
   const [revealedHurdles, setRevealedHurdles] = useState(0);
   const [deck, setDeck] = useState<Card[]>([]);
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [currentCardSource, setCurrentCardSource] = useState<"draw" | "hurdle" | null>(null);
   const [logs, setLogs] = useState<RaceLog[]>([]);
   const [winner, setWinner] = useState<HorseId | null>(null);
   const [message, setMessage] = useState("选择比赛模式，准备让马匹冲出起跑线。");
@@ -171,6 +174,7 @@ export default function HorseRaceGame() {
     setRevealedHurdles(0);
     setDeck(nextDeck);
     setCurrentCard(null);
+    setCurrentCardSource(null);
     setLogs([]);
     setWinner(null);
     setMessage("赛道已经铺好。翻开第一张牌，让比赛开始！");
@@ -201,6 +205,7 @@ export default function HorseRaceGame() {
 
     setDeck(remainingDeck);
     setCurrentCard(card);
+    setCurrentCardSource("draw");
 
     if (nextPositions[movingHorseId] >= FINISH_STEP) {
       setPositions(nextPositions);
@@ -251,6 +256,8 @@ export default function HorseRaceGame() {
       },
       ...current,
     ]);
+    setCurrentCard(hurdle);
+    setCurrentCardSource("hurdle");
     setRevealedHurdles((count) => count + 1);
     setMessage(
       `第 ${revealedHurdles + 1} 道关卡是 ${hurdle.symbol}${hurdle.rank}，${penalizedHorse.name}后退 1 格。`,
@@ -264,6 +271,7 @@ export default function HorseRaceGame() {
     setDeck(raceCards.slice(5));
     setRevealedHurdles(0);
     setCurrentCard(null);
+    setCurrentCardSource(null);
     setLogs([]);
     setWinner(null);
     setMessage("新赛道已经铺好。翻开第一张牌！");
@@ -277,7 +285,7 @@ export default function HorseRaceGame() {
           <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
           <span>魔法数学</span>
         </a>
-        <span className="issue-tag">博弈</span>
+        <span className="issue-tag">数学思维小游戏</span>
       </header>
 
       <section className="hero" id="top">
@@ -471,7 +479,9 @@ export default function HorseRaceGame() {
                     <small>剩余 {deck.length} 张</small>
                   </div>
                   <div className="draw-action">
-                    <span className="section-kicker">NEXT CARD</span>
+                    <span className="section-kicker">
+                      {currentCardSource === "hurdle" ? "CHECKPOINT CARD" : "NEXT CARD"}
+                    </span>
                     <h3>{currentCard ? `${currentCard.symbol}${currentCard.rank}` : "等待第一张牌"}</h3>
                     <p>{message}</p>
                     <button
