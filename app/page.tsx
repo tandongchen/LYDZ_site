@@ -73,10 +73,10 @@ type TeamSkill = {
 };
 
 const TEAM_DATA: Record<TeamId, { name: string; code: string; stats: Stats }> = {
-  argentina: { name: "阿根廷", code: "ARG", stats: { attack: 7, defense: 7, control: 8 } },
-  spain: { name: "西班牙", code: "ESP", stats: { attack: 6, defense: 8, control: 8 } },
-  france: { name: "法国", code: "FRA", stats: { attack: 8, defense: 6, control: 7 } },
-  england: { name: "英格兰", code: "ENG", stats: { attack: 7, defense: 7, control: 7 } },
+  argentina: { name: "阿根廷", code: "ARG", stats: { attack: 7, defense: 7, control: 10 } },
+  spain: { name: "西班牙", code: "ESP", stats: { attack: 6, defense: 8, control: 10 } },
+  france: { name: "法国", code: "FRA", stats: { attack: 8, defense: 6, control: 8 } },
+  england: { name: "英格兰", code: "ENG", stats: { attack: 7, defense: 7, control: 9 } },
   portugal: { name: "葡萄牙", code: "POR", stats: { attack: 6, defense: 6, control: 7 } },
   brazil: { name: "巴西", code: "BRA", stats: { attack: 7, defense: 6, control: 6 } },
   norway: { name: "挪威", code: "NOR", stats: { attack: 6, defense: 7, control: 6 } },

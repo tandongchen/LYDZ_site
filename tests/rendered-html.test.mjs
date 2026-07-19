@@ -123,8 +123,10 @@ test("offers all three team tiers with the revised ability values", async () => 
   assert.match(source, /label: "一档"/);
   assert.match(source, /label: "二档"/);
   assert.match(source, /label: "三档"/);
-  assert.match(source, /argentina:.*attack: 7, defense: 7, control: 8/);
-  assert.match(source, /spain:.*attack: 6, defense: 8, control: 8/);
+  assert.match(source, /argentina:.*attack: 7, defense: 7, control: 10/);
+  assert.match(source, /spain:.*attack: 6, defense: 8, control: 10/);
+  assert.match(source, /france:.*attack: 8, defense: 6, control: 8/);
+  assert.match(source, /england:.*attack: 7, defense: 7, control: 9/);
   assert.match(source, /capeVerde:.*attack: 4, defense: 8, control: 5/);
   assert.match(source, /egypt:.*attack: 6, defense: 5, control: 6/);
   assert.match(source, /<optgroup key=\{tier\.label\}/);
