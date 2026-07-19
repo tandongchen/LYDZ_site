@@ -56,11 +56,12 @@ test("implements regular time, extra time, penalties, and sudden death", async (
 test("uses the revised open-play and penalty attack formulas", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const \[penaltyScore, setPenaltyScore\]/);
-  assert.match(source, /effectiveStats\[current\]\.attack - effectiveStats\[defender\]\.defense \/ 2/);
+  assert.match(source, /effectiveStats\[current\]\.attack - effectiveStats\[defender\]\.defense \/ 1\.5/);
   assert.match(source, /effectiveStats\[current\]\.attack -\s*effectiveStats\[defender\]\.defense \/ \(defended \? 1 : 1\.3\)/);
   assert.match(source, /进攻 − 防守 ÷ 1\.3/);
   assert.doesNotMatch(source, /defended \? 1 : 1\.5/);
-  assert.match(source, /进攻 − 防守 ÷ 2/);
+  assert.match(source, /点球大战<\/small><strong>进攻 − 防守 ÷ 1\.5/);
+  assert.doesNotMatch(source, /点球进球率 = 进攻 − 对方防守 ÷ 2/);
   assert.match(source, /className="penalty-scoreboard"/);
   assert.match(source, /className="defense-action" disabled=\{!canAct \|\| penaltyPlay/);
   assert.match(source, /点球比分独立于常规及加时赛比分/);
@@ -141,7 +142,7 @@ test("allocates skill uses from the tier gap", async () => {
   assert.match(source, /技能已用尽/);
 });
 
-test("implements all seven announced team skills", async () => {
+test("implements all fourteen announced team skills", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /argentina:[\s\S]*name: "绝境之师"/);
   assert.match(source, /spain:[\s\S]*name: "Tiki-Taka"/);
@@ -158,6 +159,16 @@ test("implements all seven announced team skills", async () => {
   assert.match(source, /const defensiveSuccess = englandSkillSucceeds\(\)/);
   assert.match(source, /overrideStats: copyStats\(effectiveStats\[rival\]\)/);
   assert.match(source, /opponentDefenseDelta: -0\.5/);
+  assert.match(source, /brazil:[\s\S]*name: "边路突击"/);
+  assert.match(source, /norway:[\s\S]*name: "中路爆破"/);
+  assert.match(source, /colombia:[\s\S]*name: "势均力敌"/);
+  assert.match(source, /germany:[\s\S]*name: "速战速决"/);
+  assert.match(source, /morocco:[\s\S]*name: "长驱直入"/);
+  assert.match(source, /usa:[\s\S]*name: "声东击西"/);
+  assert.match(source, /ecuador:[\s\S]*name: "固若金汤"/);
+  assert.match(source, /blocksOpponentDefense: true/);
+  assert.match(source, /progressiveAttackStep: 0\.4/);
+  assert.match(source, /opponentAttackDelta: -1/);
 });
 
 test("expires temporary skill effects by completed rounds", async () => {
@@ -165,9 +176,29 @@ test("expires temporary skill effects by completed rounds", async () => {
   assert.match(source, /function tickSkillEffects\(\)/);
   assert.match(source, /previous\.p1\.roundsLeft - 1/);
   assert.match(source, /if \(isOpenPlayPhase\(phase\)\) tickSkillEffects\(\)/);
-  assert.match(source, /effectiveStatsFor\(player: PlayerId\)/);
+  assert.match(source, /baseEffectiveStatsFor\(player: PlayerId\)/);
   assert.match(source, /Math\.min\(\s*15,/s);
   assert.match(source, /className="skill-manual"/);
+});
+
+test("supports Colombia linked stats and USA ability permutations", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(source, /const \[pendingSkillChoice, setPendingSkillChoice\]/);
+  assert.match(source, /function chooseColombiaStat\(key: StatKey\)/);
+  assert.match(source, /linkedStat: key/);
+  assert.match(source, /effectiveStats\.p1\[skillEffects\.p1\.linkedStat\] = baseEffectiveStats\.p2/);
+  assert.match(source, /function chooseUsaPermutation\(order: StatKey\[\]\)/);
+  assert.match(source, /const STAT_PERMUTATIONS/);
+  assert.match(source, /className="pitch-panel skill-choice-panel"/);
+  assert.match(styles, /\.skill-choice-grid\s*\{/);
+});
+
+test("blocks defense while Brazil's skill is active", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /const defenseBlocked = Boolean\(skillEffects\[otherPlayer\(player\)\]\?\.blocksOpponentDefense\)/);
+  assert.match(source, /className="defense-action" disabled=\{!canAct \|\| penaltyPlay \|\| tikiTakaReady\[player\] \|\| defenseBlocked\}/);
+  assert.match(source, /防守键被封锁/);
 });
 
 test("keeps the scoreboard clear of the pitch and draws standard goal areas", async () => {
