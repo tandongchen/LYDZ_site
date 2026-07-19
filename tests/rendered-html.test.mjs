@@ -97,3 +97,49 @@ test("keeps ability and probability limits", async () => {
   assert.match(source, /stats\[player\]\[key\] >= 15/);
   assert.match(source, /stats\[player\]\[key\] <= 0/);
 });
+
+test("offers all three team tiers with the revised ability values", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /const TEAM_TIERS/);
+  assert.match(source, /label: "一档"/);
+  assert.match(source, /label: "二档"/);
+  assert.match(source, /label: "三档"/);
+  assert.match(source, /argentina:.*attack: 7, defense: 7, control: 8/);
+  assert.match(source, /spain:.*attack: 6, defense: 8, control: 8/);
+  assert.match(source, /capeVerde:.*attack: 4, defense: 8, control: 5/);
+  assert.match(source, /egypt:.*attack: 6, defense: 5, control: 6/);
+  assert.match(source, /<optgroup key=\{tier\.label\}/);
+  assert.match(source, /className="team-catalog"/);
+});
+
+test("keeps the scoreboard clear of the pitch and draws standard goal areas", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const stadium = source.match(/<div className=\{`stadium[\s\S]*?\{teamZone\("p2", "bottom"\)\}/)?.[0] ?? "";
+  assert.match(stadium, /className="scoreboard-rail"[\s\S]*className="football-pitch"/);
+  assert.match(source, /className="goal-box top-goal-box"/);
+  assert.match(source, /className="goal-box bottom-goal-box"/);
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.goal\s*\{[\s\S]*repeating-linear-gradient/);
+  assert.match(styles, /\.scoreboard\s*\{[^}]*display:\s*flex/);
+  assert.doesNotMatch(styles, /\.scoreboard\s*\{[^}]*position:\s*absolute/);
+});
+
+test("plays a goal and net-impact animation for the scoring side", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /function triggerGoalEffect\(scorer: PlayerId\)/);
+  assert.match(source, /if \(goal\) triggerGoalEffect\(current\)/);
+  assert.match(source, /className="goal-shot-ball"/);
+  assert.match(source, /className="goal-net-impact"/);
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /@keyframes goal-shot-down/);
+  assert.match(styles, /@keyframes goal-shot-up/);
+  assert.match(styles, /@keyframes net-burst-down/);
+  assert.match(styles, /@keyframes net-burst-up/);
+});
+
+test("keeps hero copy clear of the right-side illustration at medium widths", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /@media \(max-width: 1000px\)[\s\S]*?\.hero-copy\s*\{\s*width:\s*52%/);
+  assert.match(styles, /@media \(max-width: 1000px\)[\s\S]*?\.hero-description\s*\{\s*max-width:\s*400px/);
+  assert.match(styles, /@media \(max-width: 800px\)[\s\S]*?\.hero-art\s*\{\s*right:\s*-170px/);
+});

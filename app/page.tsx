@@ -3,7 +3,28 @@
 import { useMemo, useState } from "react";
 
 type PlayerId = "p1" | "p2";
-type TeamId = "argentina" | "spain" | "france" | "england" | "portugal";
+type TeamId =
+  | "argentina"
+  | "spain"
+  | "france"
+  | "england"
+  | "portugal"
+  | "brazil"
+  | "norway"
+  | "belgium"
+  | "colombia"
+  | "morocco"
+  | "netherlands"
+  | "germany"
+  | "switzerland"
+  | "mexico"
+  | "usa"
+  | "ecuador"
+  | "capeVerde"
+  | "japan"
+  | "ivoryCoast"
+  | "senegal"
+  | "egypt";
 type StatKey = "attack" | "defense" | "control";
 type Phase =
   | "setup"
@@ -33,12 +54,54 @@ type LogEntry = {
 };
 
 const TEAM_DATA: Record<TeamId, { name: string; code: string; stats: Stats }> = {
-  argentina: { name: "阿根廷", code: "ARG", stats: { attack: 7, defense: 7, control: 7 } },
-  spain: { name: "西班牙", code: "ESP", stats: { attack: 6, defense: 7, control: 8 } },
-  france: { name: "法国", code: "FRA", stats: { attack: 8, defense: 6, control: 6 } },
-  england: { name: "英格兰", code: "ENG", stats: { attack: 7, defense: 6, control: 6 } },
-  portugal: { name: "葡萄牙", code: "POR", stats: { attack: 7, defense: 5, control: 6 } },
+  argentina: { name: "阿根廷", code: "ARG", stats: { attack: 7, defense: 7, control: 8 } },
+  spain: { name: "西班牙", code: "ESP", stats: { attack: 6, defense: 8, control: 8 } },
+  france: { name: "法国", code: "FRA", stats: { attack: 8, defense: 6, control: 7 } },
+  england: { name: "英格兰", code: "ENG", stats: { attack: 7, defense: 7, control: 7 } },
+  portugal: { name: "葡萄牙", code: "POR", stats: { attack: 6, defense: 6, control: 7 } },
+  brazil: { name: "巴西", code: "BRA", stats: { attack: 7, defense: 6, control: 6 } },
+  norway: { name: "挪威", code: "NOR", stats: { attack: 6, defense: 7, control: 6 } },
+  belgium: { name: "比利时", code: "BEL", stats: { attack: 7, defense: 6, control: 6 } },
+  colombia: { name: "哥伦比亚", code: "COL", stats: { attack: 6, defense: 7, control: 6 } },
+  morocco: { name: "摩洛哥", code: "MAR", stats: { attack: 7, defense: 6, control: 6 } },
+  netherlands: { name: "荷兰", code: "NED", stats: { attack: 5, defense: 7, control: 7 } },
+  germany: { name: "德国", code: "GER", stats: { attack: 6, defense: 6, control: 6 } },
+  switzerland: { name: "瑞士", code: "SUI", stats: { attack: 6, defense: 7, control: 6 } },
+  mexico: { name: "墨西哥", code: "MEX", stats: { attack: 7, defense: 5, control: 7 } },
+  usa: { name: "美国", code: "USA", stats: { attack: 6, defense: 6, control: 7 } },
+  ecuador: { name: "厄瓜多尔", code: "ECU", stats: { attack: 4, defense: 7, control: 6 } },
+  capeVerde: { name: "佛得角", code: "CPV", stats: { attack: 4, defense: 8, control: 5 } },
+  japan: { name: "日本", code: "JPN", stats: { attack: 6, defense: 4, control: 7 } },
+  ivoryCoast: { name: "科特迪瓦", code: "CIV", stats: { attack: 6, defense: 5, control: 6 } },
+  senegal: { name: "塞内加尔", code: "SEN", stats: { attack: 7, defense: 5, control: 5 } },
+  egypt: { name: "埃及", code: "EGY", stats: { attack: 6, defense: 5, control: 6 } },
 };
+
+const TEAM_TIERS: Array<{ label: string; note: string; teams: TeamId[] }> = [
+  { label: "一档", note: "冠军争夺者", teams: ["argentina", "spain", "france", "england"] },
+  {
+    label: "二档",
+    note: "劲旅挑战者",
+    teams: [
+      "portugal",
+      "brazil",
+      "norway",
+      "belgium",
+      "colombia",
+      "morocco",
+      "netherlands",
+      "germany",
+      "switzerland",
+      "mexico",
+      "usa",
+    ],
+  },
+  {
+    label: "三档",
+    note: "黑马突围者",
+    teams: ["ecuador", "capeVerde", "japan", "ivoryCoast", "senegal", "egypt"],
+  },
+];
 
 const STAT_META: Record<StatKey, { label: string; short: string }> = {
   attack: { label: "进攻", short: "攻" },
@@ -47,8 +110,8 @@ const STAT_META: Record<StatKey, { label: string; short: string }> = {
 };
 
 const DEFAULT_STATS: Record<PlayerId, Stats> = {
-  p1: { attack: 6, defense: 7, control: 8 },
-  p2: { attack: 8, defense: 6, control: 6 },
+  p1: { attack: 6, defense: 8, control: 8 },
+  p2: { attack: 8, defense: 6, control: 7 },
 };
 
 function otherPlayer(player: PlayerId): PlayerId {
@@ -139,6 +202,7 @@ export default function WorldCupGame() {
   const [message, setMessage] = useState("双方选择球队后，由系统掷硬币决定准备阶段先手。");
   const [formula, setFormula] = useState("五回合准备 · 常规比赛十二回合");
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [goalEffect, setGoalEffect] = useState<{ id: number; scorer: PlayerId } | null>(null);
 
   const activeTeam = TEAM_DATA[teams[current]];
   const opponent = otherPlayer(current);
@@ -164,6 +228,14 @@ export default function WorldCupGame() {
 
   function pushLog(entry: Omit<LogEntry, "id">) {
     setLogs((previous) => [{ ...entry, id: Date.now() + Math.random() }, ...previous].slice(0, 16));
+  }
+
+  function triggerGoalEffect(scorer: PlayerId) {
+    const id = Date.now();
+    setGoalEffect({ id, scorer });
+    window.setTimeout(() => {
+      setGoalEffect((active) => (active?.id === id ? null : active));
+    }, 1250);
   }
 
   function updateTeam(player: PlayerId, team: TeamId) {
@@ -215,6 +287,7 @@ export default function WorldCupGame() {
     setDecidedByPenalties(false);
     setActionLocked(false);
     setLogs([]);
+    setGoalEffect(null);
     setPhase("prep");
     setMessage(`${playerLabel(prepStarter)} · ${TEAM_DATA[teams[prepStarter]].name} 获得准备阶段先手。`);
     setFormula("每个准备回合双方各抽一张牌");
@@ -500,6 +573,7 @@ export default function WorldCupGame() {
       const chanceText = formatChance(chance);
       const percentText = formatPercent(chance);
       const goal = Math.random() < chance / 10;
+      if (goal) triggerGoalEffect(current);
       const nextPenaltyScore = goal
         ? { ...penaltyScore, [current]: penaltyScore[current] + 1 }
         : penaltyScore;
@@ -522,6 +596,7 @@ export default function WorldCupGame() {
     const chanceText = formatChance(chance);
     const percentText = formatPercent(chance);
     const goal = Math.random() < chance / 10;
+    if (goal) triggerGoalEffect(current);
     const nextScore = goal ? { ...score, [current]: score[current] + 1 } : score;
     const nextAttacks = { ...attacks, [current]: attacks[current] + 1 };
     setScore(nextScore);
@@ -612,6 +687,7 @@ export default function WorldCupGame() {
     setWinnerPlayer(null);
     setDecidedByPenalties(false);
     setActionLocked(false);
+    setGoalEffect(null);
     setMessage("双方选择球队后，由系统掷硬币决定准备阶段先手。");
     setFormula("五回合准备 · 常规比赛十二回合");
   }
@@ -697,15 +773,7 @@ export default function WorldCupGame() {
         <div className={`stadium ${phase}`}>
           {teamZone("p1", "top")}
 
-          <div className="football-pitch">
-            <span className="touchline" />
-            <span className="halfway-line" />
-            <span className="centre-circle" />
-            <span className="centre-dot" />
-            <span className="penalty-box top-box" />
-            <span className="penalty-box bottom-box" />
-            <span className="goal top-goal" />
-            <span className="goal bottom-goal" />
+          <div className="scoreboard-rail" aria-label="比赛比分">
             <div className="scoreboard">
               <span>{TEAM_DATA[teams.p1].code}</span>
               <strong>{score.p1}<i>:</i>{score.p2}</strong>
@@ -716,6 +784,26 @@ export default function WorldCupGame() {
                 <span>点球</span><strong>{penaltyScore.p1}<i>:</i>{penaltyScore.p2}</strong>
               </div>
             )}
+          </div>
+
+          <div className="football-pitch">
+            <span className="touchline" />
+            <span className="halfway-line" />
+            <span className="centre-circle" />
+            <span className="centre-dot" />
+            <span className="penalty-box top-box" />
+            <span className="penalty-box bottom-box" />
+            <span className="goal-box top-goal-box" />
+            <span className="goal-box bottom-goal-box" />
+            <span className="goal top-goal" />
+            <span className="goal bottom-goal" />
+            {goalEffect && (
+              <div key={goalEffect.id} className={`goal-effect ${goalEffect.scorer}`} aria-live="polite">
+                <span className="goal-shot-ball" aria-hidden="true">⚽</span>
+                <span className="goal-net-impact" aria-hidden="true" />
+                <strong>GOAL!</strong>
+              </div>
+            )}
 
             {phase === "setup" && (
               <div className="pitch-panel setup-panel">
@@ -724,20 +812,28 @@ export default function WorldCupGame() {
                 <label>
                   <span>玩家一 · 球场上方</span>
                   <select value={teams.p1} onChange={(event) => updateTeam("p1", event.target.value as TeamId)}>
-                    {(Object.keys(TEAM_DATA) as TeamId[]).map((team) => (
-                      <option key={team} value={team} disabled={teams.p2 === team}>
-                        {TEAM_DATA[team].name} · 攻{TEAM_DATA[team].stats.attack} 守{TEAM_DATA[team].stats.defense} 控{TEAM_DATA[team].stats.control}
-                      </option>
+                    {TEAM_TIERS.map((tier) => (
+                      <optgroup key={tier.label} label={`${tier.label} · ${tier.note}`}>
+                        {tier.teams.map((team) => (
+                          <option key={team} value={team} disabled={teams.p2 === team}>
+                            {TEAM_DATA[team].name} · 攻{TEAM_DATA[team].stats.attack} 守{TEAM_DATA[team].stats.defense} 控{TEAM_DATA[team].stats.control}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </label>
                 <label>
                   <span>玩家二 · 球场下方</span>
                   <select value={teams.p2} onChange={(event) => updateTeam("p2", event.target.value as TeamId)}>
-                    {(Object.keys(TEAM_DATA) as TeamId[]).map((team) => (
-                      <option key={team} value={team} disabled={teams.p1 === team}>
-                        {TEAM_DATA[team].name} · 攻{TEAM_DATA[team].stats.attack} 守{TEAM_DATA[team].stats.defense} 控{TEAM_DATA[team].stats.control}
-                      </option>
+                    {TEAM_TIERS.map((tier) => (
+                      <optgroup key={tier.label} label={`${tier.label} · ${tier.note}`}>
+                        {tier.teams.map((team) => (
+                          <option key={team} value={team} disabled={teams.p1 === team}>
+                            {TEAM_DATA[team].name} · 攻{TEAM_DATA[team].stats.attack} 守{TEAM_DATA[team].stats.defense} 控{TEAM_DATA[team].stats.control}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </label>
@@ -871,9 +967,16 @@ export default function WorldCupGame() {
           <article><span>05</span><div><strong>五轮点球大战</strong><p>加时仍平则双方各罚五球，只能选择进攻，并在主比分下方独立计分。</p></div></article>
           <article><span>06</span><div><strong>点球突然死亡</strong><p>五轮后仍平，每回合双方各罚一球；一方进球而另一方未进球时立即决出胜负。</p></div></article>
         </div>
-        <div className="team-table">
-          {(Object.keys(TEAM_DATA) as TeamId[]).map((team) => (
-            <div key={team}><b>{TEAM_DATA[team].code}</b><strong>{TEAM_DATA[team].name}</strong><span>攻 {TEAM_DATA[team].stats.attack}</span><span>守 {TEAM_DATA[team].stats.defense}</span><span>控 {TEAM_DATA[team].stats.control}</span></div>
+        <div className="team-catalog">
+          {TEAM_TIERS.map((tier) => (
+            <section className="team-tier" key={tier.label}>
+              <header><strong>{tier.label}</strong><span>{tier.note}</span></header>
+              <div className="team-table">
+                {tier.teams.map((team) => (
+                  <div key={team}><b>{TEAM_DATA[team].code}</b><strong>{TEAM_DATA[team].name}</strong><span>攻 {TEAM_DATA[team].stats.attack}</span><span>守 {TEAM_DATA[team].stats.defense}</span><span>控 {TEAM_DATA[team].stats.control}</span></div>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       </section>
