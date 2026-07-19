@@ -37,8 +37,8 @@ test("counts one round only after both scheduled actions", async () => {
 
 test("uses the revised control formula and keeps bonus actions outside scheduled slots", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /stats\[current\]\.control - stats\[rival\]\.control \/ 2/);
-  assert.match(source, /finishAction\(success \? 2 : 0\)/);
+  assert.match(source, /effectiveStats\[current\]\.control - effectiveStats\[rival\]\.control \/ 2/);
+  assert.match(source, /finishAction\(success \? awardedTurns : 0\)/);
   assert.match(source, /不占用双方的正常行动位置/);
   assert.match(source, /bonusTurns > 0/);
 });
@@ -56,12 +56,12 @@ test("implements regular time, extra time, penalties, and sudden death", async (
 test("uses the revised open-play and penalty attack formulas", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const \[penaltyScore, setPenaltyScore\]/);
-  assert.match(source, /stats\[current\]\.attack - stats\[defender\]\.defense \/ 2/);
-  assert.match(source, /stats\[current\]\.attack - stats\[defender\]\.defense \/ \(defended \? 1 : 1\.5\)/);
+  assert.match(source, /effectiveStats\[current\]\.attack - effectiveStats\[defender\]\.defense \/ 2/);
+  assert.match(source, /effectiveStats\[current\]\.attack -\s*effectiveStats\[defender\]\.defense \/ \(defended \? 1 : 1\.5\)/);
   assert.match(source, /进攻 − 防守 ÷ 1\.5/);
   assert.match(source, /进攻 − 防守 ÷ 2/);
   assert.match(source, /className="penalty-scoreboard"/);
-  assert.match(source, /disabled=\{!canAct \|\| penaltyPlay\}/);
+  assert.match(source, /className="defense-action" disabled=\{!canAct \|\| penaltyPlay/);
   assert.match(source, /点球比分独立于常规及加时赛比分/);
 });
 
@@ -96,10 +96,16 @@ test("uses a complete Chinese font for live match text", async () => {
 test("carries a second-action defense into the next round", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const roundResolver = source.match(/function handleCompletedRound[\s\S]*?function advanceScheduledAction/)?.[0] ?? "";
+  const actionFinisher = source.match(/function finishAction[\s\S]*?function attack/)?.[0] ?? "";
+  const controlAction = source.match(/function control\(\)[\s\S]*?function confirmHalftime/)?.[0] ?? "";
   assert.match(source, /setDefenseReady\(\(previous\) => \(\{ \.\.\.previous, \[current\]: true \}\)\)/);
-  assert.match(source, /\[otherPlayer\(current\)\]: false/);
+  assert.match(source, /\[defender\]: false/);
   assert.doesNotMatch(roundResolver, /setDefenseReady/);
+  assert.doesNotMatch(actionFinisher, /setDefenseReady/);
+  assert.doesNotMatch(controlAction, /setDefenseReady/);
+  assert.doesNotMatch(source, /\[otherPlayer\(current\)\]: false/);
   assert.match(source, /防守待生效/);
+  assert.match(source, /防守会一直保留到对手真正选择进攻/);
 });
 
 test("keeps ability and probability limits", async () => {
@@ -121,6 +127,46 @@ test("offers all three team tiers with the revised ability values", async () => 
   assert.match(source, /egypt:.*attack: 6, defense: 5, control: 6/);
   assert.match(source, /<optgroup key=\{tier\.label\}/);
   assert.match(source, /className="team-catalog"/);
+});
+
+test("allocates skill uses from the tier gap", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /function tierForTeam\(team: TeamId\)/);
+  assert.match(source, /function skillUsesForTeam\(team: TeamId, opponent: TeamId\)/);
+  assert.match(source, /1 \+ Math\.max\(0, tierForTeam\(team\) - tierForTeam\(opponent\)\)/);
+  assert.match(source, /p1: skillUsesForTeam\(teams\.p1, teams\.p2\)/);
+  assert.match(source, /p2: skillUsesForTeam\(teams\.p2, teams\.p1\)/);
+  assert.match(source, /className="skill-action"/);
+  assert.match(source, /技能已用尽/);
+});
+
+test("implements all seven announced team skills", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /argentina:[\s\S]*name: "绝境之师"/);
+  assert.match(source, /spain:[\s\S]*name: "Tiki-Taka"/);
+  assert.match(source, /france:[\s\S]*name: "三驾马车"/);
+  assert.match(source, /england:[\s\S]*name: "一字长蛇"/);
+  assert.match(source, /portugal:[\s\S]*name: "攻防一体"/);
+  assert.match(source, /netherlands:[\s\S]*name: "铜墙铁壁"/);
+  assert.match(source, /belgium:[\s\S]*name: "高空轰炸"/);
+  assert.match(source, /attackDelta: 1\.5/);
+  assert.match(source, /const tikiTaka = tikiTakaReady\[current\]/);
+  assert.match(source, /const awardedTurns = tikiTaka \? 3 : 2/);
+  assert.match(source, /teams\[defender\] === "france"/);
+  assert.match(source, /function englandSkillSucceeds\(\)[\s\S]*Math\.random\(\) < 0\.75/);
+  assert.match(source, /const defensiveSuccess = englandSkillSucceeds\(\)/);
+  assert.match(source, /overrideStats: copyStats\(effectiveStats\[rival\]\)/);
+  assert.match(source, /opponentDefenseDelta: -0\.5/);
+});
+
+test("expires temporary skill effects by completed rounds", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /function tickSkillEffects\(\)/);
+  assert.match(source, /previous\.p1\.roundsLeft - 1/);
+  assert.match(source, /if \(isOpenPlayPhase\(phase\)\) tickSkillEffects\(\)/);
+  assert.match(source, /effectiveStatsFor\(player: PlayerId\)/);
+  assert.match(source, /Math\.min\(\s*15,/s);
+  assert.match(source, /className="skill-manual"/);
 });
 
 test("keeps the scoreboard clear of the pitch and draws standard goal areas", async () => {

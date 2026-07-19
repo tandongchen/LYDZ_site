@@ -52,6 +52,20 @@ type LogEntry = {
   detail: string;
   tone: "system" | "p1" | "p2" | "goal";
 };
+type SkillEffect = {
+  name: string;
+  roundsLeft: number;
+  attackDelta?: number;
+  defenseDelta?: number;
+  controlDelta?: number;
+  opponentDefenseDelta?: number;
+  overrideStats?: Stats;
+  summary: string;
+};
+type TeamSkill = {
+  name: string;
+  description: string;
+};
 
 const TEAM_DATA: Record<TeamId, { name: string; code: string; stats: Stats }> = {
   argentina: { name: "阿根廷", code: "ARG", stats: { attack: 7, defense: 7, control: 8 } },
@@ -102,6 +116,37 @@ const TEAM_TIERS: Array<{ label: string; note: string; teams: TeamId[] }> = [
     teams: ["ecuador", "capeVerde", "japan", "ivoryCoast", "senegal", "egypt"],
   },
 ];
+
+const TEAM_SKILLS: Partial<Record<TeamId, TeamSkill>> = {
+  argentina: {
+    name: "绝境之师",
+    description: "常规或加时最后三个回合可用：进攻 +1.5，持续两个回合。",
+  },
+  spain: {
+    name: "Tiki-Taka",
+    description: "下一次控制必定成功，并获得三次额外行动。",
+  },
+  france: {
+    name: "三驾马车",
+    description: "对手进攻未进后可用：进攻 +2、防守 −1，持续两个回合。",
+  },
+  england: {
+    name: "一字长蛇",
+    description: "常规最后四回合或加时可用：75% 防守 +3、进攻 −1；25% 防守 −2。",
+  },
+  portugal: {
+    name: "攻防一体",
+    description: "复制对手当前进攻、防守、控制，持续一个回合。",
+  },
+  netherlands: {
+    name: "铜墙铁壁",
+    description: "防守 +2、进攻 −2，持续一个回合。",
+  },
+  belgium: {
+    name: "高空轰炸",
+    description: "进攻 +1，并令对方防守 −0.5，持续一个回合。",
+  },
+};
 
 const STAT_META: Record<StatKey, { label: string; short: string }> = {
   attack: { label: "进攻", short: "攻" },
@@ -157,6 +202,18 @@ function copyStats(stats: Stats): Stats {
   return { attack: stats.attack, defense: stats.defense, control: stats.control };
 }
 
+function tierForTeam(team: TeamId) {
+  return TEAM_TIERS.findIndex((tier) => tier.teams.includes(team)) + 1;
+}
+
+function skillUsesForTeam(team: TeamId, opponent: TeamId) {
+  return 1 + Math.max(0, tierForTeam(team) - tierForTeam(opponent));
+}
+
+function englandSkillSucceeds() {
+  return Math.random() < 0.75;
+}
+
 function isOpenPlayPhase(phase: Phase) {
   return (
     phase === "firstHalf" ||
@@ -203,6 +260,19 @@ export default function WorldCupGame() {
   const [formula, setFormula] = useState("五回合准备 · 常规比赛十二回合");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [goalEffect, setGoalEffect] = useState<{ id: number; scorer: PlayerId } | null>(null);
+  const [skillUses, setSkillUses] = useState<Score>({ p1: 1, p2: 1 });
+  const [skillEffects, setSkillEffects] = useState<Record<PlayerId, SkillEffect | null>>({
+    p1: null,
+    p2: null,
+  });
+  const [tikiTakaReady, setTikiTakaReady] = useState<Record<PlayerId, boolean>>({
+    p1: false,
+    p2: false,
+  });
+  const [franceCounterReady, setFranceCounterReady] = useState<Record<PlayerId, boolean>>({
+    p1: false,
+    p2: false,
+  });
 
   const activeTeam = TEAM_DATA[teams[current]];
   const opponent = otherPlayer(current);
@@ -212,6 +282,28 @@ export default function WorldCupGame() {
   const prepRound = Math.floor(prepAction / 2) + 1;
   const prepSlot = (prepAction % 2) + 1;
   const showPenaltyScore = penaltyPlay || decidedByPenalties;
+
+  function effectiveStatsFor(player: PlayerId): Stats {
+    const ownEffect = skillEffects[player];
+    const rivalEffect = skillEffects[otherPlayer(player)];
+    const base = ownEffect?.overrideStats ? copyStats(ownEffect.overrideStats) : copyStats(stats[player]);
+    return {
+      attack: Math.max(0, Math.min(15, base.attack + (ownEffect?.attackDelta ?? 0))),
+      defense: Math.max(
+        0,
+        Math.min(
+          15,
+          base.defense + (ownEffect?.defenseDelta ?? 0) + (rivalEffect?.opponentDefenseDelta ?? 0),
+        ),
+      ),
+      control: Math.max(0, Math.min(15, base.control + (ownEffect?.controlDelta ?? 0))),
+    };
+  }
+
+  const effectiveStats: Record<PlayerId, Stats> = {
+    p1: effectiveStatsFor("p1"),
+    p2: effectiveStatsFor("p2"),
+  };
 
   const phaseLabel = useMemo(() => {
     if (phase === "setup") return "赛前选队";
@@ -244,6 +336,135 @@ export default function WorldCupGame() {
       setStats((oldStats) => ({ ...oldStats, [player]: copyStats(TEAM_DATA[team].stats) }));
       return { ...previous, [player]: team };
     });
+  }
+
+  function skillWindowOpen(player: PlayerId) {
+    const team = teams[player];
+    if (team === "argentina") {
+      return (phase === "secondHalf" && roundInPhase >= 3) || phase === "extraSecondHalf";
+    }
+    if (team === "england") {
+      return (
+        (phase === "secondHalf" && roundInPhase >= 2) ||
+        phase === "extraFirstHalf" ||
+        phase === "extraSecondHalf"
+      );
+    }
+    if (team === "france") return franceCounterReady[player];
+    return true;
+  }
+
+  function canActivateSkill(player: PlayerId) {
+    return Boolean(
+      TEAM_SKILLS[teams[player]] &&
+      openPlay &&
+      current === player &&
+      !actionLocked &&
+      bonusTurns === 0 &&
+      skillUses[player] > 0 &&
+      !skillEffects[player] &&
+      !tikiTakaReady[player] &&
+      skillWindowOpen(player),
+    );
+  }
+
+  function handleSkillActivation(player: PlayerId) {
+    if (!canActivateSkill(player)) return;
+    const team = teams[player];
+    const rival = otherPlayer(player);
+    const skill = TEAM_SKILLS[team];
+    if (!skill) return;
+
+    let effect: SkillEffect | null = null;
+    let result = skill.description;
+
+    if (team === "argentina") {
+      effect = {
+        name: skill.name,
+        roundsLeft: 2,
+        attackDelta: 1.5,
+        summary: "进攻 +1.5",
+      };
+    } else if (team === "spain") {
+      setTikiTakaReady((previous) => ({ ...previous, [player]: true }));
+      result = "下一次必须选择控制：控制将百分百成功，并获得三次额外行动。";
+    } else if (team === "france") {
+      effect = {
+        name: skill.name,
+        roundsLeft: 2,
+        attackDelta: 2,
+        defenseDelta: -1,
+        summary: "进攻 +2 · 防守 −1",
+      };
+      setFranceCounterReady((previous) => ({ ...previous, [player]: false }));
+    } else if (team === "england") {
+      const defensiveSuccess = englandSkillSucceeds();
+      effect = {
+        name: skill.name,
+        roundsLeft: 2,
+        attackDelta: defensiveSuccess ? -1 : 0,
+        defenseDelta: defensiveSuccess ? 3 : -2,
+        summary: defensiveSuccess ? "防守 +3 · 进攻 −1" : "防守 −2",
+      };
+      result = defensiveSuccess
+        ? "判定成功（75%）：防守 +3、进攻 −1，持续两个回合。"
+        : "判定失利（25%）：防守 −2，持续两个回合。";
+    } else if (team === "portugal") {
+      effect = {
+        name: skill.name,
+        roundsLeft: 1,
+        overrideStats: copyStats(effectiveStats[rival]),
+        summary: `复制 ${TEAM_DATA[teams[rival]].name}`,
+      };
+      result = `复制对手当前能力：攻 ${effectiveStats[rival].attack} / 守 ${effectiveStats[rival].defense} / 控 ${effectiveStats[rival].control}，持续一个回合。`;
+    } else if (team === "netherlands") {
+      effect = {
+        name: skill.name,
+        roundsLeft: 1,
+        attackDelta: -2,
+        defenseDelta: 2,
+        summary: "防守 +2 · 进攻 −2",
+      };
+    } else if (team === "belgium") {
+      effect = {
+        name: skill.name,
+        roundsLeft: 1,
+        attackDelta: 1,
+        opponentDefenseDelta: -0.5,
+        summary: "进攻 +1 · 对手防守 −0.5",
+      };
+    }
+
+    if (effect) {
+      setSkillEffects((previous) => ({ ...previous, [player]: effect }));
+    }
+    setSkillUses((previous) => ({ ...previous, [player]: previous[player] - 1 }));
+    setMessage(`${TEAM_DATA[team].name}发动技能「${skill.name}」！`);
+    setFormula(result);
+    pushLog({
+      title: `${TEAM_DATA[team].name} · ${skill.name}`,
+      detail: result,
+      tone: player,
+    });
+  }
+
+  function tickSkillEffects() {
+    setSkillEffects((previous) => ({
+      p1:
+        previous.p1 && previous.p1.roundsLeft > 1
+          ? { ...previous.p1, roundsLeft: previous.p1.roundsLeft - 1 }
+          : null,
+      p2:
+        previous.p2 && previous.p2.roundsLeft > 1
+          ? { ...previous.p2, roundsLeft: previous.p2.roundsLeft - 1 }
+          : null,
+    }));
+  }
+
+  function consumeFranceCounterWindow() {
+    if (teams[current] === "france" && franceCounterReady[current]) {
+      setFranceCounterReady((previous) => ({ ...previous, [current]: false }));
+    }
   }
 
   function starterForPhase(targetPhase: Phase): PlayerId {
@@ -288,6 +509,13 @@ export default function WorldCupGame() {
     setActionLocked(false);
     setLogs([]);
     setGoalEffect(null);
+    setSkillUses({
+      p1: skillUsesForTeam(teams.p1, teams.p2),
+      p2: skillUsesForTeam(teams.p2, teams.p1),
+    });
+    setSkillEffects({ p1: null, p2: null });
+    setTikiTakaReady({ p1: false, p2: false });
+    setFranceCounterReady({ p1: false, p2: false });
     setPhase("prep");
     setMessage(`${playerLabel(prepStarter)} · ${TEAM_DATA[teams[prepStarter]].name} 获得准备阶段先手。`);
     setFormula("每个准备回合双方各抽一张牌");
@@ -413,6 +641,8 @@ export default function WorldCupGame() {
     const starter: PlayerId = Math.random() < 0.5 ? "p1" : "p2";
     setPenaltyStarter(starter);
     setPenaltyScore({ p1: 0, p2: 0 });
+    setSkillEffects({ p1: null, p2: null });
+    setTikiTakaReady({ p1: false, p2: false });
     beginActionPhase(
       "penalties",
       starter,
@@ -460,6 +690,7 @@ export default function WorldCupGame() {
     attacksSnapshot: Score,
     penaltySnapshot: Score,
   ) {
+    if (isOpenPlayPhase(phase)) tickSkillEffects();
     if (phase === "firstHalf" && completedRounds === 6) {
       enterHalftime(scoreSnapshot, attacksSnapshot);
       return;
@@ -543,19 +774,18 @@ export default function WorldCupGame() {
     attacksSnapshot: Score = attacks,
     penaltySnapshot: Score = penaltyScore,
   ) {
-    setDefenseReady((previous) => ({ ...previous, [otherPlayer(current)]: false }));
     if (controlAward > 0) {
       setBonusTurns(controlAward);
       setActionLocked(false);
-      setMessage(`${playerLabel(current)}获得两次额外行动，期间不能再次选择控制。`);
-      setFormula("额外行动 1 / 2 · 不占用双方的正常行动位置");
+      setMessage(`${playerLabel(current)}获得${controlAward}次额外行动，期间不能再次选择控制。`);
+      setFormula(`额外行动 1 / ${controlAward} · 不占用双方的正常行动位置`);
       return;
     }
     if (bonusTurns > 1) {
       setBonusTurns((value) => value - 1);
       setActionLocked(false);
-      setMessage(`${playerLabel(current)}继续第二次额外行动。`);
-      setFormula("额外行动 2 / 2 · 控制按钮仍然禁用");
+      setMessage(`${playerLabel(current)}继续额外行动，还有 ${bonusTurns - 1} 次。`);
+      setFormula(`额外行动剩余 ${bonusTurns - 1} 次 · 控制按钮仍然禁用`);
       return;
     }
     if (bonusTurns === 1) setBonusTurns(0);
@@ -565,10 +795,11 @@ export default function WorldCupGame() {
   function attack() {
     if (!actionPhase || actionLocked) return;
     setActionLocked(true);
+    consumeFranceCounterWindow();
     const defender = otherPlayer(current);
 
     if (penaltyPlay) {
-      const rawChance = stats[current].attack - stats[defender].defense / 2;
+      const rawChance = effectiveStats[current].attack - effectiveStats[defender].defense / 2;
       const chance = clampChance(rawChance);
       const chanceText = formatChance(chance);
       const percentText = formatPercent(chance);
@@ -578,7 +809,7 @@ export default function WorldCupGame() {
         ? { ...penaltyScore, [current]: penaltyScore[current] + 1 }
         : penaltyScore;
       setPenaltyScore(nextPenaltyScore);
-      const expression = `${stats[current].attack} − ${stats[defender].defense} ÷ 2`;
+      const expression = `${effectiveStats[current].attack} − ${effectiveStats[defender].defense} ÷ 2`;
       setMessage(goal ? `${TEAM_DATA[teams[current]].name}点球命中！` : `${TEAM_DATA[teams[current]].name}罚失点球。`);
       setFormula(`${expression} = ${chanceText} · ${percentText}% 进球率`);
       pushLog({
@@ -591,7 +822,9 @@ export default function WorldCupGame() {
     }
 
     const defended = defenseReady[defender];
-    const rawChance = stats[current].attack - stats[defender].defense / (defended ? 1 : 1.5);
+    const rawChance =
+      effectiveStats[current].attack -
+      effectiveStats[defender].defense / (defended ? 1 : 1.5);
     const chance = clampChance(rawChance);
     const chanceText = formatChance(chance);
     const percentText = formatPercent(chance);
@@ -602,9 +835,12 @@ export default function WorldCupGame() {
     setScore(nextScore);
     setAttacks(nextAttacks);
     setDefenseReady((previous) => ({ ...previous, [defender]: false }));
+    if (teams[defender] === "france") {
+      setFranceCounterReady((previous) => ({ ...previous, [defender]: !goal }));
+    }
     const expression = defended
-      ? `${stats[current].attack} − ${stats[defender].defense}`
-      : `${stats[current].attack} − ${stats[defender].defense} ÷ 1.5`;
+      ? `${effectiveStats[current].attack} − ${effectiveStats[defender].defense}`
+      : `${effectiveStats[current].attack} − ${effectiveStats[defender].defense} ÷ 1.5`;
     setMessage(goal ? `进球！${TEAM_DATA[teams[current]].name}改写比分。` : "射门未能转化为进球。");
     setFormula(`${expression} = ${chanceText} · ${percentText}% 进球率`);
     pushLog({
@@ -618,12 +854,13 @@ export default function WorldCupGame() {
   function defend() {
     if (!openPlay || actionLocked) return;
     setActionLocked(true);
+    consumeFranceCounterWindow();
     setDefenseReady((previous) => ({ ...previous, [current]: true }));
     setMessage(`${TEAM_DATA[teams[current]].name}进入防守姿态。`);
-    setFormula(`对手下一次进攻时：进攻 − ${stats[current].defense}`);
+    setFormula(`对手下一次进攻时：进攻 − ${effectiveStats[current].defense}`);
     pushLog({
       title: `${TEAM_DATA[teams[current]].name}稳固防线`,
-      detail: "若对手下一次行动选择进攻，将使用“进攻 − 防守”计算，不再除以 2。",
+      detail: "防守会一直保留到对手真正选择进攻；控制和额外行动不会消耗它。届时使用“进攻 − 防守”计算。",
       tone: current,
     });
     window.setTimeout(() => finishAction(), 260);
@@ -632,19 +869,37 @@ export default function WorldCupGame() {
   function control() {
     if (!openPlay || bonusTurns > 0 || actionLocked) return;
     setActionLocked(true);
+    consumeFranceCounterWindow();
     const rival = otherPlayer(current);
-    const chance = clampChance(stats[current].control - stats[rival].control / 2);
+    const tikiTaka = tikiTakaReady[current] && teams[current] === "spain";
+    const chance = tikiTaka
+      ? 10
+      : clampChance(effectiveStats[current].control - effectiveStats[rival].control / 2);
     const chanceText = formatChance(chance);
     const percentText = formatPercent(chance);
-    const success = Math.random() < chance / 10;
-    setMessage(success ? `${TEAM_DATA[teams[current]].name}掌控节奏，赢得两次额外行动！` : "控制未成功，本次行动直接结束。");
-    setFormula(`${stats[current].control} − ${stats[rival].control} ÷ 2 = ${chanceText} · ${percentText}% 成功率`);
+    const success = tikiTaka || Math.random() < chance / 10;
+    const awardedTurns = tikiTaka ? 3 : 2;
+    if (tikiTaka) {
+      setTikiTakaReady((previous) => ({ ...previous, [current]: false }));
+    }
+    setMessage(
+      success
+        ? `${TEAM_DATA[teams[current]].name}掌控节奏，赢得${awardedTurns}次额外行动！`
+        : "控制未成功，本次行动直接结束。",
+    );
+    setFormula(
+      tikiTaka
+        ? `Tiki-Taka = 100% 控制成功 · ${awardedTurns} 次额外行动`
+        : `${effectiveStats[current].control} − ${effectiveStats[rival].control} ÷ 2 = ${chanceText} · ${percentText}% 成功率`,
+    );
     pushLog({
       title: success ? `${TEAM_DATA[teams[current]].name}掌控比赛` : `${TEAM_DATA[teams[current]].name}争夺控制失败`,
-      detail: `控制公式结果为 ${chanceText}，成功率 ${percentText}%。${success ? "获得两次额外行动。" : "本次行动跳过。"}`,
+      detail: tikiTaka
+        ? "Tiki-Taka 已发动：控制必定成功，获得三次额外行动。"
+        : `控制公式结果为 ${chanceText}，成功率 ${percentText}%。${success ? "获得两次额外行动。" : "本次行动跳过。"}`,
       tone: current,
     });
-    window.setTimeout(() => finishAction(success ? 2 : 0), 260);
+    window.setTimeout(() => finishAction(success ? awardedTurns : 0), 260);
   }
 
   function confirmHalftime() {
@@ -688,6 +943,10 @@ export default function WorldCupGame() {
     setDecidedByPenalties(false);
     setActionLocked(false);
     setGoalEffect(null);
+    setSkillUses({ p1: 1, p2: 1 });
+    setSkillEffects({ p1: null, p2: null });
+    setTikiTakaReady({ p1: false, p2: false });
+    setFranceCounterReady({ p1: false, p2: false });
     setMessage("双方选择球队后，由系统掷硬币决定准备阶段先手。");
     setFormula("五回合准备 · 常规比赛十二回合");
   }
@@ -695,6 +954,19 @@ export default function WorldCupGame() {
   function teamZone(player: PlayerId, position: "top" | "bottom") {
     const team = TEAM_DATA[teams[player]];
     const canAct = actionPhase && current === player && !actionLocked;
+    const teamSkill = TEAM_SKILLS[teams[player]];
+    const skillCanUse = canActivateSkill(player);
+    const skillStatus = !teamSkill
+      ? "技能待公布"
+      : skillEffects[player]
+        ? `${skillEffects[player]?.name} · ${skillEffects[player]?.roundsLeft}回合`
+        : tikiTakaReady[player]
+          ? "等待控制"
+          : skillUses[player] <= 0
+            ? "技能已用尽"
+            : !skillWindowOpen(player)
+              ? "条件未满足"
+              : `${teamSkill.name} · 剩${skillUses[player]}次`;
     return (
       <section className={`team-zone ${position} ${player} ${canAct ? "active" : ""}`}>
         <div className="team-identity">
@@ -703,25 +975,31 @@ export default function WorldCupGame() {
             <small>{playerLabel(player)}</small>
             <strong>{team.name}</strong>
             {openPlay && defenseReady[player] && <em className="defense-ready-chip">防守待生效</em>}
+            {openPlay && skillEffects[player] && (
+              <em className="skill-ready-chip">{skillEffects[player]?.summary}</em>
+            )}
           </div>
         </div>
         <div className="ability-strip" aria-label={`${team.name}能力值`}>
           {(Object.keys(STAT_META) as StatKey[]).map((key) => (
-            <span key={key}>
+            <span key={key} className={effectiveStats[player][key] !== stats[player][key] ? "modified" : ""}>
               <small>{STAT_META[key].short}</small>
-              <b>{stats[player][key]}</b>
+              <b>{effectiveStats[player][key]}</b>
             </span>
           ))}
         </div>
         <div className="action-row">
-          <button className="attack-action" disabled={!canAct} onClick={attack}>
+          <button className="attack-action" disabled={!canAct || tikiTakaReady[player]} onClick={attack}>
             <span>↗</span><b>进攻</b><small>{penaltyPlay ? "点球射门" : "概率进球"}</small>
           </button>
-          <button className="defense-action" disabled={!canAct || penaltyPlay} onClick={defend}>
+          <button className="defense-action" disabled={!canAct || penaltyPlay || tikiTakaReady[player]} onClick={defend}>
             <span>◆</span><b>防守</b><small>{penaltyPlay ? "点球阶段禁用" : "加强下次防守"}</small>
           </button>
           <button className="control-action" disabled={!canAct || penaltyPlay || bonusTurns > 0} onClick={control}>
             <span>◎</span><b>控制</b><small>{penaltyPlay ? "点球阶段禁用" : bonusTurns > 0 ? "额外行动禁用" : "争取两次行动"}</small>
+          </button>
+          <button className="skill-action" disabled={!skillCanUse} onClick={() => handleSkillActivation(player)}>
+            <span>✦</span><b>技能</b><small>{skillStatus}</small>
           </button>
         </div>
       </section>
@@ -955,7 +1233,7 @@ export default function WorldCupGame() {
         </div>
         <div className="formula-board">
           <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 1.5</strong><p>结果 × 10% = 本次进球率</p></div></article>
-          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守令对方下一次进攻不再除以 2</p></div></article>
+          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守保留到对方真正进攻，不再除以 1.5</p></div></article>
           <article><span>◎</span><div><small>争夺控制</small><strong>控制 − 对方控制 ÷ 2</strong><p>成功得到两次额外行动，期间不能再控制</p></div></article>
           <article><span>●</span><div><small>点球大战</small><strong>进攻 − 防守 ÷ 2</strong><p>点球比分独立于常规及加时赛比分</p></div></article>
         </div>
@@ -966,6 +1244,24 @@ export default function WorldCupGame() {
           <article><span>04</span><div><strong>加时赛六回合</strong><p>常规时间战平后进入加时赛，上下半场各三个完整回合。</p></div></article>
           <article><span>05</span><div><strong>五轮点球大战</strong><p>加时仍平则双方各罚五球，只能选择进攻，并在主比分下方独立计分。</p></div></article>
           <article><span>06</span><div><strong>点球突然死亡</strong><p>五轮后仍平，每回合双方各罚一球；一方进球而另一方未进球时立即决出胜负。</p></div></article>
+        </div>
+        <div className="skill-manual">
+          <header>
+            <div><span className="section-kicker">TEAM SKILLS / 07</span><h3>球队专属技能</h3></div>
+            <p>同档双方各 1 次；二档对一档为 2 : 1；三档对二档为 2 : 1；三档对一档为 3 : 1。技能发动不占用本次行动。</p>
+          </header>
+          <div className="skill-grid">
+            {(["argentina", "spain", "france", "england", "portugal", "netherlands", "belgium"] as TeamId[]).map((team) => (
+              <article key={team}>
+                <b>{TEAM_DATA[team].code}</b>
+                <div>
+                  <small>{TEAM_DATA[team].name}</small>
+                  <strong>{TEAM_SKILLS[team]?.name}</strong>
+                  <p>{TEAM_SKILLS[team]?.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
         <div className="team-catalog">
           {TEAM_TIERS.map((tier) => (
