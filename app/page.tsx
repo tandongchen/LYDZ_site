@@ -939,7 +939,7 @@ export default function WorldCupGame() {
             {logs.length === 0 ? (
               <p>选择球队并开赛后，这里会记录每次抽牌、行动与概率公式。</p>
             ) : logs.map((log) => (
-              <article key={log.id} className={log.tone}>
+              <article key={log.id} className={log.tone === "goal" ? "log-goal" : `log-${log.tone}`}>
                 <span>{log.tone === "goal" ? "⚽" : log.tone === "system" ? "•" : log.tone === "p1" ? "1" : "2"}</span>
                 <div><strong>{log.title}</strong><small>{log.detail}</small></div>
               </article>

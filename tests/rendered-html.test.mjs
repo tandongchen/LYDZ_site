@@ -75,11 +75,22 @@ test("formats fractional probabilities without long decimal noise", async () => 
 });
 
 test("uses a readable vertical match-report timeline", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(styles, /\.log-list\s*\{[^}]*display:\s*grid;[^}]*overflow-y:\s*auto/s);
   assert.match(styles, /\.log-list article\s*\{[^}]*grid-template-columns:\s*34px minmax\(0,\s*1fr\)/s);
   assert.match(styles, /overflow-wrap:\s*anywhere/);
   assert.doesNotMatch(styles, /\.log-list\s*\{[^}]*overflow-x:\s*auto/s);
+  assert.match(source, /className=\{log\.tone === "goal" \? "log-goal"/);
+  assert.match(styles, /\.football-pitch > \.goal\s*\{/);
+  assert.doesNotMatch(styles, /(^|\n)\.goal\s*\{/);
+  assert.match(styles, /\.log-list article\.log-goal > span/);
+});
+
+test("uses a complete Chinese font for live match text", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.pitch-status strong\s*\{[^}]*font-family:\s*"Noto Sans SC",\s*"Microsoft YaHei",\s*sans-serif/s);
+  assert.match(styles, /\.battle-log h3\s*\{[^}]*font-family:\s*"Noto Sans SC",\s*"Microsoft YaHei",\s*sans-serif/s);
 });
 
 test("carries a second-action defense into the next round", async () => {
