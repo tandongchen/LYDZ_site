@@ -57,8 +57,9 @@ test("uses the revised open-play and penalty attack formulas", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const \[penaltyScore, setPenaltyScore\]/);
   assert.match(source, /effectiveStats\[current\]\.attack - effectiveStats\[defender\]\.defense \/ 2/);
-  assert.match(source, /effectiveStats\[current\]\.attack -\s*effectiveStats\[defender\]\.defense \/ \(defended \? 1 : 1\.5\)/);
-  assert.match(source, /进攻 − 防守 ÷ 1\.5/);
+  assert.match(source, /effectiveStats\[current\]\.attack -\s*effectiveStats\[defender\]\.defense \/ \(defended \? 1 : 1\.3\)/);
+  assert.match(source, /进攻 − 防守 ÷ 1\.3/);
+  assert.doesNotMatch(source, /defended \? 1 : 1\.5/);
   assert.match(source, /进攻 − 防守 ÷ 2/);
   assert.match(source, /className="penalty-scoreboard"/);
   assert.match(source, /className="defense-action" disabled=\{!canAct \|\| penaltyPlay/);
@@ -199,4 +200,10 @@ test("keeps hero copy clear of the right-side illustration at medium widths", as
   assert.match(styles, /@media \(max-width: 1000px\)[\s\S]*?\.hero-copy\s*\{\s*width:\s*52%/);
   assert.match(styles, /@media \(max-width: 1000px\)[\s\S]*?\.hero-description\s*\{\s*max-width:\s*400px/);
   assert.match(styles, /@media \(max-width: 800px\)[\s\S]*?\.hero-art\s*\{\s*right:\s*-170px/);
+});
+
+test("uses the revised Chinese footer copy", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /<footer className="site-footer">[\s\S]*<span>魔法数学<\/span>[\s\S]*<p>角逐美加墨<\/p>/);
+  assert.doesNotMatch(source, /MAGIC MATH|把规则变成一场看得见的比赛/);
 });

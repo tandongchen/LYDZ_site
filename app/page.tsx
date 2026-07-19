@@ -824,7 +824,7 @@ export default function WorldCupGame() {
     const defended = defenseReady[defender];
     const rawChance =
       effectiveStats[current].attack -
-      effectiveStats[defender].defense / (defended ? 1 : 1.5);
+      effectiveStats[defender].defense / (defended ? 1 : 1.3);
     const chance = clampChance(rawChance);
     const chanceText = formatChance(chance);
     const percentText = formatPercent(chance);
@@ -840,7 +840,7 @@ export default function WorldCupGame() {
     }
     const expression = defended
       ? `${effectiveStats[current].attack} − ${effectiveStats[defender].defense}`
-      : `${effectiveStats[current].attack} − ${effectiveStats[defender].defense} ÷ 1.5`;
+      : `${effectiveStats[current].attack} − ${effectiveStats[defender].defense} ÷ 1.3`;
     setMessage(goal ? `进球！${TEAM_DATA[teams[current]].name}改写比分。` : "射门未能转化为进球。");
     setFormula(`${expression} = ${chanceText} · ${percentText}% 进球率`);
     pushLog({
@@ -1232,8 +1232,8 @@ export default function WorldCupGame() {
           <p>一个回合必须由双方各完成一次行动。所有能力值限制在 0—15，概率公式结果限制在 0—10。</p>
         </div>
         <div className="formula-board">
-          <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 1.5</strong><p>结果 × 10% = 本次进球率</p></div></article>
-          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守保留到对方真正进攻，不再除以 1.5</p></div></article>
+          <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 1.3</strong><p>结果 × 10% = 本次进球率</p></div></article>
+          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守保留到对方真正进攻，不再除以 1.3</p></div></article>
           <article><span>◎</span><div><small>争夺控制</small><strong>控制 − 对方控制 ÷ 2</strong><p>成功得到两次额外行动，期间不能再控制</p></div></article>
           <article><span>●</span><div><small>点球大战</small><strong>进攻 − 防守 ÷ 2</strong><p>点球比分独立于常规及加时赛比分</p></div></article>
         </div>
@@ -1278,8 +1278,8 @@ export default function WorldCupGame() {
       </section>
 
       <footer className="site-footer">
-        <span>MAGIC MATH</span>
-        <p>把规则变成一场看得见的比赛。</p>
+        <span>魔法数学</span>
+        <p>角逐美加墨</p>
       </footer>
     </main>
   );
