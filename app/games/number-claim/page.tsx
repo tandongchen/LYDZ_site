@@ -104,17 +104,17 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="eyebrow"><span /> TWO PLAYER GAME <span /></div>
-        <div className="game-name" aria-label="数字抢位战">
-          {"数字抢位战".split("").map((character) => (
-            <span key={character} aria-hidden="true">{character}</span>
+        <h1 className="game-name" aria-label="数字抢位战">
+          {"数字抢位战".split("").map((character, index) => (
+            <span key={`${character}-${index}`} aria-hidden="true">{character}</span>
           ))}
-        </div>
-        <h1>
+        </h1>
+        <p className="hero-lead">
           每次抢占一格或两格，
           <br />
           <em>谁会先碰到终点？</em>
-        </h1>
-        <p>
+        </p>
+        <p className="hero-description">
           设定一个大于 3 的终点数字，选好先手，然后从 1 开始按顺序轮流抢位。
           每一轮必须拿下接下来的 1–2 个数字，率先抢到终点数字的人获胜。
         </p>
@@ -325,4 +325,3 @@ export default function Home() {
     </main>
   );
 }
-

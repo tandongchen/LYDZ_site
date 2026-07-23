@@ -20,7 +20,8 @@ test("server-renders the magic mathematics archive and all game links", async ()
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
   assert.match(html, /魔法数学/);
-  assert.match(html, /九局入门/);
+  assert.match(html, /展示.*魔法.*中/s);
+  assert.match(html, /archive-brand-mark archive-magic-hat/);
 
   const games = [
     ["数字消消乐", "/games/number-merge"],
@@ -37,6 +38,17 @@ test("server-renders the magic mathematics archive and all game links", async ()
   for (const [title, href] of games) {
     assert.match(html, new RegExp(title));
     assert.match(html, new RegExp(`href="${href}"`));
+  }
+});
+
+test("uses the same large game-title structure for the first two games", async () => {
+  const mergeSource = await readFile(new URL("../app/games/number-merge/page.tsx", import.meta.url), "utf8");
+  const claimSource = await readFile(new URL("../app/games/number-claim/page.tsx", import.meta.url), "utf8");
+
+  for (const source of [mergeSource, claimSource]) {
+    assert.match(source, /<h1 className="game-name"/);
+    assert.match(source, /<p className="hero-lead">/);
+    assert.match(source, /<p className="hero-description">/);
   }
 });
 

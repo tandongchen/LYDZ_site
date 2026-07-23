@@ -161,23 +161,14 @@ main {
   align-items: center;
   justify-content: center;
   gap: clamp(2px, 0.7vw, 8px);
-  margin-bottom: 24px;
+  margin: 0 0 35px;
   color: var(--ink);
   font-family: "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
   font-size: clamp(51px, 7vw, 78px);
   font-weight: 900;
-  letter-spacing: 0.03em;
+  line-height: 0.92;
+  letter-spacing: -0.06em;
 }
-
-.game-name::before,
-.game-name::after {
-  content: "✦";
-  color: var(--yellow);
-  font-family: Georgia, serif;
-  font-size: 15px;
-}
-
-.game-name::after { color: var(--teal); transform: translateY(5px) rotate(18deg); }
 
 .game-name span {
   position: relative;
@@ -204,7 +195,7 @@ main {
   opacity: 0.22;
 }
 
-.hero h1 {
+.hero-lead {
   position: relative;
   z-index: 1;
   margin: 0;
@@ -216,9 +207,9 @@ main {
   letter-spacing: -0.045em;
 }
 
-.hero h1 em { position: relative; color: var(--coral); font-style: normal; }
+.hero-lead em { position: relative; color: var(--coral); font-style: normal; }
 
-.hero h1 em::after {
+.hero-lead em::after {
   content: "";
   position: absolute;
   left: 0;
@@ -230,7 +221,7 @@ main {
   transform: rotate(-1deg);
 }
 
-.hero > p {
+.hero-description {
   max-width: 650px;
   margin: 29px 0 0;
   color: var(--muted);
@@ -578,9 +569,9 @@ footer p { margin: 0; }
   .hero { padding: 43px 0 36px; }
   .hero::after { display: none; }
   .eyebrow { margin-bottom: 14px; }
-  .game-name { font-size: clamp(39px, 12vw, 56px); }
-  .hero h1 { font-size: clamp(30px, 8.5vw, 40px); }
-  .hero > p { margin-top: 25px; font-size: 14px; }
+  .game-name { font-size: clamp(47px, 13vw, 58px); }
+  .hero-lead { font-size: clamp(30px, 8.5vw, 40px); }
+  .hero-description { margin-top: 25px; font-size: 14px; }
   .workspace { margin-bottom: 64px; }
   .game-card { padding: 21px 15px; }
   .setup-controls { grid-template-columns: 1fr; }
@@ -610,4 +601,3 @@ footer p { margin: 0; }
     transition-duration: 0.01ms !important;
   }
 }
-

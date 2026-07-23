@@ -7,7 +7,9 @@ export default function Home() {
       <div className="archive-shell">
         <header className="archive-topbar">
           <Link className="archive-brand" href="/" aria-label="魔法数学首页">
-            <span className="archive-seal" aria-hidden="true">数</span>
+            <span className="archive-brand-mark archive-magic-hat" aria-hidden="true">
+              <span>✦</span>
+            </span>
             <span className="archive-brand-name">魔法数学</span>
             <span className="archive-label">MAGICAL MATHEMATICS ARCHIVE</span>
           </Link>
@@ -22,9 +24,7 @@ export default function Home() {
           <div className="archive-hero-copy">
             <p className="archive-eyebrow">欢迎进入数学魔法学院</p>
             <h1 id="cover-title">
-              九局入门，<em>玩懂</em>
-              <br />
-              藏在规则里的数学
+              展示<em>魔法</em>中
             </h1>
             <div className="archive-hero-support">
               <strong>从直觉出发</strong>

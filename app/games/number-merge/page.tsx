@@ -145,19 +145,19 @@ export default function Home() {
       </header>
 
       <section className="hero" id="top">
-        <div className="game-name" aria-label="数字消消乐">
+        <h1 className="game-name" aria-label="数字消消乐">
           <span aria-hidden="true">数</span>
           <span aria-hidden="true">字</span>
           <span aria-hidden="true">消</span>
           <span aria-hidden="true">消</span>
           <span aria-hidden="true">乐</span>
-        </div>
-        <h1>
+        </h1>
+        <p className="hero-lead">
           两个数碰一碰，
           <br />
           <em>最后会留下谁？</em>
-        </h1>
-        <p>
+        </p>
+        <p className="hero-description">
           让一段连续的数字排好队，每次选两个数，用“相加再减 1”的规则把它们合成一个新数。
         </p>
       </section>
@@ -334,4 +334,3 @@ export default function Home() {
     </main>
   );
 }
-
