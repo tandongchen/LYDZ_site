@@ -1,0 +1,48 @@
+.game-home-link {
+  position: fixed;
+  z-index: 1000;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  color: #fff8e8;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  background: rgba(25, 24, 21, 0.88);
+  border: 1px solid rgba(232, 196, 119, 0.8);
+  border-radius: 999px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.game-home-link:hover {
+  transform: translateY(-2px);
+  background: #1d1c19;
+}
+
+.game-home-link:focus-visible {
+  outline: 3px solid #e9c779;
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .game-home-link {
+    top: 10px;
+    left: 10px;
+    min-height: 36px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-home-link {
+    transition: none;
+  }
+}

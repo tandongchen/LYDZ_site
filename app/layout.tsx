@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const baseUrl = `${protocol}://${host}`;
-  const title = "世界杯风云｜本地双人足球策略游戏";
-  const description = "选择国家队，通过扑克牌强化能力，在十二回合中用进攻、防守与控制争夺世界杯胜利。";
+  const title = "魔法数学｜九款数学小游戏典藏";
+  const description = "从数字消消乐到世界杯风云，在九款双人或益智小游戏中玩懂计算、推理、博弈与概率。";
 
   return {
     title,
@@ -21,17 +21,21 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [{ url: `${baseUrl}/og-world-cup.png`, width: 1536, height: 1024 }],
+      images: [{ url: `${baseUrl}/og.png`, width: 1536, height: 1024 }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [`${baseUrl}/og-world-cup.png`],
+      images: [`${baseUrl}/og.png`],
     },
   };
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-CN"><body>{children}</body></html>;
+  return (
+    <html lang="zh-CN">
+      <body>{children}</body>
+    </html>
+  );
 }

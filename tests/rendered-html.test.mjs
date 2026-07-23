@@ -2,32 +2,68 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
   return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    new Request(new URL(pathname, "http://localhost"), { headers: { accept: "text/html" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the revised World Cup Duel game", async () => {
+test("server-renders the magic mathematics archive and all game links", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
-  assert.match(html, /世界杯风云/);
   assert.match(html, /魔法数学/);
-  assert.match(html, /双人博弈/);
-  assert.doesNotMatch(html, /魔法帽游戏实验室|双人游戏 · 第 04 期/);
-  assert.doesNotMatch(html, /<div class="hero-tags"[^>]*>.*17 回合.*扑克牌增益.*<\/div>/s);
+  assert.match(html, /九局入门/);
+
+  const games = [
+    ["数字消消乐", "/games/number-merge"],
+    ["数字抢位战", "/games/number-claim"],
+    ["尼姆博弈", "/games/nim"],
+    ["箭阵迷域", "/games/arrow-maze"],
+    ["层叠消融", "/games/layered-fusion"],
+    ["数字炸弹", "/games/number-bomb"],
+    ["御马狂飙", "/games/horse-race"],
+    ["楚汉之争", "/games/chu-han"],
+    ["世界杯风云", "/games/world-cup"],
+  ];
+
+  for (const [title, href] of games) {
+    assert.match(html, new RegExp(title));
+    assert.match(html, new RegExp(`href="${href}"`));
+  }
+});
+
+test("server-renders every game route", async () => {
+  const games = [
+    ["数字消消乐", "/games/number-merge"],
+    ["数字抢位战", "/games/number-claim"],
+    ["尼姆博弈", "/games/nim"],
+    ["箭阵迷域", "/games/arrow-maze"],
+    ["层叠消融", "/games/layered-fusion"],
+    ["数字炸弹", "/games/number-bomb"],
+    ["御马狂飙", "/games/horse-race"],
+    ["楚汉之争", "/games/chu-han"],
+    ["世界杯风云", "/games/world-cup"],
+  ];
+
+  for (const [title, pathname] of games) {
+    const response = await render(pathname);
+    assert.equal(response.status, 200, pathname);
+    const html = await response.text();
+    assert.match(html, new RegExp(title), pathname);
+    assert.match(html, /返回魔法数学/, pathname);
+  }
 });
 
 test("counts one round only after both scheduled actions", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /if \(roundSlot === 0\)/);
   assert.match(source, /setRoundSlot\(1\)/);
   assert.match(source, /handleCompletedRound\(roundInPhase \+ 1/);
@@ -36,7 +72,7 @@ test("counts one round only after both scheduled actions", async () => {
 });
 
 test("uses the revised control formula and keeps bonus actions outside scheduled slots", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /effectiveStats\[current\]\.control - effectiveStats\[rival\]\.control \/ 2/);
   assert.match(source, /finishAction\(success \? awardedTurns : 0\)/);
   assert.match(source, /不占用双方的正常行动位置/);
@@ -44,7 +80,7 @@ test("uses the revised control formula and keeps bonus actions outside scheduled
 });
 
 test("implements regular time, extra time, penalties, and sudden death", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /phase === "secondHalf" && completedRounds === 6/);
   assert.match(source, /phase === "extraFirstHalf" && completedRounds === 3/);
   assert.match(source, /phase === "extraSecondHalf" && completedRounds === 3/);
@@ -54,7 +90,7 @@ test("implements regular time, extra time, penalties, and sudden death", async (
 });
 
 test("uses the revised open-play and penalty attack formulas", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const \[penaltyScore, setPenaltyScore\]/);
   assert.match(source, /effectiveStats\[current\]\.attack - effectiveStats\[defender\]\.defense \/ 1\.5/);
   assert.match(source, /effectiveStats\[current\]\.attack -\s*effectiveStats\[defender\]\.defense \/ \(defended \? 1 : 1\.3\)/);
@@ -68,7 +104,7 @@ test("uses the revised open-play and penalty attack formulas", async () => {
 });
 
 test("formats fractional probabilities without long decimal noise", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /function formatChance/);
   assert.match(source, /value\.toFixed\(2\)/);
   assert.match(source, /function formatPercent/);
@@ -77,8 +113,8 @@ test("formats fractional probabilities without long decimal noise", async () => 
 });
 
 test("uses a readable vertical match-report timeline", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
   assert.match(styles, /\.log-list\s*\{[^}]*display:\s*grid;[^}]*overflow-y:\s*auto/s);
   assert.match(styles, /\.log-list article\s*\{[^}]*grid-template-columns:\s*34px minmax\(0,\s*1fr\)/s);
   assert.match(styles, /overflow-wrap:\s*anywhere/);
@@ -90,13 +126,13 @@ test("uses a readable vertical match-report timeline", async () => {
 });
 
 test("uses a complete Chinese font for live match text", async () => {
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
   assert.match(styles, /\.pitch-status strong\s*\{[^}]*font-family:\s*"Noto Sans SC",\s*"Microsoft YaHei",\s*sans-serif/s);
   assert.match(styles, /\.battle-log h3\s*\{[^}]*font-family:\s*"Noto Sans SC",\s*"Microsoft YaHei",\s*sans-serif/s);
 });
 
 test("carries a second-action defense into the next round", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   const roundResolver = source.match(/function handleCompletedRound[\s\S]*?function advanceScheduledAction/)?.[0] ?? "";
   const actionFinisher = source.match(/function finishAction[\s\S]*?function attack/)?.[0] ?? "";
   const controlAction = source.match(/function control\(\)[\s\S]*?function confirmHalftime/)?.[0] ?? "";
@@ -111,14 +147,14 @@ test("carries a second-action defense into the next round", async () => {
 });
 
 test("keeps ability and probability limits", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /Math\.max\(0, Math\.min\(10, value\)\)/);
   assert.match(source, /stats\[player\]\[key\] >= 15/);
   assert.match(source, /stats\[player\]\[key\] <= 0/);
 });
 
 test("offers all three team tiers with the revised ability values", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const TEAM_TIERS/);
   assert.match(source, /label: "一档"/);
   assert.match(source, /label: "二档"/);
@@ -134,7 +170,7 @@ test("offers all three team tiers with the revised ability values", async () => 
 });
 
 test("allocates skill uses from the tier gap", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /function tierForTeam\(team: TeamId\)/);
   assert.match(source, /function skillUsesForTeam\(team: TeamId, opponent: TeamId\)/);
   assert.match(source, /1 \+ Math\.max\(0, tierForTeam\(team\) - tierForTeam\(opponent\)\)/);
@@ -145,7 +181,7 @@ test("allocates skill uses from the tier gap", async () => {
 });
 
 test("implements all fourteen announced team skills", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /argentina:[\s\S]*name: "绝境之师"/);
   assert.match(source, /spain:[\s\S]*name: "Tiki-Taka"/);
   assert.match(source, /france:[\s\S]*name: "三驾马车"/);
@@ -174,7 +210,7 @@ test("implements all fourteen announced team skills", async () => {
 });
 
 test("expires temporary skill effects by completed rounds", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /function tickSkillEffects\(\)/);
   assert.match(source, /previous\.p1\.roundsLeft - 1/);
   assert.match(source, /if \(isOpenPlayPhase\(phase\)\) tickSkillEffects\(\)/);
@@ -184,8 +220,8 @@ test("expires temporary skill effects by completed rounds", async () => {
 });
 
 test("supports Colombia linked stats and USA ability permutations", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
   assert.match(source, /const \[pendingSkillChoice, setPendingSkillChoice\]/);
   assert.match(source, /function chooseColombiaStat\(key: StatKey\)/);
   assert.match(source, /linkedStat: key/);
@@ -197,31 +233,31 @@ test("supports Colombia linked stats and USA ability permutations", async () => 
 });
 
 test("blocks defense while Brazil's skill is active", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /const defenseBlocked = Boolean\(skillEffects\[otherPlayer\(player\)\]\?\.blocksOpponentDefense\)/);
   assert.match(source, /className="defense-action" disabled=\{!canAct \|\| penaltyPlay \|\| tikiTakaReady\[player\] \|\| defenseBlocked\}/);
   assert.match(source, /防守键被封锁/);
 });
 
 test("keeps the scoreboard clear of the pitch and draws standard goal areas", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   const stadium = source.match(/<div className=\{`stadium[\s\S]*?\{teamZone\("p2", "bottom"\)\}/)?.[0] ?? "";
   assert.match(stadium, /className="scoreboard-rail"[\s\S]*className="football-pitch"/);
   assert.match(source, /className="goal-box top-goal-box"/);
   assert.match(source, /className="goal-box bottom-goal-box"/);
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
   assert.match(styles, /\.goal\s*\{[\s\S]*repeating-linear-gradient/);
   assert.match(styles, /\.scoreboard\s*\{[^}]*display:\s*flex/);
   assert.doesNotMatch(styles, /\.scoreboard\s*\{[^}]*position:\s*absolute/);
 });
 
 test("plays a goal and net-impact animation for the scoring side", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /function triggerGoalEffect\(scorer: PlayerId\)/);
   assert.match(source, /if \(goal\) triggerGoalEffect\(current\)/);
   assert.match(source, /className="goal-shot-ball"/);
   assert.match(source, /className="goal-net-impact"/);
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
   assert.match(styles, /@keyframes goal-shot-down/);
   assert.match(styles, /@keyframes goal-shot-up/);
   assert.match(styles, /@keyframes net-burst-down/);
@@ -229,14 +265,14 @@ test("plays a goal and net-impact animation for the scoring side", async () => {
 });
 
 test("keeps hero copy clear of the right-side illustration at medium widths", async () => {
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
   assert.match(styles, /@media \(max-width: 1000px\)[\s\S]*?\.hero-copy\s*\{\s*width:\s*52%/);
   assert.match(styles, /@media \(max-width: 1000px\)[\s\S]*?\.hero-description\s*\{\s*max-width:\s*400px/);
   assert.match(styles, /@media \(max-width: 800px\)[\s\S]*?\.hero-art\s*\{\s*right:\s*-170px/);
 });
 
 test("uses the revised Chinese footer copy", async () => {
-  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/games/world-cup/page.tsx", import.meta.url), "utf8");
   assert.match(source, /<footer className="site-footer">[\s\S]*<span>魔法数学<\/span>[\s\S]*<p>角逐美加墨<\/p>/);
   assert.doesNotMatch(source, /MAGIC MATH|把规则变成一场看得见的比赛/);
 });
