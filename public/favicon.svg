@@ -1,6 +1,42 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M22 19.2727C22 20.779 20.779 22 19.2727 22H14.7273C13.221 22 12 20.779 12 19.2727V12H19.2727C20.779 12 22 13.221 22 14.7273V19.2727Z" fill="#68C4FF"/>
-<path d="M20 2C21.1046 2 22 2.89543 22 4V7C22 8.10457 21.1046 9 20 9H17C15.8954 9 15 8.10457 15 7V4C15 2.89543 15.8954 2 17 2H20Z" fill="#0C79D8"/>
-<path d="M7 15C8.10457 15 9 15.8954 9 17V20C9 21.1046 8.10457 22 7 22H4C2.89543 22 2 21.1046 2 20V17C2 15.8954 2.89543 15 4 15H7Z" fill="#0C79D8"/>
-<path d="M12 12H4.72727C3.22104 12 2 10.779 2 9.27273V4.72727C2 3.22104 3.22104 2 4.72727 2H9.27273C10.779 2 12 3.22104 12 4.72727V12Z" fill="#2E9EFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">魔法数学 M²</title>
+  <defs>
+    <radialGradient id="space" cx="32%" cy="70%" r="86%">
+      <stop offset="0" stop-color="#5a1835"/>
+      <stop offset="0.44" stop-color="#10162f"/>
+      <stop offset="1" stop-color="#071c49"/>
+    </radialGradient>
+    <linearGradient id="glyph" x1="28" y1="82" x2="100" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff5574"/>
+      <stop offset="0.48" stop-color="#fff"/>
+      <stop offset="1" stop-color="#4f83ff"/>
+    </linearGradient>
+    <linearGradient id="orbitRed" x1="21" y1="49" x2="107" y2="81" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff5a76" stop-opacity="0"/>
+      <stop offset="0.33" stop-color="#ff5a76"/>
+      <stop offset="1" stop-color="#ff5a76" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="orbitBlue" x1="24" y1="83" x2="106" y2="42" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#66a0ff" stop-opacity="0.12"/>
+      <stop offset="0.7" stop-color="#66a0ff"/>
+      <stop offset="1" stop-color="#66a0ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="url(#space)" stroke="#8fb4ff" stroke-opacity="0.42" stroke-width="2"/>
+  <circle cx="64" cy="64" r="47" fill="none" stroke="#9abaff" stroke-opacity="0.12"/>
+  <ellipse cx="64" cy="64" rx="51" ry="17" fill="none" stroke="url(#orbitRed)" stroke-width="4" transform="rotate(22 64 64)" filter="url(#glow)"/>
+  <ellipse cx="64" cy="64" rx="50" ry="16" fill="none" stroke="url(#orbitBlue)" stroke-width="4" transform="rotate(-31 64 64)" filter="url(#glow)"/>
+  <path d="M35 89 48 42h17l5 25 19-25h17L92 89H76l8-28-18 24h-9l-5-24-8 28H35Z" fill="url(#glyph)" filter="url(#glow)"/>
+  <circle cx="94" cy="31" r="14" fill="url(#glyph)" stroke="#e8efff" stroke-width="2"/>
+  <text x="94" y="37" fill="#081532" font-family="Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle">2</text>
+  <circle cx="108" cy="49" r="5" fill="#ff6680" filter="url(#glow)"/>
+  <circle cx="24" cy="83" r="5" fill="#6fa3ff" filter="url(#glow)"/>
+  <path d="m26 22 2.5 6.5L35 31l-6.5 2.5L26 40l-2.5-6.5L17 31l6.5-2.5L26 22Z" fill="#fff" filter="url(#glow)"/>
 </svg>
