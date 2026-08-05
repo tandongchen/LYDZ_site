@@ -8,6 +8,10 @@ const description = "魔法与科技并存的数学游戏世界：用九款原�
 export const metadata: Metadata = {
   title,
   description,
+  icons: {
+    icon: [{ url: "/favicon.svg?v=2", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg?v=2",
+  },
   openGraph: {
     title,
     description,
