@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function GameLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <GameLayoutShell>{children}</GameLayoutShell>;
+  return <GameLayoutShell gameId="number-merge">{children}</GameLayoutShell>;
 }

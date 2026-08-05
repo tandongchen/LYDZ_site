@@ -137,9 +137,11 @@ test("server-renders every game route", async () => {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     const html = await response.text();
+    const gameId = pathname.split("/").at(-1);
     assert.match(html, new RegExp(title), pathname);
     assert.match(html, /返回魔法数学/, pathname);
     assert.match(html, /magic-math-logo/, pathname);
+    assert.match(html, new RegExp(`game-route-${gameId}`), pathname);
     assert.doesNotMatch(html, /rules-(?:card|section)/, pathname);
   }
 });
@@ -166,6 +168,34 @@ test("shares the red-blue game theme and removes standalone rule narration", asy
     const source = await readFile(new URL(`../app/games/${route}/page.tsx`, import.meta.url), "utf8");
     assert.match(source, /<MagicMathLogo \/>/, route);
     assert.doesNotMatch(source, /className="rules-(?:card|section)"/, route);
+  }
+});
+
+test("keeps every game stylesheet inside its route namespace", async () => {
+  const routes = [
+    "number-merge",
+    "number-claim",
+    "nim",
+    "arrow-maze",
+    "layered-fusion",
+    "number-bomb",
+    "horse-race",
+    "chu-han",
+    "world-cup",
+  ];
+  const sharedStyles = await readFile(new URL("../app/games/game-route.css", import.meta.url), "utf8");
+
+  assert.match(sharedStyles, /^\.game-route-scope\s*\{/m);
+  assert.doesNotMatch(sharedStyles, /^(?::root|html|body)\b/m);
+
+  for (const route of routes) {
+    const layout = await readFile(new URL(`../app/games/${route}/layout.tsx`, import.meta.url), "utf8");
+    const styles = await readFile(new URL(`../app/games/${route}/game.css`, import.meta.url), "utf8");
+    const scope = `game-route-${route}`;
+
+    assert.match(layout, new RegExp(`gameId="${route}"`), route);
+    assert.match(styles, new RegExp(`\\.${scope}(?:[\\s,.:[#]|$)`), route);
+    assert.doesNotMatch(styles, /^(?::root|html|body|\.hero-title-lockup)\b/m, route);
   }
 });
 
@@ -360,10 +390,10 @@ test("plays a goal and net-impact animation for the scoring side", async () => {
   assert.match(source, /className="goal-shot-ball"/);
   assert.match(source, /className="goal-net-impact"/);
   const styles = await readFile(new URL("../app/games/world-cup/game.css", import.meta.url), "utf8");
-  assert.match(styles, /@keyframes goal-shot-down/);
-  assert.match(styles, /@keyframes goal-shot-up/);
-  assert.match(styles, /@keyframes net-burst-down/);
-  assert.match(styles, /@keyframes net-burst-up/);
+  assert.match(styles, /@keyframes game-route-world-cup-goal-shot-down/);
+  assert.match(styles, /@keyframes game-route-world-cup-goal-shot-up/);
+  assert.match(styles, /@keyframes game-route-world-cup-net-burst-down/);
+  assert.match(styles, /@keyframes game-route-world-cup-net-burst-up/);
 });
 
 test("keeps hero copy clear of the right-side illustration at medium widths", async () => {

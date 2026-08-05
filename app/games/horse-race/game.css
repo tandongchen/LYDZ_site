@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=ZCOOL+XiaoWei&display=swap");
 
-:root {
+.game-route-horse-race {
   --ink: #13273a;
   --ink-deep: #091b2a;
   --paper: #f5efe3;
@@ -14,27 +14,27 @@
   --shadow: 0 24px 70px rgba(9, 27, 42, .12);
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
+.game-route-horse-race, .game-route-horse-race * { box-sizing: border-box; }
+.game-route-horse-race { scroll-behavior: smooth; }
+.game-route-horse-race {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
   font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
 }
-button, input { font: inherit; }
-button:focus-visible, input:focus-visible, a:focus-visible {
+.game-route-horse-race button, .game-route-horse-race input { font: inherit; }
+.game-route-horse-race button:focus-visible, .game-route-horse-race input:focus-visible, .game-route-horse-race a:focus-visible {
   outline: 3px solid rgba(232, 174, 54, .55);
   outline-offset: 3px;
 }
-main {
+.game-route-horse-race main {
   min-height: 100vh;
   overflow: hidden;
   background-image: radial-gradient(rgba(19,39,58,.08) .8px, transparent .8px);
   background-size: 18px 18px;
 }
 
-.site-header {
+.game-route-horse-race .site-header {
   width: min(1180px, calc(100% - 40px));
   height: 82px;
   margin: 0 auto;
@@ -43,7 +43,7 @@ main {
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
 }
-.brand {
+.game-route-horse-race .brand {
   display: inline-flex;
   align-items: center;
   gap: 11px;
@@ -53,8 +53,8 @@ main {
   font-weight: 900;
   letter-spacing: .05em;
 }
-.brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
-.magic-hat::before {
+.game-route-horse-race .brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
+.game-route-horse-race .magic-hat::before {
   content: "";
   position: absolute;
   top: 1px;
@@ -67,7 +67,7 @@ main {
   transform: skewX(-10deg) rotate(-10deg);
   transform-origin: bottom center;
 }
-.magic-hat::after {
+.game-route-horse-race .magic-hat::after {
   content: "";
   position: absolute;
   left: 2px;
@@ -79,7 +79,7 @@ main {
   box-shadow: 0 4px 0 var(--gold);
   transform: rotate(-5deg);
 }
-.magic-hat span {
+.game-route-horse-race .magic-hat span {
   position: absolute;
   z-index: 1;
   top: 15px;
@@ -88,7 +88,7 @@ main {
   font-size: 10px;
   transform: rotate(-10deg);
 }
-.issue-tag {
+.game-route-horse-race .issue-tag {
   padding: 8px 13px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -99,7 +99,7 @@ main {
   letter-spacing: .08em;
 }
 
-.hero {
+.game-route-horse-race .hero {
   position: relative;
   width: min(1180px, calc(100% - 40px));
   min-height: 500px;
@@ -108,8 +108,8 @@ main {
   display: flex;
   align-items: flex-start;
 }
-.hero-copy { position: relative; z-index: 2; width: 100%; }
-.eyebrow {
+.game-route-horse-race .hero-copy { position: relative; z-index: 2; width: 100%; }
+.game-route-horse-race .eyebrow {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,8 +121,8 @@ main {
   font-weight: 900;
   letter-spacing: .23em;
 }
-.eyebrow span { width: 25px; height: 1px; background: var(--teal); }
-.hero h1 {
+.game-route-horse-race .eyebrow span { width: 25px; height: 1px; background: var(--teal); }
+.game-route-horse-race .hero h1 {
   margin: 0 0 20px;
   display: flex;
   justify-content: center;
@@ -133,11 +133,11 @@ main {
   line-height: 1;
   letter-spacing: -.045em;
 }
-.hero h1 span:nth-child(2) { color: var(--teal); }
-.hero h1 span:nth-child(3),
-.hero h1 span:nth-child(4) { color: var(--red); }
-.hero h1 span:nth-child(4) { position: relative; }
-.hero h1 span:nth-child(4)::after {
+.game-route-horse-race .hero h1 span:nth-child(2) { color: var(--teal); }
+.game-route-horse-race .hero h1 span:nth-child(3),
+.game-route-horse-race .hero h1 span:nth-child(4) { color: var(--red); }
+.game-route-horse-race .hero h1 span:nth-child(4) { position: relative; }
+.game-route-horse-race .hero h1 span:nth-child(4)::after {
   content: "";
   position: absolute;
   left: 4%;
@@ -148,7 +148,7 @@ main {
   background: var(--gold);
   transform: rotate(-3deg);
 }
-.hero-lead {
+.game-route-horse-race .hero-lead {
   margin: 0 0 18px;
   font-family: "STKaiti", "KaiTi", serif;
   font-size: clamp(31px,3.6vw,46px);
@@ -156,16 +156,16 @@ main {
   line-height: 1.12;
   letter-spacing: -.045em;
 }
-.hero-lead em { color: var(--red-dark); font-style: normal; }
-.hero-description {
+.game-route-horse-race .hero-lead em { color: var(--red-dark); font-style: normal; }
+.game-route-horse-race .hero-description {
   width: min(650px, calc(100% - 340px));
   margin: 0;
   color: var(--muted);
   font-size: 15px;
   line-height: 1.9;
 }
-.hero-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 19px; }
-.hero-tags span {
+.game-route-horse-race .hero-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 19px; }
+.game-route-horse-race .hero-tags span {
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -175,7 +175,7 @@ main {
   font-weight: 800;
 }
 
-.hero-race {
+.game-route-horse-race .hero-race {
   position: absolute;
   right: 0;
   top: 52%;
@@ -183,7 +183,7 @@ main {
   height: 330px;
   transform: translateY(-52%);
 }
-.sun-disc {
+.game-route-horse-race .sun-disc {
   position: absolute;
   right: 38px;
   top: 10px;
@@ -193,7 +193,7 @@ main {
   background: var(--gold);
   box-shadow: 0 0 0 28px rgba(232,174,54,.09);
 }
-.hero-race::after {
+.game-route-horse-race .hero-race::after {
   content: "";
   position: absolute;
   left: 0;
@@ -205,7 +205,7 @@ main {
   box-shadow: 0 12px 0 rgba(19,39,58,.16), 0 24px 0 rgba(19,39,58,.07);
   transform: skewX(-28deg);
 }
-.hero-horse {
+.game-route-horse-race .hero-horse {
   position: absolute;
   z-index: 2;
   font-family: Georgia, serif;
@@ -213,32 +213,32 @@ main {
   line-height: 1;
   filter: drop-shadow(0 13px 0 rgba(9,27,42,.12));
 }
-.horse-red {
+.game-route-horse-race .horse-red {
   right: 93px;
   bottom: 55px;
   color: var(--red);
   transform: rotate(-5deg);
-  animation: gallop 1.05s ease-in-out infinite alternate;
+  animation: game-route-horse-race-gallop 1.05s ease-in-out infinite alternate;
 }
-.horse-black {
+.game-route-horse-race .horse-black {
   left: 38px;
   bottom: 28px;
   color: var(--ink);
   transform: scale(.78) rotate(3deg);
   opacity: .92;
-  animation: gallop .92s .12s ease-in-out infinite alternate-reverse;
+  animation: game-route-horse-race-gallop .92s .12s ease-in-out infinite alternate-reverse;
 }
-.speed-line {
+.game-route-horse-race .speed-line {
   position: absolute;
   left: 0;
   height: 3px;
   border-radius: 99px;
   background: var(--teal);
 }
-.line-one { top: 68px; width: 120px; }
-.line-two { top: 99px; left: 26px; width: 80px; background: var(--red); }
-.line-three { top: 127px; left: 5px; width: 146px; background: var(--gold); }
-.dust {
+.game-route-horse-race .line-one { top: 68px; width: 120px; }
+.game-route-horse-race .line-two { top: 99px; left: 26px; width: 80px; background: var(--red); }
+.game-route-horse-race .line-three { top: 127px; left: 5px; width: 146px; background: var(--gold); }
+.game-route-horse-race .dust {
   position: absolute;
   z-index: 3;
   bottom: 28px;
@@ -248,13 +248,13 @@ main {
   background: var(--gold);
   box-shadow: 27px -9px 0 -4px var(--gold), 50px 3px 0 -7px var(--red);
 }
-.dust-one { left: 21px; }
-.dust-two { left: 148px; bottom: 48px; transform: scale(.6); }
-@keyframes gallop {
+.game-route-horse-race .dust-one { left: 21px; }
+.game-route-horse-race .dust-two { left: 148px; bottom: 48px; transform: scale(.6); }
+@keyframes game-route-horse-race-gallop {
   to { translate: 5px -6px; rotate: 1deg; }
 }
 
-.game-shell {
+.game-route-horse-race .game-shell {
   width: min(1160px, calc(100% - 40px));
   margin: 0 auto 32px;
   padding: 38px;
@@ -263,27 +263,27 @@ main {
   background: rgba(255,250,241,.96);
   box-shadow: var(--shadow);
 }
-.shell-heading {
+.game-route-horse-race .shell-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 28px;
 }
-.section-kicker {
+.game-route-horse-race .section-kicker {
   color: var(--teal);
   font-family: Georgia, serif;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .2em;
 }
-.shell-heading h2, .rules-heading h2 {
+.game-route-horse-race .shell-heading h2, .game-route-horse-race .rules-heading h2 {
   margin: 4px 0 0;
   font-family: "ZCOOL XiaoWei", "STKaiti", serif;
   font-size: 31px;
   font-weight: 400;
 }
-.text-button, .swap-button {
+.game-route-horse-race .text-button, .game-route-horse-race .swap-button {
   padding: 8px 0;
   border: 0;
   border-bottom: 1px solid var(--ink);
@@ -294,7 +294,7 @@ main {
   font-weight: 800;
 }
 
-.setup-form {
+.game-route-horse-race .setup-form {
   display: grid;
   grid-template-columns: 1fr 1.35fr .7fr;
   gap: 28px;
@@ -302,15 +302,15 @@ main {
   padding-top: 27px;
   border-top: 1px solid var(--line);
 }
-.mode-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
-.mode-picker legend, .field-label {
+.game-route-horse-race .mode-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
+.game-route-horse-race .mode-picker legend, .game-route-horse-race .field-label {
   margin-bottom: 10px;
   color: var(--muted);
   font-size: 11px;
   font-weight: 800;
 }
-.mode-picker > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.mode-picker button {
+.game-route-horse-race .mode-picker > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.game-route-horse-race .mode-picker button {
   min-height: 144px;
   padding: 18px 12px;
   border: 1px solid var(--line);
@@ -321,25 +321,25 @@ main {
   text-align: left;
   transition: transform .15s ease, border-color .15s ease, background .15s ease;
 }
-.mode-picker button:hover { transform: translateY(-2px); }
-.mode-picker button.selected {
+.game-route-horse-race .mode-picker button:hover { transform: translateY(-2px); }
+.game-route-horse-race .mode-picker button.selected {
   border: 2px solid var(--red);
   background: #fff2ed;
   box-shadow: inset 0 0 0 3px white;
 }
-.mode-picker strong, .mode-picker span, .mode-picker small { display: block; }
-.mode-picker strong { margin-bottom: 12px; font-size: 13px; }
-.mode-picker span {
+.game-route-horse-race .mode-picker strong, .game-route-horse-race .mode-picker span, .game-route-horse-race .mode-picker small { display: block; }
+.game-route-horse-race .mode-picker strong { margin-bottom: 12px; font-size: 13px; }
+.game-route-horse-race .mode-picker span {
   color: var(--red-dark);
   font-family: Georgia, "Noto Sans SC", serif;
   font-size: 18px;
   font-weight: 900;
 }
-.mode-picker small { margin-top: 5px; color: var(--muted); font-size: 9px; }
-.field-label { display: flex; justify-content: space-between; gap: 14px; }
-.field-label small { font-weight: 500; text-align: right; }
-.player-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.player-fields label {
+.game-route-horse-race .mode-picker small { margin-top: 5px; color: var(--muted); font-size: 9px; }
+.game-route-horse-race .field-label { display: flex; justify-content: space-between; gap: 14px; }
+.game-route-horse-race .field-label small { font-weight: 500; text-align: right; }
+.game-route-horse-race .player-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.game-route-horse-race .player-fields label {
   min-width: 0;
   display: flex;
   align-items: center;
@@ -348,7 +348,7 @@ main {
   border-radius: 8px;
   background: white;
 }
-.player-fields label > span {
+.game-route-horse-race .player-fields label > span {
   display: grid;
   width: 45px;
   align-self: stretch;
@@ -359,15 +359,15 @@ main {
   font-size: 20px;
   font-weight: 900;
 }
-.player-fields label div { min-width: 0; padding: 7px 9px; }
-.player-fields label small {
+.game-route-horse-race .player-fields label div { min-width: 0; padding: 7px 9px; }
+.game-route-horse-race .player-fields label small {
   display: block;
   margin-bottom: 2px;
   color: var(--muted);
   font-size: 8px;
   font-weight: 700;
 }
-.player-fields input {
+.game-route-horse-race .player-fields input {
   min-width: 0;
   width: 100%;
   padding: 0;
@@ -377,12 +377,12 @@ main {
   font-size: 12px;
   font-weight: 800;
 }
-.player-fields input:focus { outline: 0; }
-.player-fields.mode-2 { grid-template-columns: 1fr; }
-.swap-button { margin-top: 10px; color: var(--teal); border-color: var(--teal); }
-.red-suit { color: var(--red-dark) !important; }
-.black-suit { color: var(--ink) !important; }
-.setup-note {
+.game-route-horse-race .player-fields input:focus { outline: 0; }
+.game-route-horse-race .player-fields.mode-2 { grid-template-columns: 1fr; }
+.game-route-horse-race .swap-button { margin-top: 10px; color: var(--teal); border-color: var(--teal); }
+.game-route-horse-race .red-suit { color: var(--red-dark) !important; }
+.game-route-horse-race .black-suit { color: var(--ink) !important; }
+.game-route-horse-race .setup-note {
   padding: 21px;
   display: flex;
   flex-direction: column;
@@ -390,9 +390,9 @@ main {
   background: var(--ink);
   color: white;
 }
-.setup-note .section-kicker { color: var(--gold); }
-.setup-note p { margin: 9px 0 20px; color: rgba(255,255,255,.64); font-size: 10px; line-height: 1.7; }
-.primary-button {
+.game-route-horse-race .setup-note .section-kicker { color: var(--gold); }
+.game-route-horse-race .setup-note p { margin: 9px 0 20px; color: rgba(255,255,255,.64); font-size: 10px; line-height: 1.7; }
+.game-route-horse-race .primary-button {
   min-height: 48px;
   padding: 0 19px;
   border: 0;
@@ -406,13 +406,13 @@ main {
   box-shadow: 0 6px 0 var(--ink-deep);
   transition: transform .15s ease, box-shadow .15s ease;
 }
-.primary-button:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--ink-deep); }
-.primary-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink-deep); }
-.primary-button span { margin-left: 8px; color: var(--gold); }
-.start-button { width: 100%; margin-top: auto; background: var(--red); box-shadow: 0 6px 0 var(--red-dark); }
+.game-route-horse-race .primary-button:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--ink-deep); }
+.game-route-horse-race .primary-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink-deep); }
+.game-route-horse-race .primary-button span { margin-left: 8px; color: var(--gold); }
+.game-route-horse-race .start-button { width: 100%; margin-top: auto; background: var(--red); box-shadow: 0 6px 0 var(--red-dark); }
 
-.race-console { padding-top: 2px; }
-.course-board {
+.game-route-horse-race .race-console { padding-top: 2px; }
+.game-route-horse-race .course-board {
   padding: 22px 20px 24px;
   overflow-x: auto;
   border-radius: 13px;
@@ -422,14 +422,14 @@ main {
   background-size: 26px 26px;
   color: white;
 }
-.course-axis, .lane-row {
+.game-route-horse-race .course-axis, .game-route-horse-race .lane-row {
   min-width: 850px;
   display: grid;
   grid-template-columns: 150px 1fr;
   gap: 14px;
 }
-.course-axis { align-items: end; margin-bottom: 12px; }
-.axis-label {
+.game-route-horse-race .course-axis { align-items: end; margin-bottom: 12px; }
+.game-route-horse-race .axis-label {
   padding: 0 8px 3px;
   color: rgba(255,255,255,.45);
   font-family: Georgia, serif;
@@ -437,14 +437,14 @@ main {
   font-weight: 900;
   letter-spacing: .18em;
 }
-.axis-grid, .lane-track { display: grid; grid-template-columns: repeat(7, 1fr); }
-.axis-grid > div {
+.game-route-horse-race .axis-grid, .game-route-horse-race .lane-track { display: grid; grid-template-columns: repeat(7, 1fr); }
+.game-route-horse-race .axis-grid > div {
   min-height: 82px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.start-marker span, .finish-marker span {
+.game-route-horse-race .start-marker span, .game-route-horse-race .finish-marker span {
   color: var(--gold);
   font-family: Georgia, serif;
   font-size: 8px;
@@ -452,28 +452,28 @@ main {
   letter-spacing: .12em;
   writing-mode: vertical-rl;
 }
-.gate-marker { position: relative; flex-direction: column; gap: 4px; }
-.gate-marker small {
+.game-route-horse-race .gate-marker { position: relative; flex-direction: column; gap: 4px; }
+.game-route-horse-race .gate-marker small {
   color: rgba(255,255,255,.45);
   font-size: 7px;
   font-weight: 700;
 }
-.hurdle-card-button {
+.game-route-horse-race .hurdle-card-button {
   position: relative;
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
 }
-.hurdle-card-button:disabled { opacity: 1; cursor: default; }
-.gate-marker.ready-to-flip .hurdle-card-button {
+.game-route-horse-race .hurdle-card-button:disabled { opacity: 1; cursor: default; }
+.game-route-horse-race .gate-marker.ready-to-flip .hurdle-card-button {
   cursor: pointer;
-  animation: gate-ready 1s ease-in-out infinite alternate;
+  animation: game-route-horse-race-gate-ready 1s ease-in-out infinite alternate;
 }
-.gate-marker.ready-to-flip .playing-card {
+.game-route-horse-race .gate-marker.ready-to-flip .playing-card {
   box-shadow: 0 0 0 4px var(--gold), 0 7px 0 rgba(0,0,0,.2);
 }
-.flip-hint {
+.game-route-horse-race .flip-hint {
   position: absolute;
   z-index: 3;
   left: 50%;
@@ -486,11 +486,11 @@ main {
   white-space: nowrap;
   transform: translateX(-50%);
 }
-@keyframes gate-ready {
+@keyframes game-route-horse-race-gate-ready {
   to { transform: translateY(-4px); }
 }
-.finish-marker { position: relative; gap: 8px; }
-.finish-marker i {
+.game-route-horse-race .finish-marker { position: relative; gap: 8px; }
+.game-route-horse-race .finish-marker i {
   width: 32px;
   height: 58px;
   background:
@@ -498,15 +498,15 @@ main {
   border: 1px solid rgba(255,255,255,.38);
   transform: skewY(-4deg);
 }
-.lane-row { align-items: center; border-top: 1px solid rgba(255,255,255,.08); }
-.lane-meta {
+.game-route-horse-race .lane-row { align-items: center; border-top: 1px solid rgba(255,255,255,.08); }
+.game-route-horse-race .lane-meta {
   min-width: 0;
   padding: 12px 8px;
   display: flex;
   align-items: center;
   gap: 9px;
 }
-.lane-meta > span {
+.game-route-horse-race .lane-meta > span {
   display: grid;
   width: 32px;
   height: 32px;
@@ -518,16 +518,16 @@ main {
   font-size: 16px;
   font-weight: 900;
 }
-.lane-meta strong, .lane-meta small {
+.game-route-horse-race .lane-meta strong, .game-route-horse-race .lane-meta small {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.lane-meta strong { font-size: 10px; }
-.lane-meta small { margin-top: 2px; color: rgba(255,255,255,.46); font-size: 8px; }
-.lane-track { position: relative; min-height: 74px; }
-.lane-track::after {
+.game-route-horse-race .lane-meta strong { font-size: 10px; }
+.game-route-horse-race .lane-meta small { margin-top: 2px; color: rgba(255,255,255,.46); font-size: 8px; }
+.game-route-horse-race .lane-track { position: relative; min-height: 74px; }
+.game-route-horse-race .lane-track::after {
   content: "";
   position: absolute;
   left: 2%;
@@ -538,16 +538,16 @@ main {
   background: rgba(255,255,255,.16);
   transform: translateY(-50%);
 }
-.track-cell {
+.game-route-horse-race .track-cell {
   position: relative;
   z-index: 1;
   display: grid;
   place-items: center;
   border-left: 1px dashed rgba(255,255,255,.12);
 }
-.track-cell.step-0 { border-left-color: var(--gold); }
-.track-cell.step-6 { border-right: 2px solid rgba(255,255,255,.65); }
-.horse-token {
+.game-route-horse-race .track-cell.step-0 { border-left-color: var(--gold); }
+.game-route-horse-race .track-cell.step-6 { border-right: 2px solid rgba(255,255,255,.65); }
+.game-route-horse-race .horse-token {
   position: relative;
   z-index: 3;
   display: grid;
@@ -560,9 +560,9 @@ main {
   color: var(--ink);
   box-shadow: 0 7px 0 rgba(0,0,0,.22);
   transform: rotate(-3deg);
-  animation: horse-arrive .34s var(--horse-delay) ease both;
+  animation: game-route-horse-race-horse-arrive .34s var(--horse-delay) ease both;
 }
-.horse-token b {
+.game-route-horse-race .horse-token b {
   position: absolute;
   left: 4px;
   top: 3px;
@@ -570,18 +570,18 @@ main {
   font-size: 7px;
   letter-spacing: -.05em;
 }
-.horse-token em { font-family: Georgia, serif; font-size: 25px; font-style: normal; font-weight: 900; }
-.horse-token.red-horse { color: var(--red-dark); }
-.horse-token.black-horse { color: var(--ink); }
-.horse-token.winner { box-shadow: 0 0 0 7px rgba(232,174,54,.22), 0 7px 0 rgba(0,0,0,.22); animation: winner-bounce .7s ease-in-out infinite alternate; }
-@keyframes horse-arrive {
+.game-route-horse-race .horse-token em { font-family: Georgia, serif; font-size: 25px; font-style: normal; font-weight: 900; }
+.game-route-horse-race .horse-token.red-horse { color: var(--red-dark); }
+.game-route-horse-race .horse-token.black-horse { color: var(--ink); }
+.game-route-horse-race .horse-token.winner { box-shadow: 0 0 0 7px rgba(232,174,54,.22), 0 7px 0 rgba(0,0,0,.22); animation: game-route-horse-race-winner-bounce .7s ease-in-out infinite alternate; }
+@keyframes game-route-horse-race-horse-arrive {
   from { opacity: .4; translate: -18px 0; rotate: -9deg; }
 }
-@keyframes winner-bounce {
+@keyframes game-route-horse-race-winner-bounce {
   to { translate: 0 -7px; rotate: 3deg; }
 }
 
-.playing-card {
+.game-route-horse-race .playing-card {
   position: relative;
   display: inline-grid;
   width: 82px;
@@ -594,16 +594,16 @@ main {
   background: var(--cream);
   box-shadow: 0 7px 0 rgba(0,0,0,.14);
 }
-.playing-card.small { width: 43px; height: 60px; border-width: 2px; border-radius: 5px; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
-.card-front b {
+.game-route-horse-race .playing-card.small { width: 43px; height: 60px; border-width: 2px; border-radius: 5px; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+.game-route-horse-race .card-front b {
   position: absolute;
   left: 6px;
   top: 3px;
   font-family: Georgia, serif;
   font-size: 14px;
 }
-.card-front em { font-family: Georgia, serif; font-size: 44px; font-style: normal; }
-.card-front small {
+.game-route-horse-race .card-front em { font-family: Georgia, serif; font-size: 44px; font-style: normal; }
+.game-route-horse-race .card-front small {
   position: absolute;
   right: 6px;
   bottom: 4px;
@@ -611,26 +611,26 @@ main {
   font-size: 13px;
   transform: rotate(180deg);
 }
-.playing-card.small b { left: 3px; top: 2px; font-size: 8px; }
-.playing-card.small em { font-size: 23px; }
-.playing-card.small small { right: 3px; bottom: 2px; font-size: 7px; }
-.red-card { color: var(--red-dark); }
-.black-card { color: var(--ink); }
-.card-back { background: var(--red); }
-.card-back::before, .card-back::after {
+.game-route-horse-race .playing-card.small b { left: 3px; top: 2px; font-size: 8px; }
+.game-route-horse-race .playing-card.small em { font-size: 23px; }
+.game-route-horse-race .playing-card.small small { right: 3px; bottom: 2px; font-size: 7px; }
+.game-route-horse-race .red-card { color: var(--red-dark); }
+.game-route-horse-race .black-card { color: var(--ink); }
+.game-route-horse-race .card-back { background: var(--red); }
+.game-route-horse-race .card-back::before, .game-route-horse-race .card-back::after {
   content: "";
   position: absolute;
   inset: 5px;
   border: 1px solid rgba(255,255,255,.82);
   border-radius: 4px;
 }
-.card-back::after {
+.game-route-horse-race .card-back::after {
   inset: 10px;
   background:
     repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.22) 4px 6px),
     repeating-linear-gradient(-45deg, transparent 0 4px, rgba(255,255,255,.18) 4px 6px);
 }
-.card-back i {
+.game-route-horse-race .card-back i {
   z-index: 1;
   width: 26px;
   height: 26px;
@@ -638,22 +638,22 @@ main {
   border-radius: 50%;
   background: var(--red-dark);
 }
-.playing-card.small.card-back::before { inset: 3px; }
-.playing-card.small.card-back::after { inset: 6px; }
-.playing-card.small.card-back i { width: 15px; height: 15px; }
+.game-route-horse-race .playing-card.small.card-back::before { inset: 3px; }
+.game-route-horse-race .playing-card.small.card-back::after { inset: 6px; }
+.game-route-horse-race .playing-card.small.card-back i { width: 15px; height: 15px; }
 
-.draw-grid {
+.game-route-horse-race .draw-grid {
   display: grid;
   grid-template-columns: 1.35fr .65fr;
   gap: 18px;
   margin-top: 18px;
 }
-.draw-stage, .race-log, .winner-panel {
+.game-route-horse-race .draw-stage, .game-route-horse-race .race-log, .game-route-horse-race .winner-panel {
   border: 1px solid var(--line);
   border-radius: 11px;
   background: white;
 }
-.draw-stage {
+.game-route-horse-race .draw-stage {
   min-height: 222px;
   padding: 26px 29px;
   display: grid;
@@ -661,12 +661,12 @@ main {
   align-items: center;
   gap: 22px;
 }
-.deck-stack {
+.game-route-horse-race .deck-stack {
   position: relative;
   width: 88px;
   height: 132px;
 }
-.deck-stack > span:not(.playing-card) {
+.game-route-horse-race .deck-stack > span:not(.playing-card) {
   position: absolute;
   inset: 0;
   width: 82px;
@@ -676,10 +676,10 @@ main {
   background: var(--red-dark);
   box-shadow: 0 6px 0 rgba(9,27,42,.18);
 }
-.deck-stack > span:nth-child(1) { translate: -7px 7px; rotate: -4deg; }
-.deck-stack > span:nth-child(2) { translate: -3px 3px; rotate: -2deg; }
-.deck-stack .playing-card { position: absolute; left: 0; top: 0; }
-.deck-stack > small {
+.game-route-horse-race .deck-stack > span:nth-child(1) { translate: -7px 7px; rotate: -4deg; }
+.game-route-horse-race .deck-stack > span:nth-child(2) { translate: -3px 3px; rotate: -2deg; }
+.game-route-horse-race .deck-stack .playing-card { position: absolute; left: 0; top: 0; }
+.game-route-horse-race .deck-stack > small {
   position: absolute;
   left: 0;
   right: 5px;
@@ -689,30 +689,30 @@ main {
   font-weight: 800;
   text-align: center;
 }
-.draw-action h3 {
+.game-route-horse-race .draw-action h3 {
   margin: 4px 0 5px;
   font-family: "ZCOOL XiaoWei", "STKaiti", serif;
   font-size: 29px;
   font-weight: 400;
 }
-.draw-action h3.red-card-title { color: var(--red-dark); }
-.draw-action p {
+.game-route-horse-race .draw-action h3.red-card-title { color: var(--red-dark); }
+.game-route-horse-race .draw-action p {
   min-height: 34px;
   margin: 0 0 15px;
   color: var(--muted);
   font-size: 10px;
   line-height: 1.7;
 }
-.draw-button { background: var(--red); box-shadow: 0 6px 0 var(--red-dark); }
-.draw-button:disabled {
+.game-route-horse-race .draw-button { background: var(--red); box-shadow: 0 6px 0 var(--red-dark); }
+.game-route-horse-race .draw-button:disabled {
   background: var(--muted);
   cursor: not-allowed;
   box-shadow: 0 4px 0 #4c565e;
   transform: none;
 }
-.current-card { display: grid; place-items: center; }
-.current-card .playing-card { animation: card-flip .38s ease both; }
-.card-placeholder {
+.game-route-horse-race .current-card { display: grid; place-items: center; }
+.game-route-horse-race .current-card .playing-card { animation: game-route-horse-race-card-flip .38s ease both; }
+.game-route-horse-race .card-placeholder {
   display: grid;
   width: 82px;
   height: 112px;
@@ -723,30 +723,30 @@ main {
   font-family: Georgia, serif;
   font-size: 43px;
 }
-@keyframes card-flip {
+@keyframes game-route-horse-race-card-flip {
   from { opacity: .1; transform: rotateY(80deg) translateY(-10px); }
 }
-.race-log { max-height: 222px; padding: 20px; overflow: hidden; }
-.log-heading {
+.game-route-horse-race .race-log { max-height: 222px; padding: 20px; overflow: hidden; }
+.game-route-horse-race .log-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   padding-bottom: 13px;
   border-bottom: 1px solid var(--line);
 }
-.log-heading h3 { margin: 3px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 21px; font-weight: 400; }
-.log-heading > strong { color: var(--red-dark); font-family: Georgia, serif; font-size: 23px; }
-.log-heading > strong small { display: block; color: var(--muted); font-family: "Noto Sans SC", sans-serif; font-size: 7px; }
-.log-list { max-height: 145px; overflow-y: auto; scrollbar-width: thin; }
-.empty-log { margin: 25px 0; color: var(--muted); font-family: "ZCOOL XiaoWei", serif; font-size: 13px; line-height: 1.7; text-align: center; }
-.log-item {
+.game-route-horse-race .log-heading h3 { margin: 3px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 21px; font-weight: 400; }
+.game-route-horse-race .log-heading > strong { color: var(--red-dark); font-family: Georgia, serif; font-size: 23px; }
+.game-route-horse-race .log-heading > strong small { display: block; color: var(--muted); font-family: "Noto Sans SC", sans-serif; font-size: 7px; }
+.game-route-horse-race .log-list { max-height: 145px; overflow-y: auto; scrollbar-width: thin; }
+.game-route-horse-race .empty-log { margin: 25px 0; color: var(--muted); font-family: "ZCOOL XiaoWei", serif; font-size: 13px; line-height: 1.7; text-align: center; }
+.game-route-horse-race .log-item {
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 9px 0;
   border-bottom: 1px dashed var(--line);
 }
-.log-item > span {
+.game-route-horse-race .log-item > span {
   display: grid;
   width: 36px;
   height: 36px;
@@ -758,15 +758,15 @@ main {
   font-size: 11px;
   font-weight: 900;
 }
-.log-item strong, .log-item small { display: block; }
-.log-item strong { font-size: 9px; }
-.log-item small { margin-top: 2px; color: var(--muted); font-size: 7px; }
-.log-item.penalty { margin: 0 -5px; padding: 9px 5px; background: #fff2ed; }
-.log-item.penalty > span { background: var(--red); color: white !important; }
-.game-message { margin: 15px 0 0; color: var(--muted); font-size: 10px; }
-.game-message span { margin-right: 7px; color: var(--teal); }
+.game-route-horse-race .log-item strong, .game-route-horse-race .log-item small { display: block; }
+.game-route-horse-race .log-item strong { font-size: 9px; }
+.game-route-horse-race .log-item small { margin-top: 2px; color: var(--muted); font-size: 7px; }
+.game-route-horse-race .log-item.penalty { margin: 0 -5px; padding: 9px 5px; background: #fff2ed; }
+.game-route-horse-race .log-item.penalty > span { background: var(--red); color: white !important; }
+.game-route-horse-race .game-message { margin: 15px 0 0; color: var(--muted); font-size: 10px; }
+.game-route-horse-race .game-message span { margin-right: 7px; color: var(--teal); }
 
-.winner-panel {
+.game-route-horse-race .winner-panel {
   margin-top: 18px;
   padding: 26px;
   display: grid;
@@ -775,7 +775,7 @@ main {
   gap: 20px;
   background: #fff6e7;
 }
-.winner-seal {
+.game-route-horse-race .winner-seal {
   display: grid;
   width: 66px;
   height: 66px;
@@ -789,12 +789,12 @@ main {
   box-shadow: 0 0 0 3px var(--gold);
   transform: rotate(-8deg);
 }
-.winner-seal.red-seal { background: var(--red); }
-.winner-panel h3 { margin: 4px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
-.winner-panel h3.red-winner-title { color: var(--red-dark); }
-.winner-panel p { margin: 0; color: var(--muted); font-size: 10px; }
+.game-route-horse-race .winner-seal.red-seal { background: var(--red); }
+.game-route-horse-race .winner-panel h3 { margin: 4px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
+.game-route-horse-race .winner-panel h3.red-winner-title { color: var(--red-dark); }
+.game-route-horse-race .winner-panel p { margin: 0; color: var(--muted); font-size: 10px; }
 
-.rules-section {
+.game-route-horse-race .rules-section {
   width: min(1160px, calc(100% - 40px));
   margin: 0 auto 78px;
   padding: 35px 38px;
@@ -802,22 +802,22 @@ main {
   border-radius: 14px;
   background: rgba(255,250,241,.78);
 }
-.rules-heading {
+.game-route-horse-race .rules-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 28px;
 }
-.rules-heading h2 { font-size: 27px; }
-.rules-heading > p { max-width: 330px; margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
-.rule-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
-.rule-grid article { display: flex; gap: 12px; }
-.rule-grid article > span { color: var(--red); font-family: Georgia, serif; font-size: 25px; font-weight: 900; line-height: 1; }
-.rule-grid strong { display: block; margin-bottom: 5px; font-size: 11px; }
-.rule-grid p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.75; }
+.game-route-horse-race .rules-heading h2 { font-size: 27px; }
+.game-route-horse-race .rules-heading > p { max-width: 330px; margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
+.game-route-horse-race .rule-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; }
+.game-route-horse-race .rule-grid article { display: flex; gap: 12px; }
+.game-route-horse-race .rule-grid article > span { color: var(--red); font-family: Georgia, serif; font-size: 25px; font-weight: 900; line-height: 1; }
+.game-route-horse-race .rule-grid strong { display: block; margin-bottom: 5px; font-size: 11px; }
+.game-route-horse-race .rule-grid p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.75; }
 
-footer {
+.game-route-horse-race footer {
   width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
   padding: 25px 0 32px;
@@ -828,65 +828,65 @@ footer {
   border-top: 1px solid var(--line);
   color: var(--muted);
 }
-footer > span { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: .1em; }
-footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 13px; }
+.game-route-horse-race footer > span { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: .1em; }
+.game-route-horse-race footer p { justify-self: end; margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 13px; }
 
 @media (max-width: 960px) {
-  .hero { min-height: 465px; }
-  .hero-copy { width: 100%; }
-  .hero-race { right: -60px; transform: translateY(-52%) scale(.86); }
-  .setup-form { grid-template-columns: 1fr 1.2fr; }
-  .setup-note { grid-column: 1 / -1; min-height: 120px; display: grid; grid-template-columns: 1fr 2fr auto; align-items: center; gap: 18px; }
-  .setup-note p { margin: 0; }
-  .setup-note .start-button { width: auto; margin: 0; }
-  .rule-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-route-horse-race .hero { min-height: 465px; }
+  .game-route-horse-race .hero-copy { width: 100%; }
+  .game-route-horse-race .hero-race { right: -60px; transform: translateY(-52%) scale(.86); }
+  .game-route-horse-race .setup-form { grid-template-columns: 1fr 1.2fr; }
+  .game-route-horse-race .setup-note { grid-column: 1 / -1; min-height: 120px; display: grid; grid-template-columns: 1fr 2fr auto; align-items: center; gap: 18px; }
+  .game-route-horse-race .setup-note p { margin: 0; }
+  .game-route-horse-race .setup-note .start-button { width: auto; margin: 0; }
+  .game-route-horse-race .rule-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
-  .site-header { height: 70px; }
-  .hero { min-height: 0; padding: 50px 0 42px; }
-  .hero-copy { width: 100%; }
-  .hero h1 { font-size: clamp(44px,10vw,62px); }
-  .hero-race { right: -155px; opacity: .12; transform: translateY(-52%) scale(.9); }
-  .game-shell { padding: 24px 18px; }
-  .setup-form { grid-template-columns: 1fr; gap: 22px; }
-  .setup-note { grid-column: auto; display: flex; min-height: 0; }
-  .setup-note p { margin: 9px 0 20px; }
-  .setup-note .start-button { width: 100%; margin-top: auto; }
-  .draw-grid { grid-template-columns: 1fr; }
-  .race-log { max-height: 260px; }
-  .draw-stage { grid-template-columns: 90px 1fr 84px; gap: 12px; padding: 22px 18px; }
-  .playing-card { width: 72px; height: 101px; }
-  .deck-stack { transform: scale(.88); transform-origin: left center; }
-  .card-placeholder { width: 72px; height: 101px; }
-  .winner-panel { grid-template-columns: auto 1fr; }
-  .winner-panel .primary-button { grid-column: 1 / -1; width: 100%; }
-  .rules-heading { display: block; }
-  .rules-heading > p { margin-top: 8px; text-align: left; }
+  .game-route-horse-race .site-header { height: 70px; }
+  .game-route-horse-race .hero { min-height: 0; padding: 50px 0 42px; }
+  .game-route-horse-race .hero-copy { width: 100%; }
+  .game-route-horse-race .hero h1 { font-size: clamp(44px,10vw,62px); }
+  .game-route-horse-race .hero-race { right: -155px; opacity: .12; transform: translateY(-52%) scale(.9); }
+  .game-route-horse-race .game-shell { padding: 24px 18px; }
+  .game-route-horse-race .setup-form { grid-template-columns: 1fr; gap: 22px; }
+  .game-route-horse-race .setup-note { grid-column: auto; display: flex; min-height: 0; }
+  .game-route-horse-race .setup-note p { margin: 9px 0 20px; }
+  .game-route-horse-race .setup-note .start-button { width: 100%; margin-top: auto; }
+  .game-route-horse-race .draw-grid { grid-template-columns: 1fr; }
+  .game-route-horse-race .race-log { max-height: 260px; }
+  .game-route-horse-race .draw-stage { grid-template-columns: 90px 1fr 84px; gap: 12px; padding: 22px 18px; }
+  .game-route-horse-race .playing-card { width: 72px; height: 101px; }
+  .game-route-horse-race .deck-stack { transform: scale(.88); transform-origin: left center; }
+  .game-route-horse-race .card-placeholder { width: 72px; height: 101px; }
+  .game-route-horse-race .winner-panel { grid-template-columns: auto 1fr; }
+  .game-route-horse-race .winner-panel .primary-button { grid-column: 1 / -1; width: 100%; }
+  .game-route-horse-race .rules-heading { display: block; }
+  .game-route-horse-race .rules-heading > p { margin-top: 8px; text-align: left; }
 }
 
 @media (max-width: 520px) {
-  .site-header, .hero, .game-shell, .rules-section, footer { width: min(100% - 24px, 1160px); }
-  .brand { font-size: 16px; }
-  .issue-tag { display: none; }
-  .hero h1 { font-size: clamp(40px,12vw,54px); }
-  .hero-lead { font-size: 32px; }
-  .hero-description { font-size: 13px; }
-  .mode-picker > div { grid-template-columns: 1fr; }
-  .mode-picker button { min-height: 105px; }
-  .player-fields { grid-template-columns: 1fr; }
-  .draw-stage { grid-template-columns: 72px 1fr; }
-  .current-card { display: none; }
-  .draw-action h3 { font-size: 24px; }
-  .draw-button { width: 100%; }
-  .rule-grid { grid-template-columns: 1fr; gap: 23px; }
-  .rules-section { padding: 28px 22px; }
-  footer { grid-template-columns: 1fr auto; }
-  footer p { max-width: 190px; font-size: 12px; text-align: right; }
+  .game-route-horse-race .site-header, .game-route-horse-race .hero, .game-route-horse-race .game-shell, .game-route-horse-race .rules-section, .game-route-horse-race footer { width: min(100% - 24px, 1160px); }
+  .game-route-horse-race .brand { font-size: 16px; }
+  .game-route-horse-race .issue-tag { display: none; }
+  .game-route-horse-race .hero h1 { font-size: clamp(40px,12vw,54px); }
+  .game-route-horse-race .hero-lead { font-size: 32px; }
+  .game-route-horse-race .hero-description { font-size: 13px; }
+  .game-route-horse-race .mode-picker > div { grid-template-columns: 1fr; }
+  .game-route-horse-race .mode-picker button { min-height: 105px; }
+  .game-route-horse-race .player-fields { grid-template-columns: 1fr; }
+  .game-route-horse-race .draw-stage { grid-template-columns: 72px 1fr; }
+  .game-route-horse-race .current-card { display: none; }
+  .game-route-horse-race .draw-action h3 { font-size: 24px; }
+  .game-route-horse-race .draw-button { width: 100%; }
+  .game-route-horse-race .rule-grid { grid-template-columns: 1fr; gap: 23px; }
+  .game-route-horse-race .rules-section { padding: 28px 22px; }
+  .game-route-horse-race footer { grid-template-columns: 1fr auto; }
+  .game-route-horse-race footer p { max-width: 190px; font-size: 12px; text-align: right; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  .game-route-horse-race, .game-route-horse-race *, .game-route-horse-race *::before, .game-route-horse-race *::after {
     scroll-behavior: auto !important;
     animation: none !important;
     transition: none !important;

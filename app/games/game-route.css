@@ -1,4 +1,4 @@
-:root {
+.game-route-scope {
   --ink: #10264a;
   --muted: #617694;
   --paper: #e8effa;
@@ -20,11 +20,11 @@
   --shadow: 0 24px 70px rgba(29, 71, 137, 0.14);
 }
 
-html {
+.game-route-scope {
   background: #dce7f8;
 }
 
-body {
+.game-route-scope {
   color: var(--ink);
   background:
     radial-gradient(circle at 4% 11%, rgba(239, 64, 88, 0.24), transparent 30%),
@@ -34,7 +34,7 @@ body {
   background-attachment: fixed !important;
 }
 
-body::before {
+.game-route-scope::before {
   position: fixed;
   z-index: -1;
   inset: 0;
@@ -48,7 +48,7 @@ body::before {
   pointer-events: none;
 }
 
-main {
+.game-route-scope main {
   color: var(--ink);
   background-color: transparent !important;
   background-image:
@@ -57,13 +57,13 @@ main {
   background-size: 34px 34px !important;
 }
 
-.site-header {
+.game-route-scope .site-header {
   position: relative;
   z-index: 20;
   border-color: rgba(39, 84, 151, 0.2) !important;
 }
 
-.site-header::after {
+.game-route-scope .site-header::after {
   position: absolute;
   right: 0;
   bottom: -1px;
@@ -74,21 +74,21 @@ main {
   opacity: 0.7;
 }
 
-.brand {
+.game-route-scope .brand {
   gap: 12px !important;
   color: var(--ink) !important;
 }
 
-.site-header .magic-math-logo {
+.game-route-scope .site-header .magic-math-logo {
   --logo-size: 46px;
 }
 
-.issue-tag,
-.header-tag,
-.mode-chip,
-.hero-tags span,
-.status-pill,
-.phase-chip {
+.game-route-scope .issue-tag,
+.game-route-scope .header-tag,
+.game-route-scope .mode-chip,
+.game-route-scope .hero-tags span,
+.game-route-scope .status-pill,
+.game-route-scope .phase-chip {
   color: #244c85 !important;
   border-color: rgba(36, 108, 255, 0.24) !important;
   background: rgba(245, 249, 255, 0.62) !important;
@@ -96,21 +96,21 @@ main {
   backdrop-filter: blur(12px) saturate(130%);
 }
 
-.eyebrow,
-.section-kicker,
-.panel-kicker,
-.micro-label {
+.game-route-scope .eyebrow,
+.game-route-scope .section-kicker,
+.game-route-scope .panel-kicker,
+.game-route-scope .micro-label {
   color: var(--red-dark) !important;
 }
 
-.hero,
-.game-shell,
-.workspace,
-.lower-grid {
+.game-route-scope .hero,
+.game-route-scope .game-shell,
+.game-route-scope .workspace,
+.game-route-scope .lower-grid {
   position: relative;
 }
 
-.hero::after {
+.game-route-scope .hero::after {
   position: absolute;
   z-index: 0;
   top: 9%;
@@ -124,27 +124,27 @@ main {
     conic-gradient(from 45deg, transparent, rgba(239, 64, 88, 0.08), transparent 38%, rgba(36, 108, 255, 0.09), transparent 76%);
   content: "";
   pointer-events: none;
-  animation: game-tech-orbit 18s linear infinite;
+  animation: game-route-scope-game-tech-orbit 18s linear infinite;
 }
 
-.hero > * {
+.game-route-scope .hero > * {
   position: relative;
   z-index: 1;
 }
 
-.game-card,
-.game-shell,
-.history-card,
-.setup-panel,
-.control-panel,
-.scoreboard,
-.board-panel,
-.status-panel,
-.player-panel,
-.target-zone,
-.answer-zone,
-.result-panel,
-.log-panel {
+.game-route-scope .game-card,
+.game-route-scope .game-shell,
+.game-route-scope .history-card,
+.game-route-scope .setup-panel,
+.game-route-scope .control-panel,
+.game-route-scope .scoreboard,
+.game-route-scope .board-panel,
+.game-route-scope .status-panel,
+.game-route-scope .player-panel,
+.game-route-scope .target-zone,
+.game-route-scope .answer-zone,
+.game-route-scope .result-panel,
+.game-route-scope .log-panel {
   border-color: rgba(31, 83, 158, 0.18) !important;
   background:
     linear-gradient(140deg, rgba(255, 244, 248, 0.93), rgba(238, 245, 255, 0.93)) !important;
@@ -154,20 +154,20 @@ main {
   backdrop-filter: blur(14px) saturate(125%);
 }
 
-.workspace,
-.lower-grid {
+.game-route-scope .workspace,
+.game-route-scope .lower-grid {
   grid-template-columns: minmax(0, 1fr) !important;
 }
 
-input,
-select,
-textarea {
+.game-route-scope input,
+.game-route-scope select,
+.game-route-scope textarea {
   color: var(--ink) !important;
   border-color: rgba(36, 108, 255, 0.25) !important;
   background: rgba(248, 251, 255, 0.78) !important;
 }
 
-button {
+.game-route-scope button {
   transition:
     color 180ms ease,
     background-color 180ms ease,
@@ -176,30 +176,30 @@ button {
     transform 180ms ease;
 }
 
-.primary-button,
-.start-button,
-.confirm-button,
-.submit-button,
-.action-button,
-.restart-button,
-.next-button,
-.draw-button,
-.attack-button {
+.game-route-scope .primary-button,
+.game-route-scope .start-button,
+.game-route-scope .confirm-button,
+.game-route-scope .submit-button,
+.game-route-scope .action-button,
+.game-route-scope .restart-button,
+.game-route-scope .next-button,
+.game-route-scope .draw-button,
+.game-route-scope .attack-button {
   color: #fff !important;
   border-color: rgba(36, 108, 255, 0.34) !important;
   background: linear-gradient(112deg, #246cff 0%, #655ddd 48%, #ef4058 100%) !important;
   box-shadow: 0 12px 30px rgba(36, 108, 255, 0.22) !important;
 }
 
-.primary-button:not(:disabled):hover,
-.start-button:not(:disabled):hover,
-.confirm-button:not(:disabled):hover,
-.submit-button:not(:disabled):hover,
-.action-button:not(:disabled):hover,
-.restart-button:not(:disabled):hover,
-.next-button:not(:disabled):hover,
-.draw-button:not(:disabled):hover,
-.attack-button:not(:disabled):hover {
+.game-route-scope .primary-button:not(:disabled):hover,
+.game-route-scope .start-button:not(:disabled):hover,
+.game-route-scope .confirm-button:not(:disabled):hover,
+.game-route-scope .submit-button:not(:disabled):hover,
+.game-route-scope .action-button:not(:disabled):hover,
+.game-route-scope .restart-button:not(:disabled):hover,
+.game-route-scope .next-button:not(:disabled):hover,
+.game-route-scope .draw-button:not(:disabled):hover,
+.game-route-scope .attack-button:not(:disabled):hover {
   border-color: rgba(239, 64, 88, 0.52) !important;
   background: linear-gradient(112deg, #ef4058 0%, #735ed8 48%, #246cff 100%) !important;
   box-shadow:
@@ -208,20 +208,20 @@ button {
   transform: translateY(-2px);
 }
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-a:focus-visible {
+.game-route-scope button:focus-visible,
+.game-route-scope input:focus-visible,
+.game-route-scope select:focus-visible,
+.game-route-scope a:focus-visible {
   outline-color: rgba(36, 108, 255, 0.65) !important;
 }
 
-footer,
-.site-footer {
+.game-route-scope footer,
+.game-route-scope .site-footer {
   color: var(--muted) !important;
   border-color: rgba(33, 81, 150, 0.2) !important;
 }
 
-.game-home-link {
+.game-route-scope .game-home-link {
   position: fixed;
   z-index: 1000;
   right: 18px;
@@ -254,7 +254,7 @@ footer,
     box-shadow 180ms ease;
 }
 
-.game-home-link::after {
+.game-route-scope .game-home-link::after {
   position: absolute;
   inset: 0;
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.19) 0 0.7px, transparent 0.9px);
@@ -264,16 +264,16 @@ footer,
   pointer-events: none;
 }
 
-.game-home-link > * {
+.game-route-scope .game-home-link > * {
   position: relative;
   z-index: 1;
 }
 
-.game-home-link .magic-math-logo {
+.game-route-scope .game-home-link .magic-math-logo {
   --logo-size: 42px;
 }
 
-.game-home-link:hover {
+.game-route-scope .game-home-link:hover {
   border-color: rgba(255, 105, 128, 0.65);
   box-shadow:
     0 17px 42px rgba(25, 61, 126, 0.28),
@@ -281,23 +281,23 @@ footer,
   transform: translateY(-2px);
 }
 
-.game-home-link:focus-visible {
+.game-route-scope .game-home-link:focus-visible {
   outline: 3px solid rgba(36, 108, 255, 0.6);
   outline-offset: 3px;
 }
 
-@keyframes game-tech-orbit {
+@keyframes game-route-scope-game-tech-orbit {
   to {
     transform: rotate(360deg);
   }
 }
 
 @media (max-width: 560px) {
-  .site-header .magic-math-logo {
+  .game-route-scope .site-header .magic-math-logo {
     --logo-size: 38px;
   }
 
-  .game-home-link {
+  .game-route-scope .game-home-link {
     right: 9px;
     bottom: 9px;
     min-height: 46px;
@@ -305,24 +305,24 @@ footer,
     font-size: 11px;
   }
 
-  .game-home-link .magic-math-logo {
+  .game-route-scope .game-home-link .magic-math-logo {
     --logo-size: 36px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero::after {
+  .game-route-scope .hero::after {
     animation: none;
   }
 
-  .game-home-link,
-  button {
+  .game-route-scope .game-home-link,
+  .game-route-scope button {
     transition: none;
   }
 }
 
 /* Shared premium surface for all nine game worlds. */
-:root {
+.game-route-scope {
   --ink: #f0f5ff;
   --muted: rgba(205, 220, 247, 0.6);
   --paper: #081329;
@@ -332,11 +332,11 @@ footer,
   --shadow: 0 26px 70px rgba(0, 4, 17, 0.34);
 }
 
-html {
+.game-route-scope {
   background: #040814;
 }
 
-body {
+.game-route-scope {
   color: var(--ink);
   background:
     radial-gradient(circle at 3% 12%, rgba(239, 64, 88, 0.2), transparent 30%),
@@ -345,7 +345,7 @@ body {
     linear-gradient(140deg, #090914 0%, #081227 50%, #071d40 100%) !important;
 }
 
-body::before {
+.game-route-scope::before {
   z-index: 0;
   opacity: 0.42;
   background-image:
@@ -356,7 +356,7 @@ body::before {
   pointer-events: none;
 }
 
-main {
+.game-route-scope main {
   position: relative;
   z-index: 1;
   color: var(--ink);
@@ -364,7 +364,7 @@ main {
   background-image: none !important;
 }
 
-.site-header {
+.game-route-scope .site-header {
   border-color: rgba(139, 174, 240, 0.18) !important;
   background: rgba(6, 15, 34, 0.7) !important;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.04), 0 16px 42px rgba(0, 4, 16, 0.2);
@@ -372,42 +372,42 @@ main {
   -webkit-backdrop-filter: blur(18px) saturate(132%);
 }
 
-.brand {
+.game-route-scope .brand {
   color: #f3f7ff !important;
 }
 
-.issue-tag,
-.header-tag,
-.mode-chip,
-.hero-tags span,
-.status-pill,
-.phase-chip {
+.game-route-scope .issue-tag,
+.game-route-scope .header-tag,
+.game-route-scope .mode-chip,
+.game-route-scope .hero-tags span,
+.game-route-scope .status-pill,
+.game-route-scope .phase-chip {
   color: rgba(225, 235, 253, 0.78) !important;
   border-color: rgba(128, 166, 238, 0.22) !important;
   background: rgba(17, 31, 60, 0.68) !important;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.05);
 }
 
-.eyebrow,
-.section-kicker,
-.panel-kicker,
-.micro-label {
+.game-route-scope .eyebrow,
+.game-route-scope .section-kicker,
+.game-route-scope .panel-kicker,
+.game-route-scope .micro-label {
   color: #ff8094 !important;
 }
 
-.game-card,
-.game-shell,
-.history-card,
-.setup-panel,
-.control-panel,
-.scoreboard,
-.board-panel,
-.status-panel,
-.player-panel,
-.target-zone,
-.answer-zone,
-.result-panel,
-.log-panel {
+.game-route-scope .game-card,
+.game-route-scope .game-shell,
+.game-route-scope .history-card,
+.game-route-scope .setup-panel,
+.game-route-scope .control-panel,
+.game-route-scope .scoreboard,
+.game-route-scope .board-panel,
+.game-route-scope .status-panel,
+.game-route-scope .player-panel,
+.game-route-scope .target-zone,
+.game-route-scope .answer-zone,
+.game-route-scope .result-panel,
+.game-route-scope .log-panel {
   border-color: rgba(137, 173, 239, 0.16) !important;
   border-radius: 16px !important;
   color: var(--ink) !important;
@@ -421,32 +421,32 @@ main {
   -webkit-backdrop-filter: blur(14px) saturate(118%);
 }
 
-.faction-card,
-.difficulty-picker > button,
-.gesture-buttons button,
-.status-strip,
-.skill-panel,
-.hand-panel,
-.turn-panel,
-.battle-log,
-.victory-panel,
-.count-picker button,
-.team-fields label,
-.team-chip,
-.guess-card,
-.result-panel,
-.size-picker button,
-.result-banner,
-.board-frame,
-.strategy-note,
-.setup-panel select,
-.skill-choice-grid button,
-.allocation-grid button,
-.halftime-abilities button,
-.match-ribbon,
-.pile-card,
-.take-control,
-.stepper {
+.game-route-scope .faction-card,
+.game-route-scope .difficulty-picker > button,
+.game-route-scope .gesture-buttons button,
+.game-route-scope .status-strip,
+.game-route-scope .skill-panel,
+.game-route-scope .hand-panel,
+.game-route-scope .turn-panel,
+.game-route-scope .battle-log,
+.game-route-scope .victory-panel,
+.game-route-scope .count-picker button,
+.game-route-scope .team-fields label,
+.game-route-scope .team-chip,
+.game-route-scope .guess-card,
+.game-route-scope .result-panel,
+.game-route-scope .size-picker button,
+.game-route-scope .result-banner,
+.game-route-scope .board-frame,
+.game-route-scope .strategy-note,
+.game-route-scope .setup-panel select,
+.game-route-scope .skill-choice-grid button,
+.game-route-scope .allocation-grid button,
+.game-route-scope .halftime-abilities button,
+.game-route-scope .match-ribbon,
+.game-route-scope .pile-card,
+.game-route-scope .take-control,
+.game-route-scope .stepper {
   border-color: rgba(137, 173, 239, 0.17) !important;
   color: var(--ink) !important;
   background:
@@ -455,69 +455,59 @@ main {
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.04) !important;
 }
 
-.count-picker button.selected,
-.team-chip.lost,
-.pile-card.selected,
-.pile-card.selected.player-b,
-.turn-instruction.is-winner {
+.game-route-scope .count-picker button.selected,
+.game-route-scope .team-chip.lost,
+.game-route-scope .pile-card.selected,
+.game-route-scope .pile-card.selected.player-b,
+.game-route-scope .turn-instruction.is-winner {
   border-color: rgba(255, 108, 132, 0.65) !important;
   color: #fff !important;
   background: linear-gradient(125deg, rgba(239, 64, 88, 0.18), rgba(36, 108, 255, 0.16)), #0c1933 !important;
 }
 
-.game-card :where(p, small, label),
-.game-shell :where(p, small, label),
-.history-card :where(p, small),
-.setup-panel :where(p, small, label),
-.control-panel :where(p, small, label),
-.scoreboard :where(p, small),
-.board-panel :where(p, small),
-.status-panel :where(p, small),
-.player-panel :where(p, small),
-.result-panel :where(p, small),
-.log-panel :where(p, small) {
+.game-route-scope .game-card :where(p, small, label), .game-route-scope .game-shell :where(p, small, label), .game-route-scope .history-card :where(p, small), .game-route-scope .setup-panel :where(p, small, label), .game-route-scope .control-panel :where(p, small, label), .game-route-scope .scoreboard :where(p, small), .game-route-scope .board-panel :where(p, small), .game-route-scope .status-panel :where(p, small), .game-route-scope .player-panel :where(p, small), .game-route-scope .result-panel :where(p, small), .game-route-scope .log-panel :where(p, small) {
   color: var(--muted);
 }
 
-input,
-select,
-textarea {
+.game-route-scope input,
+.game-route-scope select,
+.game-route-scope textarea {
   color: #f2f6ff !important;
   border-color: rgba(130, 169, 241, 0.24) !important;
   background: rgba(5, 14, 32, 0.78) !important;
 }
 
-input::placeholder,
-textarea::placeholder {
+.game-route-scope input::placeholder,
+.game-route-scope textarea::placeholder {
   color: rgba(200, 217, 247, 0.34) !important;
 }
 
-button:active:not(:disabled),
-.game-home-link:active {
+.game-route-scope button:active:not(:disabled),
+.game-route-scope .game-home-link:active {
   transform: translateY(0) scale(0.98);
 }
 
-footer,
-.site-footer {
+.game-route-scope footer,
+.game-route-scope .site-footer {
   color: rgba(197, 214, 244, 0.48) !important;
   border-color: rgba(137, 173, 239, 0.15) !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .site-header,
-  .game-card,
-  .game-shell,
-  .history-card,
-  .setup-panel,
-  .control-panel,
-  .scoreboard,
-  .board-panel,
-  .status-panel,
-  .player-panel,
-  .target-zone,
-  .answer-zone,
-  .result-panel,
-  .log-panel {
+  .game-route-scope .site-header,
+  .game-route-scope .game-card,
+  .game-route-scope .game-shell,
+  .game-route-scope .history-card,
+  .game-route-scope .setup-panel,
+  .game-route-scope .control-panel,
+  .game-route-scope .scoreboard,
+  .game-route-scope .board-panel,
+  .game-route-scope .status-panel,
+  .game-route-scope .player-panel,
+  .game-route-scope .target-zone,
+  .game-route-scope .answer-zone,
+  .game-route-scope .result-panel,
+  .game-route-scope .log-panel {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background-color: #0b1730 !important;

@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&display=swap");
 
-:root {
+.game-route-chu-han {
   --paper: #f3ecdd;
   --cream: #fffaf0;
   --ink: #172026;
@@ -15,9 +15,9 @@
   --wood-dark: #5d351e;
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
+.game-route-chu-han, .game-route-chu-han * { box-sizing: border-box; }
+.game-route-chu-han { scroll-behavior: smooth; }
+.game-route-chu-han {
   margin: 0;
   background:
     radial-gradient(circle at 10% 2%, rgba(216, 167, 55, .14), transparent 25%),
@@ -28,11 +28,11 @@ body {
   font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
   font-size: 16px;
 }
-button, input { font: inherit; }
-button { color: inherit; }
-button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.game-route-chu-han button, .game-route-chu-han input { font: inherit; }
+.game-route-chu-han button { color: inherit; }
+.game-route-chu-han button:focus-visible, .game-route-chu-han [role="button"]:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
-.site-header {
+.game-route-chu-han .site-header {
   width: min(1180px, calc(100% - 40px));
   height: 82px;
   margin: 0 auto;
@@ -41,9 +41,9 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   justify-content: space-between;
   border-bottom: 1px solid rgba(23, 32, 38, .22);
 }
-.brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: .05em; text-decoration: none; }
-.brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
-.magic-hat::before {
+.game-route-chu-han .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: .05em; text-decoration: none; }
+.game-route-chu-han .brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
+.game-route-chu-han .magic-hat::before {
   content: "";
   position: absolute;
   top: 1px;
@@ -56,7 +56,7 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   transform: skewX(-10deg) rotate(-10deg);
   transform-origin: bottom center;
 }
-.magic-hat::after {
+.game-route-chu-han .magic-hat::after {
   content: "";
   position: absolute;
   left: 2px;
@@ -68,10 +68,10 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   box-shadow: 0 4px 0 var(--gold);
   transform: rotate(-5deg);
 }
-.magic-hat > span { position: absolute; z-index: 1; top: 15px; left: 20px; color: var(--chu); font-size: 10px; transform: rotate(-10deg); }
-.issue-tag { padding: 6px 10px; border: 1px solid var(--ink); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.game-route-chu-han .magic-hat > span { position: absolute; z-index: 1; top: 15px; left: 20px; color: var(--chu); font-size: 10px; transform: rotate(-10deg); }
+.game-route-chu-han .issue-tag { padding: 6px 10px; border: 1px solid var(--ink); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
 
-.hero {
+.game-route-chu-han .hero {
   position: relative;
   width: min(1180px, calc(100% - 40px));
   min-height: 510px;
@@ -80,33 +80,33 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   align-items: center;
   overflow: hidden;
 }
-.hero-title-lockup { position: absolute; top: 70px; left: 0; z-index: 3; width: 100%; text-align: center; }
-.hero-copy { position: relative; z-index: 2; width: 58%; padding: 250px 0 66px; }
-.eyebrow, .section-kicker { color: var(--chu-dark); font-family: Georgia, serif; font-size: 10px; font-weight: 900; letter-spacing: .2em; }
-.eyebrow { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 14px; }
-.eyebrow span { width: 28px; height: 1px; background: currentColor; }
-.hero h1 { margin: 0; font-family: "ZCOOL XiaoWei", "STKaiti", serif; font-size: clamp(70px, 9vw, 116px); font-weight: 400; letter-spacing: -.09em; line-height: .92; text-align: center; }
-.hero h1 span { display: inline-block; }
-.hero h1 span:nth-child(1), .hero h1 span:nth-child(3) { color: var(--chu); }
-.hero h1 span:nth-child(2), .hero h1 span:nth-child(4) { color: var(--han); }
-.hero-lead { margin: 26px 0 18px; font-family: "ZCOOL XiaoWei", "STKaiti", serif; font-size: 36px; line-height: 1.15; }
-.hero-lead em { color: var(--chu-dark); font-style: normal; }
-.hero-description { max-width: 560px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
-.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
-.hero-tags span { padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.35); font-size: 9px; font-weight: 700; }
-.hero-art { position: absolute; right: 10px; top: 61%; width: 470px; height: 390px; transform: translateY(-50%); }
-.sun-disc { position: absolute; right: 36px; top: 26px; width: 250px; height: 250px; border-radius: 50%; background: var(--gold); opacity: .82; }
-.hero-banner { position: absolute; top: 55px; display: grid; width: 132px; height: 235px; place-items: center; border: 8px solid rgba(255,255,255,.7); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 80px; box-shadow: 0 15px 0 rgba(23,32,38,.14); }
-.hero-banner::after { content: ""; position: absolute; bottom: -42px; left: -8px; border-style: solid; border-width: 42px 66px 0; border-color: currentColor transparent transparent; color: inherit; filter: brightness(.72); }
-.chu-banner { left: 80px; background: var(--chu); transform: rotate(-7deg); }
-.han-banner { right: 25px; top: 92px; background: var(--han); transform: rotate(6deg); }
-.river-stroke { position: absolute; left: 212px; top: 15px; width: 11px; height: 350px; border-radius: 60%; background: var(--ink); transform: rotate(11deg); opacity: .86; }
-.spear { position: absolute; width: 290px; height: 4px; background: var(--ink); transform-origin: right center; }
-.spear::before { content: ""; position: absolute; left: -26px; top: -9px; border-width: 11px 27px 11px 0; border-style: solid; border-color: transparent var(--ink) transparent transparent; }
-.spear-one { right: 8px; bottom: 35px; transform: rotate(-16deg); }
-.spear-two { right: 80px; top: 5px; transform: rotate(205deg); }
+.game-route-chu-han .hero-title-lockup { position: absolute; top: 70px; left: 0; z-index: 3; width: 100%; text-align: center; }
+.game-route-chu-han .hero-copy { position: relative; z-index: 2; width: 58%; padding: 250px 0 66px; }
+.game-route-chu-han .eyebrow, .game-route-chu-han .section-kicker { color: var(--chu-dark); font-family: Georgia, serif; font-size: 10px; font-weight: 900; letter-spacing: .2em; }
+.game-route-chu-han .eyebrow { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 14px; }
+.game-route-chu-han .eyebrow span { width: 28px; height: 1px; background: currentColor; }
+.game-route-chu-han .hero h1 { margin: 0; font-family: "ZCOOL XiaoWei", "STKaiti", serif; font-size: clamp(70px, 9vw, 116px); font-weight: 400; letter-spacing: -.09em; line-height: .92; text-align: center; }
+.game-route-chu-han .hero h1 span { display: inline-block; }
+.game-route-chu-han .hero h1 span:nth-child(1), .game-route-chu-han .hero h1 span:nth-child(3) { color: var(--chu); }
+.game-route-chu-han .hero h1 span:nth-child(2), .game-route-chu-han .hero h1 span:nth-child(4) { color: var(--han); }
+.game-route-chu-han .hero-lead { margin: 26px 0 18px; font-family: "ZCOOL XiaoWei", "STKaiti", serif; font-size: 36px; line-height: 1.15; }
+.game-route-chu-han .hero-lead em { color: var(--chu-dark); font-style: normal; }
+.game-route-chu-han .hero-description { max-width: 560px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
+.game-route-chu-han .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.game-route-chu-han .hero-tags span { padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.35); font-size: 9px; font-weight: 700; }
+.game-route-chu-han .hero-art { position: absolute; right: 10px; top: 61%; width: 470px; height: 390px; transform: translateY(-50%); }
+.game-route-chu-han .sun-disc { position: absolute; right: 36px; top: 26px; width: 250px; height: 250px; border-radius: 50%; background: var(--gold); opacity: .82; }
+.game-route-chu-han .hero-banner { position: absolute; top: 55px; display: grid; width: 132px; height: 235px; place-items: center; border: 8px solid rgba(255,255,255,.7); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 80px; box-shadow: 0 15px 0 rgba(23,32,38,.14); }
+.game-route-chu-han .hero-banner::after { content: ""; position: absolute; bottom: -42px; left: -8px; border-style: solid; border-width: 42px 66px 0; border-color: currentColor transparent transparent; color: inherit; filter: brightness(.72); }
+.game-route-chu-han .chu-banner { left: 80px; background: var(--chu); transform: rotate(-7deg); }
+.game-route-chu-han .han-banner { right: 25px; top: 92px; background: var(--han); transform: rotate(6deg); }
+.game-route-chu-han .river-stroke { position: absolute; left: 212px; top: 15px; width: 11px; height: 350px; border-radius: 60%; background: var(--ink); transform: rotate(11deg); opacity: .86; }
+.game-route-chu-han .spear { position: absolute; width: 290px; height: 4px; background: var(--ink); transform-origin: right center; }
+.game-route-chu-han .spear::before { content: ""; position: absolute; left: -26px; top: -9px; border-width: 11px 27px 11px 0; border-style: solid; border-color: transparent var(--ink) transparent transparent; }
+.game-route-chu-han .spear-one { right: 8px; bottom: 35px; transform: rotate(-16deg); }
+.game-route-chu-han .spear-two { right: 80px; top: 5px; transform: rotate(205deg); }
 
-.game-shell {
+.game-route-chu-han .game-shell {
   width: min(1220px, calc(100% - 40px));
   margin: 0 auto 38px;
   padding: 32px;
@@ -115,11 +115,11 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   background: rgba(255, 250, 240, .9);
   box-shadow: 0 18px 50px rgba(73, 46, 23, .08);
 }
-.shell-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 27px; }
-.shell-heading h2, .rules-heading h2 { margin: 5px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 31px; font-weight: 400; }
-#game-title { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; font-weight: 500; letter-spacing: .015em; }
-.text-button { padding: 0 0 3px; border: 0; border-bottom: 1px solid var(--ink); background: transparent; font-size: 10px; font-weight: 700; cursor: pointer; }
-.primary-button, .outline-button, .skill-button {
+.game-route-chu-han .shell-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 27px; }
+.game-route-chu-han .shell-heading h2, .game-route-chu-han .rules-heading h2 { margin: 5px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 31px; font-weight: 400; }
+.game-route-chu-han #game-title { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; font-weight: 500; letter-spacing: .015em; }
+.game-route-chu-han .text-button { padding: 0 0 3px; border: 0; border-bottom: 1px solid var(--ink); background: transparent; font-size: 10px; font-weight: 700; cursor: pointer; }
+.game-route-chu-han .primary-button, .game-route-chu-han .outline-button, .game-route-chu-han .skill-button {
   min-height: 43px;
   padding: 0 18px;
   border: 1px solid var(--ink);
@@ -133,71 +133,71 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
   box-shadow: 0 5px 0 rgba(23,32,38,.18);
   transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
 }
-.primary-button:hover:not(:disabled), .outline-button:hover:not(:disabled), .skill-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(23,32,38,.18); }
-.primary-button:disabled, .skill-button:disabled { cursor: not-allowed; opacity: .38; box-shadow: none; }
-.outline-button { background: transparent; color: var(--ink); }
+.game-route-chu-han .primary-button:hover:not(:disabled), .game-route-chu-han .outline-button:hover:not(:disabled), .game-route-chu-han .skill-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(23,32,38,.18); }
+.game-route-chu-han .primary-button:disabled, .game-route-chu-han .skill-button:disabled { cursor: not-allowed; opacity: .38; box-shadow: none; }
+.game-route-chu-han .outline-button { background: transparent; color: var(--ink); }
 
-.faction-setup { display: grid; grid-template-columns: 1fr 300px; gap: 22px; }
-.setup-main { min-width: 0; }
-.faction-picker { display: grid; grid-template-columns: 1fr 45px 1fr; align-items: stretch; }
-.faction-card { position: relative; min-height: 270px; padding: 30px; border: 1px solid var(--line); border-radius: 10px; background: white; text-align: left; cursor: pointer; overflow: hidden; transition: .2s ease; }
-.faction-card::after { position: absolute; right: -18px; bottom: -50px; font-family: "ZCOOL XiaoWei", serif; font-size: 170px; opacity: .055; }
-.faction-card.chu::after { content: "楚"; }
-.faction-card.han::after { content: "汉"; }
-.faction-card.selected { border-width: 3px; transform: translateY(-4px); }
-.faction-card.chu.selected { border-color: var(--chu); box-shadow: 0 10px 0 rgba(200,73,54,.15); }
-.faction-card.han.selected { border-color: var(--han); box-shadow: 0 10px 0 rgba(30,115,128,.15); }
-.faction-seal { display: grid; width: 70px; height: 70px; margin-bottom: 22px; place-items: center; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 40px; }
-.han .faction-seal { background: var(--han); }
-.faction-card small, .faction-card strong, .faction-card p { display: block; }
-.faction-card small { color: var(--muted); font-size: 9px; }
-.faction-card strong { margin-top: 8px; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
-.faction-card p { max-width: 260px; margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.75; }
-.versus { display: grid; place-items: center; color: var(--muted); font-family: Georgia, serif; font-size: 12px; font-weight: 900; }
-.difficulty-picker { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 18px; }
-.difficulty-picker > div { display: flex; flex-direction: column; justify-content: center; padding: 10px 14px; }
-.difficulty-picker h3 { margin: 4px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 20px; font-weight: 400; }
-.difficulty-picker > button { display: grid; min-height: 82px; padding: 12px 15px; place-items: center; border: 1px solid var(--line); border-radius: 7px; background: white; text-align: center; cursor: pointer; transition: .18s ease; }
-.difficulty-picker > button.selected { border-color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); transform: translateY(-2px); }
-.difficulty-picker strong { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; font-size: 23px; font-weight: 900; letter-spacing: .12em; }
-.setup-brief { display: flex; flex-direction: column; min-height: 270px; padding: 28px; border-radius: 10px; background: var(--ink); color: white; }
-.setup-brief .section-kicker { color: var(--gold); }
-.setup-brief h3 { margin: 12px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 30px; font-weight: 400; }
-.setup-brief p { margin: 0 0 24px; color: rgba(255,255,255,.65); font-size: 10px; line-height: 1.8; }
-.setup-brief .primary-button { width: 100%; margin-top: auto; background: var(--gold); color: var(--ink); }
+.game-route-chu-han .faction-setup { display: grid; grid-template-columns: 1fr 300px; gap: 22px; }
+.game-route-chu-han .setup-main { min-width: 0; }
+.game-route-chu-han .faction-picker { display: grid; grid-template-columns: 1fr 45px 1fr; align-items: stretch; }
+.game-route-chu-han .faction-card { position: relative; min-height: 270px; padding: 30px; border: 1px solid var(--line); border-radius: 10px; background: white; text-align: left; cursor: pointer; overflow: hidden; transition: .2s ease; }
+.game-route-chu-han .faction-card::after { position: absolute; right: -18px; bottom: -50px; font-family: "ZCOOL XiaoWei", serif; font-size: 170px; opacity: .055; }
+.game-route-chu-han .faction-card.chu::after { content: "楚"; }
+.game-route-chu-han .faction-card.han::after { content: "汉"; }
+.game-route-chu-han .faction-card.selected { border-width: 3px; transform: translateY(-4px); }
+.game-route-chu-han .faction-card.chu.selected { border-color: var(--chu); box-shadow: 0 10px 0 rgba(200,73,54,.15); }
+.game-route-chu-han .faction-card.han.selected { border-color: var(--han); box-shadow: 0 10px 0 rgba(30,115,128,.15); }
+.game-route-chu-han .faction-seal { display: grid; width: 70px; height: 70px; margin-bottom: 22px; place-items: center; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 40px; }
+.game-route-chu-han .han .faction-seal { background: var(--han); }
+.game-route-chu-han .faction-card small, .game-route-chu-han .faction-card strong, .game-route-chu-han .faction-card p { display: block; }
+.game-route-chu-han .faction-card small { color: var(--muted); font-size: 9px; }
+.game-route-chu-han .faction-card strong { margin-top: 8px; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
+.game-route-chu-han .faction-card p { max-width: 260px; margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.75; }
+.game-route-chu-han .versus { display: grid; place-items: center; color: var(--muted); font-family: Georgia, serif; font-size: 12px; font-weight: 900; }
+.game-route-chu-han .difficulty-picker { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 18px; }
+.game-route-chu-han .difficulty-picker > div { display: flex; flex-direction: column; justify-content: center; padding: 10px 14px; }
+.game-route-chu-han .difficulty-picker h3 { margin: 4px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 20px; font-weight: 400; }
+.game-route-chu-han .difficulty-picker > button { display: grid; min-height: 82px; padding: 12px 15px; place-items: center; border: 1px solid var(--line); border-radius: 7px; background: white; text-align: center; cursor: pointer; transition: .18s ease; }
+.game-route-chu-han .difficulty-picker > button.selected { border-color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); transform: translateY(-2px); }
+.game-route-chu-han .difficulty-picker strong { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; font-size: 23px; font-weight: 900; letter-spacing: .12em; }
+.game-route-chu-han .setup-brief { display: flex; flex-direction: column; min-height: 270px; padding: 28px; border-radius: 10px; background: var(--ink); color: white; }
+.game-route-chu-han .setup-brief .section-kicker { color: var(--gold); }
+.game-route-chu-han .setup-brief h3 { margin: 12px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 30px; font-weight: 400; }
+.game-route-chu-han .setup-brief p { margin: 0 0 24px; color: rgba(255,255,255,.65); font-size: 10px; line-height: 1.8; }
+.game-route-chu-han .setup-brief .primary-button { width: 100%; margin-top: auto; background: var(--gold); color: var(--ink); }
 
-.rps-stage { min-height: 310px; display: grid; grid-template-columns: 1.15fr .85fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.rps-result { display: grid; grid-template-columns: 1fr 45px 1fr; align-items: center; padding: 36px; background: var(--ink); color: white; }
-.rps-result > div { display: grid; justify-items: center; }
-.rps-result small { color: rgba(255,255,255,.55); font-size: 9px; }
-.rps-result strong { display: grid; width: 110px; height: 110px; margin: 12px 0; place-items: center; border: 2px solid white; border-radius: 50%; font-size: 56px; }
-.rps-result > div:first-child strong { background: var(--chu); }
-.rps-result > div:last-child strong { background: var(--han); }
-.rps-result span { font-family: "ZCOOL XiaoWei", serif; font-size: 19px; }
-.rps-result > b { color: var(--gold); font-family: "ZCOOL XiaoWei", serif; font-size: 28px; text-align: center; }
-.rps-controls { display: flex; flex-direction: column; justify-content: center; padding: 36px; }
-.rps-controls h3 { margin: 8px 0 25px; font-family: "ZCOOL XiaoWei", serif; font-size: 26px; font-weight: 400; }
-.gesture-buttons, .order-buttons { display: flex; gap: 9px; }
-.gesture-buttons button { display: grid; min-width: 76px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: white; cursor: pointer; }
-.gesture-buttons b { font-size: 25px; }
-.gesture-buttons span { margin-top: 4px; font-size: 9px; }
+.game-route-chu-han .rps-stage { min-height: 310px; display: grid; grid-template-columns: 1.15fr .85fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.game-route-chu-han .rps-result { display: grid; grid-template-columns: 1fr 45px 1fr; align-items: center; padding: 36px; background: var(--ink); color: white; }
+.game-route-chu-han .rps-result > div { display: grid; justify-items: center; }
+.game-route-chu-han .rps-result small { color: rgba(255,255,255,.55); font-size: 9px; }
+.game-route-chu-han .rps-result strong { display: grid; width: 110px; height: 110px; margin: 12px 0; place-items: center; border: 2px solid white; border-radius: 50%; font-size: 56px; }
+.game-route-chu-han .rps-result > div:first-child strong { background: var(--chu); }
+.game-route-chu-han .rps-result > div:last-child strong { background: var(--han); }
+.game-route-chu-han .rps-result span { font-family: "ZCOOL XiaoWei", serif; font-size: 19px; }
+.game-route-chu-han .rps-result > b { color: var(--gold); font-family: "ZCOOL XiaoWei", serif; font-size: 28px; text-align: center; }
+.game-route-chu-han .rps-controls { display: flex; flex-direction: column; justify-content: center; padding: 36px; }
+.game-route-chu-han .rps-controls h3 { margin: 8px 0 25px; font-family: "ZCOOL XiaoWei", serif; font-size: 26px; font-weight: 400; }
+.game-route-chu-han .gesture-buttons, .game-route-chu-han .order-buttons { display: flex; gap: 9px; }
+.game-route-chu-han .gesture-buttons button { display: grid; min-width: 76px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: white; cursor: pointer; }
+.game-route-chu-han .gesture-buttons b { font-size: 25px; }
+.game-route-chu-han .gesture-buttons span { margin-top: 4px; font-size: 9px; }
 
-.war-console { min-width: 0; }
-.status-strip { display: grid; grid-template-columns: 230px 1fr 230px; align-items: stretch; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 9px; background: white; overflow: hidden; }
-.army-chip { display: grid; grid-template-columns: 36px 1fr; align-items: center; column-gap: 10px; padding: 13px 16px; }
-.army-chip > span { grid-row: 1 / 3; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: var(--han); color: white; font-size: 10px; font-weight: 900; }
-.army-chip.chu > span, .army-chip.player.chu > span { background: var(--chu); }
-.army-chip b { font-size: 11px; }
-.army-chip small { color: var(--muted); font-size: 8px; }
-.army-chip.player { text-align: right; grid-template-columns: 1fr 36px; }
-.army-chip.player > span { grid-column: 2; }
-.army-chip.player b, .army-chip.player small { grid-column: 1; }
-.turn-message { display: grid; place-items: center; padding: 9px 18px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
-.turn-message > span { color: var(--chu-dark); font-family: Georgia, serif; font-size: 8px; font-weight: 900; letter-spacing: .18em; }
-.turn-message p { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
+.game-route-chu-han .war-console { min-width: 0; }
+.game-route-chu-han .status-strip { display: grid; grid-template-columns: 230px 1fr 230px; align-items: stretch; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 9px; background: white; overflow: hidden; }
+.game-route-chu-han .army-chip { display: grid; grid-template-columns: 36px 1fr; align-items: center; column-gap: 10px; padding: 13px 16px; }
+.game-route-chu-han .army-chip > span { grid-row: 1 / 3; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: var(--han); color: white; font-size: 10px; font-weight: 900; }
+.game-route-chu-han .army-chip.chu > span, .game-route-chu-han .army-chip.player.chu > span { background: var(--chu); }
+.game-route-chu-han .army-chip b { font-size: 11px; }
+.game-route-chu-han .army-chip small { color: var(--muted); font-size: 8px; }
+.game-route-chu-han .army-chip.player { text-align: right; grid-template-columns: 1fr 36px; }
+.game-route-chu-han .army-chip.player > span { grid-column: 2; }
+.game-route-chu-han .army-chip.player b, .game-route-chu-han .army-chip.player small { grid-column: 1; }
+.game-route-chu-han .turn-message { display: grid; place-items: center; padding: 9px 18px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
+.game-route-chu-han .turn-message > span { color: var(--chu-dark); font-family: Georgia, serif; font-size: 8px; font-weight: 900; letter-spacing: .18em; }
+.game-route-chu-han .turn-message p { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
 
-.battle-scroll { overflow-x: auto; border-radius: 11px; scrollbar-width: thin; }
-.battle-board {
+.game-route-chu-han .battle-scroll { overflow-x: auto; border-radius: 11px; scrollbar-width: thin; }
+.game-route-chu-han .battle-board {
   position: relative;
   min-width: 1090px;
   padding: 15px 19px 19px;
@@ -209,187 +209,187 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--g
     linear-gradient(180deg, #9c6b3d, #7e4e2d);
   box-shadow: inset 0 0 40px rgba(40,20,10,.32);
 }
-.battle-board::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, rgba(255,232,179,.12), transparent 68%); }
-.army-axis { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,.68); font-size: 8px; font-weight: 900; letter-spacing: .18em; }
-.army-axis i { height: 1px; flex: 1; background: rgba(255,255,255,.25); }
-.top-axis { margin-bottom: 6px; }
-.bottom-axis { margin-top: 7px; }
-.battle-grid { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(8, 1fr); gap: 7px; }
-.battlefield { position: relative; min-width: 120px; padding: 6px 5px 8px; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: rgba(39,21,11,.12); }
-.battlefield > header { display: flex; align-items: center; justify-content: space-between; height: 20px; padding: 0 3px; color: rgba(255,255,255,.72); font-size: 8px; }
-.battlefield > header b { padding: 2px 4px; border-radius: 2px; background: var(--gold); color: var(--ink); font-size: 6px; }
-.battlefield.won-player { box-shadow: inset 0 0 0 3px var(--gold); }
-.battlefield.won-ai { box-shadow: inset 0 0 0 3px var(--han); }
+.game-route-chu-han .battle-board::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, rgba(255,232,179,.12), transparent 68%); }
+.game-route-chu-han .army-axis { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,.68); font-size: 8px; font-weight: 900; letter-spacing: .18em; }
+.game-route-chu-han .army-axis i { height: 1px; flex: 1; background: rgba(255,255,255,.25); }
+.game-route-chu-han .top-axis { margin-bottom: 6px; }
+.game-route-chu-han .bottom-axis { margin-top: 7px; }
+.game-route-chu-han .battle-grid { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(8, 1fr); gap: 7px; }
+.game-route-chu-han .battlefield { position: relative; min-width: 120px; padding: 6px 5px 8px; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: rgba(39,21,11,.12); }
+.game-route-chu-han .battlefield > header { display: flex; align-items: center; justify-content: space-between; height: 20px; padding: 0 3px; color: rgba(255,255,255,.72); font-size: 8px; }
+.game-route-chu-han .battlefield > header b { padding: 2px 4px; border-radius: 2px; background: var(--gold); color: var(--ink); font-size: 6px; }
+.game-route-chu-han .battlefield.won-player { box-shadow: inset 0 0 0 3px var(--gold); }
+.game-route-chu-han .battlefield.won-ai { box-shadow: inset 0 0 0 3px var(--han); }
 
-.troop-row { position: relative; min-height: 140px; display: block; }
-.troop-slot { position: absolute; left: 50%; width: 52px; height: 70px; margin: 0; padding: 0; border: 1px dashed rgba(255,255,255,.26); border-radius: 5px; background: rgba(255,255,255,.045); color: rgba(255,255,255,.35); cursor: default; transform: translateX(-50%); }
-.troop-slot:nth-child(1) { top: 0; z-index: 1; }
-.troop-slot:nth-child(2) { top: 32px; z-index: 2; }
-.troop-slot:nth-child(3) { top: 64px; z-index: 3; }
-.troop-slot:disabled { opacity: 1; }
-.troop-slot.filled { border: 0; background: transparent; }
-.troop-slot.selectable { cursor: pointer; }
-.troop-slot.selectable:hover .poker-card { transform: translateY(-5px); }
-.troop-slot.swap-selected .poker-card { box-shadow: 0 0 0 4px var(--gold), 0 6px 0 rgba(0,0,0,.22); transform: translateY(-8px); }
-.formation-tag { position: absolute; left: 50%; bottom: 3px; z-index: 6; padding: 3px 6px; border-radius: 999px; background: var(--ink); color: white; font-size: 7px; white-space: nowrap; transform: translateX(-50%); }
-.ai-troops.advanced { transform: translateY(12px); }
-.player-troops.advanced { transform: translateY(-12px); }
-.front-line { position: relative; display: grid; height: 88px; place-items: center; }
-.front-line::before { content: ""; position: absolute; left: -5px; right: -5px; top: 50%; height: 2px; background: rgba(255,230,173,.5); box-shadow: 0 5px 0 rgba(41,21,10,.22); }
-.river-label { position: absolute; left: 0; top: 50%; z-index: 1; padding: 2px 3px; background: var(--wood); color: rgba(255,255,255,.6); font-family: "ZCOOL XiaoWei", serif; font-size: 7px; transform: translateY(-50%); }
-.front-line .poker-card { z-index: 2; transform: rotate(-2deg); }
-.player-field-target { border-radius: 6px; }
-.player-field-target.ready { cursor: pointer; animation: field-ready 1s ease-in-out infinite alternate; }
-.player-field-target.ready .player-troops { background: rgba(217,167,55,.08); box-shadow: inset 0 0 0 2px var(--gold); border-radius: 6px; }
-.player-field-target.drop-ready .player-troops { background: rgba(217,167,55,.2); box-shadow: inset 0 0 0 3px var(--gold), 0 0 18px rgba(217,167,55,.32); }
-@keyframes field-ready { to { transform: translateY(-3px); } }
-.field-footer { min-height: 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; color: rgba(255,255,255,.68); font-size: 7px; text-align: center; }
-.field-footer button { padding: 4px 7px; border: 0; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 7px; font-weight: 900; cursor: pointer; }
+.game-route-chu-han .troop-row { position: relative; min-height: 140px; display: block; }
+.game-route-chu-han .troop-slot { position: absolute; left: 50%; width: 52px; height: 70px; margin: 0; padding: 0; border: 1px dashed rgba(255,255,255,.26); border-radius: 5px; background: rgba(255,255,255,.045); color: rgba(255,255,255,.35); cursor: default; transform: translateX(-50%); }
+.game-route-chu-han .troop-slot:nth-child(1) { top: 0; z-index: 1; }
+.game-route-chu-han .troop-slot:nth-child(2) { top: 32px; z-index: 2; }
+.game-route-chu-han .troop-slot:nth-child(3) { top: 64px; z-index: 3; }
+.game-route-chu-han .troop-slot:disabled { opacity: 1; }
+.game-route-chu-han .troop-slot.filled { border: 0; background: transparent; }
+.game-route-chu-han .troop-slot.selectable { cursor: pointer; }
+.game-route-chu-han .troop-slot.selectable:hover .poker-card { transform: translateY(-5px); }
+.game-route-chu-han .troop-slot.swap-selected .poker-card { box-shadow: 0 0 0 4px var(--gold), 0 6px 0 rgba(0,0,0,.22); transform: translateY(-8px); }
+.game-route-chu-han .formation-tag { position: absolute; left: 50%; bottom: 3px; z-index: 6; padding: 3px 6px; border-radius: 999px; background: var(--ink); color: white; font-size: 7px; white-space: nowrap; transform: translateX(-50%); }
+.game-route-chu-han .ai-troops.advanced { transform: translateY(12px); }
+.game-route-chu-han .player-troops.advanced { transform: translateY(-12px); }
+.game-route-chu-han .front-line { position: relative; display: grid; height: 88px; place-items: center; }
+.game-route-chu-han .front-line::before { content: ""; position: absolute; left: -5px; right: -5px; top: 50%; height: 2px; background: rgba(255,230,173,.5); box-shadow: 0 5px 0 rgba(41,21,10,.22); }
+.game-route-chu-han .river-label { position: absolute; left: 0; top: 50%; z-index: 1; padding: 2px 3px; background: var(--wood); color: rgba(255,255,255,.6); font-family: "ZCOOL XiaoWei", serif; font-size: 7px; transform: translateY(-50%); }
+.game-route-chu-han .front-line .poker-card { z-index: 2; transform: rotate(-2deg); }
+.game-route-chu-han .player-field-target { border-radius: 6px; }
+.game-route-chu-han .player-field-target.ready { cursor: pointer; animation: game-route-chu-han-field-ready 1s ease-in-out infinite alternate; }
+.game-route-chu-han .player-field-target.ready .player-troops { background: rgba(217,167,55,.08); box-shadow: inset 0 0 0 2px var(--gold); border-radius: 6px; }
+.game-route-chu-han .player-field-target.drop-ready .player-troops { background: rgba(217,167,55,.2); box-shadow: inset 0 0 0 3px var(--gold), 0 0 18px rgba(217,167,55,.32); }
+@keyframes game-route-chu-han-field-ready { to { transform: translateY(-3px); } }
+.game-route-chu-han .field-footer { min-height: 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; color: rgba(255,255,255,.68); font-size: 7px; text-align: center; }
+.game-route-chu-han .field-footer button { padding: 4px 7px; border: 0; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 7px; font-weight: 900; cursor: pointer; }
 
-.poker-card { position: relative; display: inline-grid; width: 72px; height: 100px; place-items: center; overflow: hidden; border: 4px solid white; border-radius: 8px; background: var(--cream); box-shadow: 0 6px 0 rgba(0,0,0,.2); transition: transform .18s ease; }
-.poker-card.small { width: 52px; height: 70px; border-width: 2px; border-radius: 5px; box-shadow: 0 4px 0 rgba(0,0,0,.2); }
-.card-front b { position: absolute; left: 5px; top: 2px; font-family: Georgia, serif; font-size: 13px; line-height: 1; }
-.card-front em { font-family: Georgia, serif; font-size: 36px; font-style: normal; }
-.card-front small { position: absolute; right: 5px; bottom: 2px; font-family: Georgia, serif; font-size: 11px; transform: rotate(180deg); }
-.poker-card.small b { left: 3px; font-size: 9px; }
-.poker-card.small em { font-size: 24px; }
-.poker-card.small small { right: 3px; font-size: 8px; }
-.troop-slot .poker-card.small b { top: 2px; font-size: 10px; }
-.troop-slot .poker-card.small em { position: absolute; left: 3px; top: 14px; font-size: 13px; line-height: 1; }
-.red-card { color: var(--chu-dark); }
-.black-card { color: var(--ink); }
-.card-back { border-color: #eee7db; background: #24324d; color: white; }
-.card-back::before, .card-back::after { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(255,255,255,.7); border-radius: 3px; }
-.card-back::after { inset: 9px; background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.18) 4px 6px), repeating-linear-gradient(-45deg, transparent 0 4px, rgba(255,255,255,.12) 4px 6px); }
-.card-back i { z-index: 2; display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; background: #18233a; font-family: "ZCOOL XiaoWei", serif; font-size: 8px; font-style: normal; }
-.card-back.small i { width: 23px; height: 23px; font-size: 6px; }
+.game-route-chu-han .poker-card { position: relative; display: inline-grid; width: 72px; height: 100px; place-items: center; overflow: hidden; border: 4px solid white; border-radius: 8px; background: var(--cream); box-shadow: 0 6px 0 rgba(0,0,0,.2); transition: transform .18s ease; }
+.game-route-chu-han .poker-card.small { width: 52px; height: 70px; border-width: 2px; border-radius: 5px; box-shadow: 0 4px 0 rgba(0,0,0,.2); }
+.game-route-chu-han .card-front b { position: absolute; left: 5px; top: 2px; font-family: Georgia, serif; font-size: 13px; line-height: 1; }
+.game-route-chu-han .card-front em { font-family: Georgia, serif; font-size: 36px; font-style: normal; }
+.game-route-chu-han .card-front small { position: absolute; right: 5px; bottom: 2px; font-family: Georgia, serif; font-size: 11px; transform: rotate(180deg); }
+.game-route-chu-han .poker-card.small b { left: 3px; font-size: 9px; }
+.game-route-chu-han .poker-card.small em { font-size: 24px; }
+.game-route-chu-han .poker-card.small small { right: 3px; font-size: 8px; }
+.game-route-chu-han .troop-slot .poker-card.small b { top: 2px; font-size: 10px; }
+.game-route-chu-han .troop-slot .poker-card.small em { position: absolute; left: 3px; top: 14px; font-size: 13px; line-height: 1; }
+.game-route-chu-han .red-card { color: var(--chu-dark); }
+.game-route-chu-han .black-card { color: var(--ink); }
+.game-route-chu-han .card-back { border-color: #eee7db; background: #24324d; color: white; }
+.game-route-chu-han .card-back::before, .game-route-chu-han .card-back::after { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(255,255,255,.7); border-radius: 3px; }
+.game-route-chu-han .card-back::after { inset: 9px; background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.18) 4px 6px), repeating-linear-gradient(-45deg, transparent 0 4px, rgba(255,255,255,.12) 4px 6px); }
+.game-route-chu-han .card-back i { z-index: 2; display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; background: #18233a; font-family: "ZCOOL XiaoWei", serif; font-size: 8px; font-style: normal; }
+.game-route-chu-han .card-back.small i { width: 23px; height: 23px; font-size: 6px; }
 
-.command-deck { display: grid; grid-template-columns: 225px minmax(0, 1fr) 205px; gap: 13px; margin-top: 14px; }
-.skill-panel, .hand-panel, .turn-panel, .battle-log, .victory-panel { border: 1px solid var(--line); border-radius: 9px; background: white; }
-.skill-panel, .turn-panel { padding: 19px; }
-.skill-panel h3, .turn-panel h3, .hand-heading h3, .battle-log h3 { margin: 4px 0 6px; font-family: "ZCOOL XiaoWei", serif; font-size: 21px; font-weight: 400; }
-.skill-panel p, .turn-panel p { min-height: 44px; margin: 0 0 12px; color: var(--muted); font-size: 8px; line-height: 1.7; }
-.skill-button { min-height: 36px; width: 100%; border-color: var(--chu-dark); background: var(--chu); }
-.han-skill-actions { display: flex; align-items: center; gap: 7px; }
-.clear-selection { border: 0; background: transparent; color: var(--muted); font-size: 8px; text-decoration: underline; cursor: pointer; }
-.hand-panel { min-width: 0; padding: 15px 18px 11px; overflow: hidden; }
-.hand-heading { display: flex; align-items: flex-start; justify-content: space-between; }
-.hand-heading > small { color: var(--muted); font-size: 8px; }
-.hand-hint { margin: -2px 0 3px; color: var(--muted); font-size: 7px; }
-.player-hand { min-height: 120px; display: flex; align-items: flex-end; justify-content: center; padding-top: 5px; overflow-x: auto; }
-.player-hand > button { flex: 0 0 auto; margin-left: -11px; padding: 0; border: 0; background: transparent; cursor: pointer; transform-origin: bottom center; transition: .18s ease; }
-.player-hand > button:first-child { margin-left: 0; transform: rotate(-5deg) translateY(5px); }
-.player-hand > button:nth-child(2) { transform: rotate(-3deg) translateY(2px); }
-.player-hand > button:nth-last-child(2) { transform: rotate(3deg) translateY(2px); }
-.player-hand > button:last-child { transform: rotate(5deg) translateY(5px); }
-.player-hand > button:hover:not(:disabled), .player-hand > button.selected { z-index: 3; transform: translateY(-10px) rotate(0); }
-.player-hand > button.selected .poker-card { box-shadow: 0 0 0 4px var(--gold), 0 7px 0 rgba(0,0,0,.18); }
-.player-hand > button.dragging { z-index: 5; opacity: .58; transform: translateY(-14px) rotate(0); }
-.player-hand > button:disabled { cursor: default; opacity: .72; }
-.player-hand > p { color: var(--muted); font-size: 9px; }
-.turn-panel .end-turn { width: 100%; background: var(--han); }
-.battle-log { margin-top: 13px; padding: 15px 18px; display: grid; grid-template-columns: 125px 1fr; gap: 20px; }
-.log-list { display: flex; gap: 9px; overflow-x: auto; }
-.log-list > p { margin: auto 0; color: var(--muted); font-size: 9px; }
-.log-list article { min-width: 270px; display: flex; align-items: flex-start; gap: 9px; padding: 8px 12px; border-left: 1px solid var(--line); }
-.log-list article > span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 13px; }
-.log-list article > span.ai { background: var(--han); }
-.log-list em, .log-list strong, .log-list small { display: block; }
-.log-list em { margin-bottom: 3px; color: var(--chu-dark); font-size: 7px; font-style: normal; font-weight: 900; letter-spacing: .08em; }
-.log-list strong { font-size: 9px; }
-.log-list small { margin-top: 4px; color: var(--muted); font-size: 7px; line-height: 1.55; }
-.victory-panel { margin-top: 14px; padding: 24px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; background: #fff4df; }
-.victory-seal { display: grid; width: 65px; height: 65px; place-items: center; border: 4px solid white; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 35px; box-shadow: 0 0 0 3px var(--gold); }
-.victory-panel.han .victory-seal { background: var(--han); }
-.victory-panel h3 { margin: 3px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
-.victory-panel p { margin: 0; color: var(--muted); font-size: 10px; }
+.game-route-chu-han .command-deck { display: grid; grid-template-columns: 225px minmax(0, 1fr) 205px; gap: 13px; margin-top: 14px; }
+.game-route-chu-han .skill-panel, .game-route-chu-han .hand-panel, .game-route-chu-han .turn-panel, .game-route-chu-han .battle-log, .game-route-chu-han .victory-panel { border: 1px solid var(--line); border-radius: 9px; background: white; }
+.game-route-chu-han .skill-panel, .game-route-chu-han .turn-panel { padding: 19px; }
+.game-route-chu-han .skill-panel h3, .game-route-chu-han .turn-panel h3, .game-route-chu-han .hand-heading h3, .game-route-chu-han .battle-log h3 { margin: 4px 0 6px; font-family: "ZCOOL XiaoWei", serif; font-size: 21px; font-weight: 400; }
+.game-route-chu-han .skill-panel p, .game-route-chu-han .turn-panel p { min-height: 44px; margin: 0 0 12px; color: var(--muted); font-size: 8px; line-height: 1.7; }
+.game-route-chu-han .skill-button { min-height: 36px; width: 100%; border-color: var(--chu-dark); background: var(--chu); }
+.game-route-chu-han .han-skill-actions { display: flex; align-items: center; gap: 7px; }
+.game-route-chu-han .clear-selection { border: 0; background: transparent; color: var(--muted); font-size: 8px; text-decoration: underline; cursor: pointer; }
+.game-route-chu-han .hand-panel { min-width: 0; padding: 15px 18px 11px; overflow: hidden; }
+.game-route-chu-han .hand-heading { display: flex; align-items: flex-start; justify-content: space-between; }
+.game-route-chu-han .hand-heading > small { color: var(--muted); font-size: 8px; }
+.game-route-chu-han .hand-hint { margin: -2px 0 3px; color: var(--muted); font-size: 7px; }
+.game-route-chu-han .player-hand { min-height: 120px; display: flex; align-items: flex-end; justify-content: center; padding-top: 5px; overflow-x: auto; }
+.game-route-chu-han .player-hand > button { flex: 0 0 auto; margin-left: -11px; padding: 0; border: 0; background: transparent; cursor: pointer; transform-origin: bottom center; transition: .18s ease; }
+.game-route-chu-han .player-hand > button:first-child { margin-left: 0; transform: rotate(-5deg) translateY(5px); }
+.game-route-chu-han .player-hand > button:nth-child(2) { transform: rotate(-3deg) translateY(2px); }
+.game-route-chu-han .player-hand > button:nth-last-child(2) { transform: rotate(3deg) translateY(2px); }
+.game-route-chu-han .player-hand > button:last-child { transform: rotate(5deg) translateY(5px); }
+.game-route-chu-han .player-hand > button:hover:not(:disabled), .game-route-chu-han .player-hand > button.selected { z-index: 3; transform: translateY(-10px) rotate(0); }
+.game-route-chu-han .player-hand > button.selected .poker-card { box-shadow: 0 0 0 4px var(--gold), 0 7px 0 rgba(0,0,0,.18); }
+.game-route-chu-han .player-hand > button.dragging { z-index: 5; opacity: .58; transform: translateY(-14px) rotate(0); }
+.game-route-chu-han .player-hand > button:disabled { cursor: default; opacity: .72; }
+.game-route-chu-han .player-hand > p { color: var(--muted); font-size: 9px; }
+.game-route-chu-han .turn-panel .end-turn { width: 100%; background: var(--han); }
+.game-route-chu-han .battle-log { margin-top: 13px; padding: 15px 18px; display: grid; grid-template-columns: 125px 1fr; gap: 20px; }
+.game-route-chu-han .log-list { display: flex; gap: 9px; overflow-x: auto; }
+.game-route-chu-han .log-list > p { margin: auto 0; color: var(--muted); font-size: 9px; }
+.game-route-chu-han .log-list article { min-width: 270px; display: flex; align-items: flex-start; gap: 9px; padding: 8px 12px; border-left: 1px solid var(--line); }
+.game-route-chu-han .log-list article > span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 13px; }
+.game-route-chu-han .log-list article > span.ai { background: var(--han); }
+.game-route-chu-han .log-list em, .game-route-chu-han .log-list strong, .game-route-chu-han .log-list small { display: block; }
+.game-route-chu-han .log-list em { margin-bottom: 3px; color: var(--chu-dark); font-size: 7px; font-style: normal; font-weight: 900; letter-spacing: .08em; }
+.game-route-chu-han .log-list strong { font-size: 9px; }
+.game-route-chu-han .log-list small { margin-top: 4px; color: var(--muted); font-size: 7px; line-height: 1.55; }
+.game-route-chu-han .victory-panel { margin-top: 14px; padding: 24px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; background: #fff4df; }
+.game-route-chu-han .victory-seal { display: grid; width: 65px; height: 65px; place-items: center; border: 4px solid white; border-radius: 50%; background: var(--chu); color: white; font-family: "ZCOOL XiaoWei", serif; font-size: 35px; box-shadow: 0 0 0 3px var(--gold); }
+.game-route-chu-han .victory-panel.han .victory-seal { background: var(--han); }
+.game-route-chu-han .victory-panel h3 { margin: 3px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 25px; font-weight: 400; }
+.game-route-chu-han .victory-panel p { margin: 0; color: var(--muted); font-size: 10px; }
 
-.rules-section { width: min(1160px, calc(100% - 40px)); margin: 0 auto 70px; padding: 35px 38px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,250,240,.76); }
-.rules-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
-.rules-heading > p { max-width: 390px; margin: 0; color: var(--muted); font-size: 9px; line-height: 1.7; text-align: right; }
-.formation-order { display: flex; align-items: center; justify-content: center; gap: 13px; margin-bottom: 28px; padding: 13px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.formation-order span { color: var(--chu-dark); font-size: 8px; font-weight: 900; }
-.formation-order b { font-family: "ZCOOL XiaoWei", serif; font-size: 16px; font-weight: 400; }
-.formation-order i { color: var(--gold); font-style: normal; font-size: 20px; }
-.rule-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.rule-grid article { display: flex; gap: 12px; }
-.rule-grid article > span { color: var(--chu); font-family: Georgia, serif; font-size: 24px; font-weight: 900; line-height: 1; }
-.rule-grid strong { display: block; margin-bottom: 5px; font-size: 10px; }
-.rule-grid p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.75; }
-.site-footer { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 24px 0 30px; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); color: var(--muted); }
-.site-footer > span { color: var(--ink); font-size: 10px; font-weight: 900; letter-spacing: .12em; }
-.site-footer p { justify-self: end; margin: 0; font-family: "ZCOOL XiaoWei", serif; font-size: 13px; }
+.game-route-chu-han .rules-section { width: min(1160px, calc(100% - 40px)); margin: 0 auto 70px; padding: 35px 38px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,250,240,.76); }
+.game-route-chu-han .rules-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.game-route-chu-han .rules-heading > p { max-width: 390px; margin: 0; color: var(--muted); font-size: 9px; line-height: 1.7; text-align: right; }
+.game-route-chu-han .formation-order { display: flex; align-items: center; justify-content: center; gap: 13px; margin-bottom: 28px; padding: 13px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.game-route-chu-han .formation-order span { color: var(--chu-dark); font-size: 8px; font-weight: 900; }
+.game-route-chu-han .formation-order b { font-family: "ZCOOL XiaoWei", serif; font-size: 16px; font-weight: 400; }
+.game-route-chu-han .formation-order i { color: var(--gold); font-style: normal; font-size: 20px; }
+.game-route-chu-han .rule-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.game-route-chu-han .rule-grid article { display: flex; gap: 12px; }
+.game-route-chu-han .rule-grid article > span { color: var(--chu); font-family: Georgia, serif; font-size: 24px; font-weight: 900; line-height: 1; }
+.game-route-chu-han .rule-grid strong { display: block; margin-bottom: 5px; font-size: 10px; }
+.game-route-chu-han .rule-grid p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.75; }
+.game-route-chu-han .site-footer { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 24px 0 30px; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); color: var(--muted); }
+.game-route-chu-han .site-footer > span { color: var(--ink); font-size: 10px; font-weight: 900; letter-spacing: .12em; }
+.game-route-chu-han .site-footer p { justify-self: end; margin: 0; font-family: "ZCOOL XiaoWei", serif; font-size: 13px; }
 
 @media (max-width: 960px) {
-  .hero { min-height: 470px; text-align: left; }
-  .hero-copy { width: 60%; }
-  .hero-art { display: block; right: -78px; opacity: .78; transform: translateY(-50%) scale(.72); }
-  .hero-tags { justify-content: flex-start; }
-  .hero-description { margin: 0; }
-  .faction-setup { grid-template-columns: 1fr; }
-  .setup-brief { min-height: 190px; }
-  .status-strip { grid-template-columns: 190px 1fr 190px; }
-  .command-deck { grid-template-columns: 1fr 1.8fr; }
-  .turn-panel { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 2fr auto; align-items: center; gap: 14px; }
-  .turn-panel p { min-height: 0; margin: 0; }
-  .rule-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-route-chu-han .hero { min-height: 470px; text-align: left; }
+  .game-route-chu-han .hero-copy { width: 60%; }
+  .game-route-chu-han .hero-art { display: block; right: -78px; opacity: .78; transform: translateY(-50%) scale(.72); }
+  .game-route-chu-han .hero-tags { justify-content: flex-start; }
+  .game-route-chu-han .hero-description { margin: 0; }
+  .game-route-chu-han .faction-setup { grid-template-columns: 1fr; }
+  .game-route-chu-han .setup-brief { min-height: 190px; }
+  .game-route-chu-han .status-strip { grid-template-columns: 190px 1fr 190px; }
+  .game-route-chu-han .command-deck { grid-template-columns: 1fr 1.8fr; }
+  .game-route-chu-han .turn-panel { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 2fr auto; align-items: center; gap: 14px; }
+  .game-route-chu-han .turn-panel p { min-height: 0; margin: 0; }
+  .game-route-chu-han .rule-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
-  .site-header { height: 68px; }
-  .hero { min-height: 420px; }
-  .hero-title-lockup { top: 42px; }
-  .hero-copy { width: 100%; padding: 175px 0 45px; }
-  .hero h1 { font-size: clamp(58px, 16vw, 92px); }
-  .hero-lead { font-size: 31px; }
-  .hero-art { right: -180px; opacity: .15; }
-  .game-shell { padding: 23px 17px; }
-  .faction-picker { grid-template-columns: 1fr; gap: 12px; }
-  .versus { display: none; }
-  .faction-card { min-height: 220px; }
-  .difficulty-picker { grid-template-columns: 1fr 1fr; }
-  .difficulty-picker > div { grid-column: 1 / -1; padding-left: 0; }
-  .rps-stage { grid-template-columns: 1fr; }
-  .rps-result { padding: 28px; }
-  .rps-controls { padding: 28px; }
-  .status-strip { grid-template-columns: 1fr 1fr; }
-  .turn-message { grid-column: 1 / -1; grid-row: 2; border: 0; border-top: 1px solid var(--line); }
-  .command-deck { grid-template-columns: 1fr; }
-  .turn-panel { grid-column: auto; display: block; }
-  .turn-panel p { margin-bottom: 12px; }
-  .battle-log { grid-template-columns: 1fr; }
-  .victory-panel { grid-template-columns: auto 1fr; }
-  .victory-panel .primary-button { grid-column: 1 / -1; width: 100%; }
-  .rules-heading { display: block; }
-  .rules-heading > p { margin-top: 8px; text-align: left; }
-  .formation-order { flex-wrap: wrap; gap: 8px; }
+  .game-route-chu-han .site-header { height: 68px; }
+  .game-route-chu-han .hero { min-height: 420px; }
+  .game-route-chu-han .hero-title-lockup { top: 42px; }
+  .game-route-chu-han .hero-copy { width: 100%; padding: 175px 0 45px; }
+  .game-route-chu-han .hero h1 { font-size: clamp(58px, 16vw, 92px); }
+  .game-route-chu-han .hero-lead { font-size: 31px; }
+  .game-route-chu-han .hero-art { right: -180px; opacity: .15; }
+  .game-route-chu-han .game-shell { padding: 23px 17px; }
+  .game-route-chu-han .faction-picker { grid-template-columns: 1fr; gap: 12px; }
+  .game-route-chu-han .versus { display: none; }
+  .game-route-chu-han .faction-card { min-height: 220px; }
+  .game-route-chu-han .difficulty-picker { grid-template-columns: 1fr 1fr; }
+  .game-route-chu-han .difficulty-picker > div { grid-column: 1 / -1; padding-left: 0; }
+  .game-route-chu-han .rps-stage { grid-template-columns: 1fr; }
+  .game-route-chu-han .rps-result { padding: 28px; }
+  .game-route-chu-han .rps-controls { padding: 28px; }
+  .game-route-chu-han .status-strip { grid-template-columns: 1fr 1fr; }
+  .game-route-chu-han .turn-message { grid-column: 1 / -1; grid-row: 2; border: 0; border-top: 1px solid var(--line); }
+  .game-route-chu-han .command-deck { grid-template-columns: 1fr; }
+  .game-route-chu-han .turn-panel { grid-column: auto; display: block; }
+  .game-route-chu-han .turn-panel p { margin-bottom: 12px; }
+  .game-route-chu-han .battle-log { grid-template-columns: 1fr; }
+  .game-route-chu-han .victory-panel { grid-template-columns: auto 1fr; }
+  .game-route-chu-han .victory-panel .primary-button { grid-column: 1 / -1; width: 100%; }
+  .game-route-chu-han .rules-heading { display: block; }
+  .game-route-chu-han .rules-heading > p { margin-top: 8px; text-align: left; }
+  .game-route-chu-han .formation-order { flex-wrap: wrap; gap: 8px; }
 }
 
 @media (max-width: 520px) {
-  .site-header, .hero, .game-shell, .rules-section, .site-footer { width: min(100% - 24px, 1180px); }
-  .brand { font-size: 15px; }
-  .issue-tag { display: none; }
-  .hero { min-height: 390px; }
-  .hero h1 { font-size: 57px; }
-  .hero-description { font-size: 11px; }
-  .game-shell { padding: 20px 12px; }
-  .shell-heading h2 { font-size: 26px; }
-  .faction-card { padding: 23px; }
-  .difficulty-picker { grid-template-columns: 1fr; }
-  .difficulty-picker > div { grid-column: auto; }
-  .rps-result strong { width: 82px; height: 82px; font-size: 42px; }
-  .rps-result { padding: 23px 14px; }
-  .gesture-buttons button { min-width: 0; flex: 1; }
-  .army-chip { padding: 10px; }
-  .army-chip small { font-size: 7px; }
-  .player-hand { justify-content: flex-start; }
-  .rule-grid { grid-template-columns: 1fr; }
-  .rules-section { padding: 27px 21px; }
-  .site-footer { grid-template-columns: 1fr; gap: 8px; }
-  .site-footer p { justify-self: start; }
+  .game-route-chu-han .site-header, .game-route-chu-han .hero, .game-route-chu-han .game-shell, .game-route-chu-han .rules-section, .game-route-chu-han .site-footer { width: min(100% - 24px, 1180px); }
+  .game-route-chu-han .brand { font-size: 15px; }
+  .game-route-chu-han .issue-tag { display: none; }
+  .game-route-chu-han .hero { min-height: 390px; }
+  .game-route-chu-han .hero h1 { font-size: 57px; }
+  .game-route-chu-han .hero-description { font-size: 11px; }
+  .game-route-chu-han .game-shell { padding: 20px 12px; }
+  .game-route-chu-han .shell-heading h2 { font-size: 26px; }
+  .game-route-chu-han .faction-card { padding: 23px; }
+  .game-route-chu-han .difficulty-picker { grid-template-columns: 1fr; }
+  .game-route-chu-han .difficulty-picker > div { grid-column: auto; }
+  .game-route-chu-han .rps-result strong { width: 82px; height: 82px; font-size: 42px; }
+  .game-route-chu-han .rps-result { padding: 23px 14px; }
+  .game-route-chu-han .gesture-buttons button { min-width: 0; flex: 1; }
+  .game-route-chu-han .army-chip { padding: 10px; }
+  .game-route-chu-han .army-chip small { font-size: 7px; }
+  .game-route-chu-han .player-hand { justify-content: flex-start; }
+  .game-route-chu-han .rule-grid { grid-template-columns: 1fr; }
+  .game-route-chu-han .rules-section { padding: 27px 21px; }
+  .game-route-chu-han .site-footer { grid-template-columns: 1fr; gap: 8px; }
+  .game-route-chu-han .site-footer p { justify-self: start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+  .game-route-chu-han, .game-route-chu-han *, .game-route-chu-han *::before, .game-route-chu-han *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
 
