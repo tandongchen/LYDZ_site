@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type PlayerId = "p1" | "p2";
 type TeamId =
@@ -1191,7 +1192,7 @@ export default function WorldCupGame() {
     <main>
       <header className="site-header">
         <a className="brand" href="#game">
-          <span className="brand-mark magic-hat"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="issue-tag">双人博弈</span>
@@ -1445,72 +1446,6 @@ export default function WorldCupGame() {
         </div>
       </section>
 
-      <section className="rules-section" id="rules">
-        <div className="rules-heading">
-          <div><span className="section-kicker">RULE BOOK / FULL MATCH</span><h2>从抽牌到点球决胜</h2></div>
-          <p>一个回合必须由双方各完成一次行动。所有能力值限制在 0—15，概率公式结果限制在 0—10。</p>
-        </div>
-        <div className="formula-board">
-          <article><span>↗</span><div><small>普通进攻</small><strong>进攻 − 防守 ÷ 1.3</strong><p>结果 × 10% = 本次进球率</p></div></article>
-          <article><span>◆</span><div><small>防守后进攻</small><strong>进攻 − 防守</strong><p>防守保留到对方真正进攻，不再除以 1.3</p></div></article>
-          <article><span>◎</span><div><small>争夺控制</small><strong>控制 − 对方控制 ÷ 2</strong><p>成功得到两次额外行动，期间不能再控制</p></div></article>
-          <article><span>●</span><div><small>点球大战</small><strong>进攻 − 防守 ÷ 1.5</strong><p>点球比分独立于常规及加时赛比分</p></div></article>
-        </div>
-        <div className="rule-grid">
-          <article><span>01</span><div><strong>五回合准备</strong><p>每回合双方各抽一张牌。红牌为本队加 2；黑牌为本队加 1，并令对手任一能力减 1。</p></div></article>
-          <article><span>02</span><div><strong>上下半场各六回合</strong><p>每回合双方各行动一次；上半场后手在下半场先行动。</p></div></article>
-          <article><span>03</span><div><strong>中场各加三点</strong><p>领先者先加；比分相同则进攻次数更多者先加；仍相同则上半场先手先加。</p></div></article>
-          <article><span>04</span><div><strong>加时赛六回合</strong><p>常规时间战平后进入加时赛，上下半场各三个完整回合。</p></div></article>
-          <article><span>05</span><div><strong>五轮点球大战</strong><p>加时仍平则双方各罚五球，只能选择进攻，并在主比分下方独立计分。</p></div></article>
-          <article><span>06</span><div><strong>点球突然死亡</strong><p>五轮后仍平，每回合双方各罚一球；一方进球而另一方未进球时立即决出胜负。</p></div></article>
-        </div>
-        <div className="skill-manual">
-          <header>
-            <div><span className="section-kicker">TEAM SKILLS / 14</span><h3>球队专属技能</h3></div>
-            <p>同档双方各 1 次；二档对一档为 2 : 1；三档对二档为 2 : 1；三档对一档为 3 : 1。技能发动不占用本次行动。</p>
-          </header>
-          <div className="skill-grid">
-            {([
-              "argentina",
-              "spain",
-              "france",
-              "england",
-              "portugal",
-              "netherlands",
-              "belgium",
-              "brazil",
-              "norway",
-              "colombia",
-              "germany",
-              "morocco",
-              "usa",
-              "ecuador",
-            ] as TeamId[]).map((team) => (
-              <article key={team}>
-                <b>{TEAM_DATA[team].code}</b>
-                <div>
-                  <small>{TEAM_DATA[team].name}</small>
-                  <strong>{TEAM_SKILLS[team]?.name}</strong>
-                  <p>{TEAM_SKILLS[team]?.description}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-        <div className="team-catalog">
-          {TEAM_TIERS.map((tier) => (
-            <section className="team-tier" key={tier.label}>
-              <header><strong>{tier.label}</strong><span>{tier.note}</span></header>
-              <div className="team-table">
-                {tier.teams.map((team) => (
-                  <div key={team}><b>{TEAM_DATA[team].code}</b><strong>{TEAM_DATA[team].name}</strong><span>攻 {TEAM_DATA[team].stats.attack}</span><span>守 {TEAM_DATA[team].stats.defense}</span><span>控 {TEAM_DATA[team].stats.control}</span></div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
-
       <footer className="site-footer">
         <span>魔法数学</span>
         <p>角逐美加墨</p>
@@ -1518,4 +1453,3 @@ export default function WorldCupGame() {
     </main>
   );
 }
-

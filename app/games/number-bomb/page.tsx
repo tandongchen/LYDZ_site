@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type Phase = "setup" | "playing" | "exploded";
 
@@ -51,7 +52,7 @@ export default function NumberBombGame() {
     setTurn(0);
     setGuess("");
     setRecords([]);
-    setMessage("炸弹已经埋好，范围是 1—100。");
+    setMessage("炸弹已经埋好，范围是 1-100。");
     setError("");
     setLoser(null);
     setPhase("playing");
@@ -99,7 +100,7 @@ export default function NumberBombGame() {
 
     const nextLower = value < secret ? value : lower;
     const nextUpper = value > secret ? value : upper;
-    const hint = `炸弹在 ${nextLower}—${nextUpper} 之间`;
+    const hint = `炸弹在 ${nextLower}-${nextUpper} 之间`;
     setLower(nextLower);
     setUpper(nextUpper);
     setRecords((items) => [{ team: currentTeam, teamIndex: turn, guess: value, hint }, ...items]);
@@ -112,7 +113,7 @@ export default function NumberBombGame() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="issue-tag">派对游戏</span>
@@ -209,7 +210,7 @@ export default function NumberBombGame() {
               <div className="range-copy">
                 <span className="section-kicker">DANGER ZONE</span>
                 <p>{phase === "exploded" ? "炸弹数字揭晓" : "炸弹就在这个范围内"}</p>
-                <strong>{phase === "exploded" ? secret : `${lower} — ${upper}`}</strong>
+                <strong>{phase === "exploded" ? secret : `${lower} - ${upper}`}</strong>
                 <small>{phase === "exploded" ? `${loser} 引爆了炸弹` : `还剩 ${remainingPossibilities} 个可能`}</small>
               </div>
               <div className="range-bomb" aria-hidden="true">
@@ -283,20 +284,7 @@ export default function NumberBombGame() {
         )}
       </section>
 
-      <section className="rules-section">
-        <div className="rules-heading">
-          <span className="section-kicker">HOW TO PLAY</span>
-          <h2>三步开始，越猜越刺激</h2>
-        </div>
-        <ol>
-          <li><span>01</span><div><strong>组建队伍</strong><p>选择 2—4 名玩家，每人代表一支队伍，按顺序轮流猜数。</p></div></li>
-          <li><span>02</span><div><strong>缩小范围</strong><p>系统会根据猜测提示新区间。下一位只能在当前范围内继续猜。</p></div></li>
-          <li><span>03</span><div><strong>避开炸弹</strong><p>谁猜中系统随机生成的秘密数字，谁就引爆炸弹并输掉本轮。</p></div></li>
-        </ol>
-      </section>
-
       <footer><span>魔法数学</span><p>在 1 和 100 之间，藏着一次心跳。</p></footer>
     </main>
   );
 }
-

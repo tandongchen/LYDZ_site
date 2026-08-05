@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type Player = "A" | "B";
 
@@ -150,7 +151,7 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="header-tag">双人数学策略小游戏</span>
@@ -236,7 +237,7 @@ export default function Home() {
             </button>
           </div>
           <div className="setup-meta">
-            <span id="pile-hint">可设置 3–7 堆，每堆随机出现 3–9 朵花</span>
+            <span id="pile-hint">可设置 3-7 堆，每堆随机出现 3-9 朵花</span>
             {error && <span id="pile-error" className="error-text">{error}</span>}
           </div>
         </form>
@@ -386,19 +387,6 @@ export default function Home() {
       </section>
 
       <section className="lower-grid">
-        <aside className="rules-card">
-          <div className="card-heading">
-            <span className="card-number">01</span>
-            <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
-          </div>
-          <ol>
-            <li><span>1</span><p><strong>任选一堆</strong>每回合先从还有花的堆中选择一堆。</p></li>
-            <li><span>2</span><p><strong>想拿几朵都可以</strong>至少拿一朵，也可以把这一堆全部拿空。</p></li>
-            <li><span>3</span><p><strong>拿完换人</strong>一回合不能同时拿两堆，确认后轮到对方。</p></li>
-            <li><span>4</span><p><strong>最后一朵定胜负</strong>取走桌上最后一朵花的人立即获胜。</p></li>
-          </ol>
-        </aside>
-
         <aside className="history-card">
           <div className="card-heading">
             <span className="card-number">02</span>
@@ -435,4 +423,3 @@ export default function Home() {
     </main>
   );
 }
-

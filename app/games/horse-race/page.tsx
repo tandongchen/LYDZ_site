@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type Mode = 2 | 4;
 type Phase = "setup" | "playing" | "finished";
@@ -283,7 +284,7 @@ export default function HorseRaceGame() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="issue-tag">派对游戏</span>
@@ -529,34 +530,6 @@ export default function HorseRaceGame() {
             </p>
           </div>
         )}
-      </section>
-
-      <section className="rules-section" aria-labelledby="rules-title">
-        <div className="rules-heading">
-          <div>
-            <span className="section-kicker">HOW TO PLAY</span>
-            <h2 id="rules-title">一副牌，两种赛制</h2>
-          </div>
-          <p>先让所有马越过关卡，再揭晓它的惩罚牌。</p>
-        </div>
-        <div className="rule-grid">
-          <article>
-            <span>01</span>
-            <div><strong>选马与铺赛道</strong><p>双人版用大小王作为红、黑两匹马；四人版用四张 A 代表四种花色。随机抽 5 张牌背面朝上排成赛道。</p></div>
-          </article>
-          <article>
-            <span>02</span>
-            <div><strong>翻牌向前冲</strong><p>双人版按红黑颜色前进；四人版按红桃、方块、黑桃、梅花的具体花色前进。每翻一张，对应马匹前进 1 格。</p></div>
-          </article>
-          <article>
-            <span>03</span>
-            <div><strong>手动揭晓关卡</strong><p>第 1—4 关必须等所有马完全越过后，才由玩家点击翻开；第 5 关只需所有马到达即可翻开。双人版同色马后退 1 格，四人版同花色马后退 1 格。</p></div>
-          </article>
-          <article>
-            <span>04</span>
-            <div><strong>率先越线夺冠</strong><p>继续翻牌并逐道处理关卡。任何一匹马率先越过第 5 张赛道牌、抵达终点，比赛立即结束。</p></div>
-          </article>
-        </div>
       </section>
 
       <footer>

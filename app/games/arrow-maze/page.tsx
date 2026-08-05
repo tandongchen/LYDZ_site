@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type DirectionKey = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 type GameStatus = "ready" | "running" | "success" | "failed";
@@ -317,7 +318,7 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="header-tag">数学思维小游戏</span>
@@ -481,24 +482,11 @@ export default function Home() {
         <div className="board-footnote">
           <span><i className="dot dot-live" />仍在场</span>
           <span><i className="dot dot-chain" />正在连锁</span>
-          <p>{status === "ready" ? "点击任意一格开始挑战" : `本局起点：${startId === null ? "—" : coordinateOf(startId, board.size)}`}</p>
+          <p>{status === "ready" ? "点击任意一格开始挑战" : `本局起点：${startId === null ? "待定" : coordinateOf(startId, board.size)}`}</p>
         </div>
       </section>
 
       <section className="lower-grid">
-        <aside className="rules-card">
-          <div className="card-heading">
-            <span className="card-number">01</span>
-            <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
-          </div>
-          <ol>
-            <li><span>1</span><p><strong>只选一次起点</strong>棋盘静止时，任选一个仍存在的方格点击。</p></li>
-            <li><span>2</span><p><strong>沿箭头寻找目标</strong>每支箭击中该方向上最近的方格；没有目标就停止。</p></li>
-            <li><span>3</span><p><strong>被击中的格继续触发</strong>多支箭可以同时延伸，形成一串自动连锁。</p></li>
-            <li><span>4</span><p><strong>清空棋盘即胜利</strong>连锁结束后没有方格留下，挑战成功；否则失败。</p></li>
-          </ol>
-        </aside>
-
         <aside className="history-card">
           <div className="card-heading">
             <span className="card-number">02</span>
@@ -534,4 +522,3 @@ export default function Home() {
     </main>
   );
 }
-

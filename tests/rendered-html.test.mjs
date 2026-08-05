@@ -13,15 +13,30 @@ async function render(pathname = "/") {
   );
 }
 
-test("server-renders the magic mathematics archive and all game links", async () => {
+test("server-renders the magic mathematics studio and all game links", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<html[^>]*lang="zh-CN"/i);
   assert.match(html, /魔法数学/);
-  assert.match(html, /展示.*魔法.*中/s);
-  assert.match(html, /archive-brand-mark archive-magic-hat/);
+  assert.match(html, /把数学规则/);
+  assert.match(html, /变成.*可玩的世界/s);
+  assert.match(html, /class="hero-video"/);
+  assert.match(html, /data-shadow="MAGIC MATH"/);
+  assert.match(html, /magic-math-logo/);
+  assert.match(html, /magic-wand-cursor/);
+  assert.doesNotMatch(html, /brand-hat-crown/);
+  assert.match(html, /派对·社交/);
+  assert.match(html, /策略·博弈/);
+  assert.match(html, /逻辑·解谜/);
+  assert.match(html, /启动全域征程/);
+  assert.match(html, /精选项目档案/);
+  assert.match(html, /打开全站搜索/);
+  assert.match(html, /id="contact"/);
+  assert.match(html, /游戏规则详解/);
+  assert.match(html, /href="\/rules"/);
+  assert.match(html, /href="\/contact"/);
 
   const games = [
     ["数字消消乐", "/games/number-merge"],
@@ -39,6 +54,59 @@ test("server-renders the magic mathematics archive and all game links", async ()
     assert.match(html, new RegExp(title));
     assert.match(html, new RegExp(`href="${href}"`));
   }
+});
+
+test("keeps the magic wand cursor above the global search overlay", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const cursorLayer = Number(styles.match(/\.magic-wand-cursor\s*\{[^}]*z-index:\s*(\d+)/s)?.[1]);
+  const searchLayer = Number(styles.match(/\.site-search-overlay\s*\{[^}]*z-index:\s*(\d+)/s)?.[1]);
+
+  assert.ok(Number.isFinite(cursorLayer));
+  assert.ok(Number.isFinite(searchLayer));
+  assert.ok(cursorLayer > searchLayer);
+});
+
+test("server-renders the collaboration contact page", async () => {
+  const response = await render("/contact");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /让一个灵感/);
+  assert.match(html, /成为下一套规则/);
+  assert.match(html, /1224106085@qq\.com/);
+  assert.match(html, /tandongchen499@gmail\.com/);
+  assert.match(html, /新的游戏/);
+  assert.match(html, /新的规则|有趣的规则/);
+});
+
+test("server-renders the complete nine-game rule archive", async () => {
+  const response = await render("/rules");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /RULE ARCHIVE/);
+  assert.match(html, /遵循规则/);
+  assert.match(html, /or 创造规则/);
+  assert.match(html, /挑战自我/);
+  assert.doesNotMatch(html, /09 GAMES/);
+  assert.match(html, /游戏规则详解/);
+
+  for (const title of [
+    "数字消消乐",
+    "数字抢位战",
+    "尼姆博弈",
+    "箭阵迷域",
+    "层叠消融",
+    "数字炸弹",
+    "御马狂飙",
+    "楚汉之争",
+    "世界杯风云",
+  ]) {
+    assert.match(html, new RegExp(title));
+  }
+
+  assert.doesNotMatch(html, /概率公式/);
+  assert.doesNotMatch(html, /进攻 − 防守 ÷ 1\.3/);
+  assert.match(html, /球队专属技能/);
+  assert.match(html, /Tiki-Taka/);
 });
 
 test("uses the same large game-title structure for the first two games", async () => {
@@ -71,6 +139,33 @@ test("server-renders every game route", async () => {
     const html = await response.text();
     assert.match(html, new RegExp(title), pathname);
     assert.match(html, /返回魔法数学/, pathname);
+    assert.match(html, /magic-math-logo/, pathname);
+    assert.doesNotMatch(html, /rules-(?:card|section)/, pathname);
+  }
+});
+
+test("shares the red-blue game theme and removes standalone rule narration", async () => {
+  const styles = await readFile(new URL("../app/games/game-route.css", import.meta.url), "utf8");
+  assert.match(styles, /--red:\s*#ef4058/);
+  assert.match(styles, /--blue:\s*#246cff/);
+  assert.match(styles, /backdrop-filter:\s*blur/);
+
+  const routes = [
+    "number-merge",
+    "number-claim",
+    "nim",
+    "arrow-maze",
+    "layered-fusion",
+    "number-bomb",
+    "horse-race",
+    "chu-han",
+    "world-cup",
+  ];
+
+  for (const route of routes) {
+    const source = await readFile(new URL(`../app/games/${route}/page.tsx`, import.meta.url), "utf8");
+    assert.match(source, /<MagicMathLogo \/>/, route);
+    assert.doesNotMatch(source, /className="rules-(?:card|section)"/, route);
   }
 });
 
@@ -106,13 +201,10 @@ test("uses the revised open-play and penalty attack formulas", async () => {
   assert.match(source, /const \[penaltyScore, setPenaltyScore\]/);
   assert.match(source, /effectiveStats\[current\]\.attack - effectiveStats\[defender\]\.defense \/ 1\.5/);
   assert.match(source, /effectiveStats\[current\]\.attack -\s*effectiveStats\[defender\]\.defense \/ \(defended \? 1 : 1\.3\)/);
-  assert.match(source, /进攻 − 防守 ÷ 1\.3/);
   assert.doesNotMatch(source, /defended \? 1 : 1\.5/);
-  assert.match(source, /点球大战<\/small><strong>进攻 − 防守 ÷ 1\.5/);
   assert.doesNotMatch(source, /点球进球率 = 进攻 − 对方防守 ÷ 2/);
   assert.match(source, /className="penalty-scoreboard"/);
   assert.match(source, /className="defense-action" disabled=\{!canAct \|\| penaltyPlay/);
-  assert.match(source, /点球比分独立于常规及加时赛比分/);
 });
 
 test("formats fractional probabilities without long decimal noise", async () => {
@@ -178,7 +270,6 @@ test("offers all three team tiers with the revised ability values", async () => 
   assert.match(source, /capeVerde:.*attack: 4, defense: 8, control: 5/);
   assert.match(source, /egypt:.*attack: 6, defense: 5, control: 6/);
   assert.match(source, /<optgroup key=\{tier\.label\}/);
-  assert.match(source, /className="team-catalog"/);
 });
 
 test("allocates skill uses from the tier gap", async () => {
@@ -228,7 +319,6 @@ test("expires temporary skill effects by completed rounds", async () => {
   assert.match(source, /if \(isOpenPlayPhase\(phase\)\) tickSkillEffects\(\)/);
   assert.match(source, /baseEffectiveStatsFor\(player: PlayerId\)/);
   assert.match(source, /Math\.min\(\s*15,/s);
-  assert.match(source, /className="skill-manual"/);
 });
 
 test("supports Colombia linked stats and USA ability permutations", async () => {

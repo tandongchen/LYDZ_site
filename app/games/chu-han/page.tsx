@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type Suit = "heart" | "diamond" | "spade" | "club" | "joker";
 type Faction = "chu" | "han";
@@ -1015,7 +1016,7 @@ export default function ChuHanGame() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="issue-tag">博弈游戏</span>
@@ -1023,7 +1024,7 @@ export default function ChuHanGame() {
 
       <section className="hero" id="top">
         <div className="hero-title-lockup">
-          <p className="eyebrow"><span />CHU–HAN CONTENTION<span /></p>
+          <p className="eyebrow"><span />CHU-HAN CONTENTION<span /></p>
           <h1><span>楚</span><span>汉</span><span>之</span><span>争</span></h1>
         </div>
         <div className="hero-copy">
@@ -1282,17 +1283,6 @@ export default function ChuHanGame() {
             </div>
           </div>
         )}
-      </section>
-
-      <section className="rules-section" aria-labelledby="rules-title">
-        <div className="rules-heading"><div><span className="section-kicker">FIELD MANUAL</span><h2 id="rules-title">八战场，一套兵法</h2></div><p>三张牌结成队形；主动进攻不占用出牌。相同队形先比点数和，再比谁先成阵。</p></div>
-        <div className="formation-order"><span>强</span><b>同花顺</b><i>›</i><b>同点数</b><i>›</i><b>顺子</b><i>›</i><b>同花</b><i>›</i><b>散阵</b><span>弱</span></div>
-        <div className="rule-grid">
-          <article><span>01</span><div><strong>打一张，补一张</strong><p>每回合向未占领且己方未满三张的战场出一张牌，然后自动从牌堆补一张。</p></div></article>
-          <article><span>02</span><div><strong>三种进攻判定</strong><p>对方满阵就正面比较；零张直接夺取；一至两张则检验其理论最强队形。</p></div></article>
-          <article><span>03</span><div><strong>三条胜利路线</strong><p>任意四场“大获全胜”；相邻三场“势如破竹”；最左或最右连续两场“边路突袭”。</p></div></article>
-          <article><span>04</span><div><strong>牌尽仍可继续</strong><p>抽牌堆耗尽后继续打手牌；所有战场无空位时跳过出牌，但依旧可以进攻。</p></div></article>
-        </div>
       </section>
 
       <footer className="site-footer"><span>魔法数学 · PLAY WITH NUMBERS</span><p>鸿沟为界，胜负由你落下的每一张牌决定。</p></footer>

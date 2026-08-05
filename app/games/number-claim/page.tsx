@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type Player = "A" | "B";
 type Owner = Player | null;
@@ -94,9 +95,7 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true">
-            <span>✦</span>
-          </span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="header-tag">双人数学策略小游戏</span>
@@ -116,7 +115,7 @@ export default function Home() {
         </p>
         <p className="hero-description">
           设定一个大于 3 的终点数字，选好先手，然后从 1 开始按顺序轮流抢位。
-          每一轮必须拿下接下来的 1–2 个数字，率先抢到终点数字的人获胜。
+          每一轮必须拿下接下来的 1-2 个数字，率先抢到终点数字的人获胜。
         </p>
       </section>
 
@@ -171,7 +170,7 @@ export default function Home() {
             </div>
 
             <div className="input-meta">
-              <span id="target-hint">支持 4–{MAX_TARGET}，默认终点为 30</span>
+              <span id="target-hint">支持 4-{MAX_TARGET}，默认终点为 30</span>
               {error && <span id="input-error" className="error-text">{error}</span>}
             </div>
           </form>
@@ -220,7 +219,7 @@ export default function Home() {
                   <small>本轮已选</small>
                   <strong>
                     {pending.length === 0
-                      ? `请 ${currentPlayer} 选手从 ${claimedTotal + 1} 开始选择 1–2 个数字`
+                      ? `请 ${currentPlayer} 选手从 ${claimedTotal + 1} 开始选择 1-2 个数字`
                       : pending.length === 2
                         ? `已选择 ${[...pending].sort((a, b) => a - b).join("、")}，可以确认本轮抢位`
                         : `已选择 ${pending[0]}，可以确认或再选一个`}
@@ -280,42 +279,6 @@ export default function Home() {
           </div>
         </div>
 
-        <aside className="rules-card">
-          <div className="rules-title-row">
-            <span className="rules-icon" aria-hidden="true">?</span>
-            <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
-          </div>
-          <ol>
-            <li>
-              <span>1</span>
-              <div><strong>设定终点</strong><p>输入一个大于 3 的数字，生成从 1 到终点的抢位棋盘。</p></div>
-            </li>
-            <li>
-              <span>2</span>
-              <div><strong>决定先手</strong><p>A、B 两位选手商量好谁先开始，再开启对局。</p></div>
-            </li>
-            <li>
-              <span>3</span>
-              <div><strong>按顺序抢位</strong><p>从 1 开始，每轮必须选择接下来的 1 或 2 个数字，确认后交换选手。</p></div>
-            </li>
-            <li>
-              <span>4</span>
-              <div><strong>抢到终点</strong><p>谁先把终点数字收入自己的颜色，谁就立即获胜。</p></div>
-            </li>
-          </ol>
-
-          <div className="legend-box">
-            <span>颜色图例</span>
-            <div><i className="legend-a" /> A 选手</div>
-            <div><i className="legend-b" /> B 选手</div>
-            <div><i className="legend-target" /> 终点数字</div>
-          </div>
-
-          <div className="think-note">
-            <span aria-hidden="true">✦</span>
-            <p><strong>想一想</strong>先手和后手有什么区别？抢占1个或2个有什么区别？你能想到必胜的策略吗</p>
-          </div>
-        </aside>
       </section>
 
       <footer>

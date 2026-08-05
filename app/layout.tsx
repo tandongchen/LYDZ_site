@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { MagicWandCursor } from "./components/magic-wand-cursor";
 import "./globals.css";
 
-const title = "魔法数学｜九款数学小游戏典藏";
-const description = "从数字消消乐到世界杯风云，在九款双人或益智小游戏中玩懂计算、推理、博弈与概率。";
+const title = "魔法数学｜数学游戏设计师作品集";
+const description = "魔法与科技并存的数学游戏世界：用九款原创游戏，把计算、推理、博弈与概率变成可以亲手体验的规则。";
 
 export const metadata: Metadata = {
   title,
@@ -10,9 +11,10 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
+    type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title,
     description,
   },
@@ -21,7 +23,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        {children}
+        <MagicWandCursor />
+      </body>
     </html>
   );
 }

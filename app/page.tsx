@@ -1,93 +1,226 @@
+import Image from "next/image";
 import Link from "next/link";
-import { GAME_CATALOG, gameCountLabel } from "./games/catalog";
+import { MagicGalaxyPortal } from "./components/magic-galaxy-portal";
+import { StudioNav } from "./components/studio-nav";
+import { GAME_CATALOG, GAME_GROUPS, gameCountLabel } from "./games/catalog";
 
 export default function Home() {
+  const featuredGames = GAME_CATALOG.filter((game) => game.cover);
+
   return (
-    <main className="magic-archive">
-      <div className="archive-shell">
-        <header className="archive-topbar">
-          <Link className="archive-brand" href="/" aria-label="魔法数学首页">
-            <span className="archive-brand-mark archive-magic-hat" aria-hidden="true">
-              <span>✦</span>
-            </span>
-            <span className="archive-brand-name">魔法数学</span>
-            <span className="archive-label">MAGICAL MATHEMATICS ARCHIVE</span>
-          </Link>
-          <p className="archive-note">
-            <span aria-hidden="true">✦</span>
-            学院典藏 · {gameCountLabel} 册游戏簿
-            <span aria-hidden="true">✦</span>
-          </p>
-        </header>
+    <main className="studio-site" id="top">
+      <StudioNav />
+      <section className="studio-hero" aria-labelledby="hero-title">
+        <video
+          className="hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/og.png"
+          preload="metadata"
+          aria-hidden="true"
+        >
+          <source src="/magic-tech-loop.webm" type="video/webm" />
+        </video>
+        <div className="hero-atmosphere" aria-hidden="true" />
+        <div className="hero-grid" aria-hidden="true" />
 
-        <section className="archive-hero" aria-labelledby="cover-title">
-          <div className="archive-hero-copy">
-            <p className="archive-eyebrow">欢迎进入数学魔法学院</p>
-            <h1 id="cover-title">
-              展示<em>魔法</em>中
+        <div className="hero-content studio-frame">
+          <MagicGalaxyPortal />
+
+          <div className="hero-title-lockup">
+            <p className="hero-title-cn">魔法数学</p>
+            <h1 id="hero-title" data-shadow="MAGIC MATH">
+              MAGIC MATH<sup>®</sup>
             </h1>
-            <div className="archive-hero-support">
-              <strong>从直觉出发</strong>
-              <span className="archive-rule" aria-hidden="true" />
-              <span>
-                计算、推理、博弈与概率，化作九场可亲手验证的游戏。
-                <br />
-                选一本典藏，即刻翻开你的第一局。
-              </span>
+            <p className="hero-title-tagline">把数学规则变成可玩的世界</p>
+          </div>
+
+          <div className="hero-designer-note">
+            <span>游戏设计师 / GAME DESIGNER</span>
+            <p>数学是上帝的语言，宇宙是用数学写成的</p>
+          </div>
+        </div>
+
+        <div className="hero-footer studio-frame">
+          <p className="hero-footnote">
+            Mathematical games engineered for curious minds.
+            <br />
+            Designed for clarity, replayed for discovery.
+          </p>
+          <div className="hero-metrics">
+            <span><strong>{gameCountLabel}</strong> PROJECTS</span>
+            <span><strong>03</strong> CATEGORIES</span>
+          </div>
+          <a className="hero-enter" href="#projects">
+            <span>进入游戏档案</span>
+            <strong aria-hidden="true">↓</strong>
+          </a>
+        </div>
+      </section>
+
+      <section className="project-section" id="projects" aria-labelledby="projects-title">
+        <div className="studio-frame">
+          <div className="section-heading">
+            <div>
+              <p className="section-kicker section-kicker-dark">GAME UNIVERSE</p>
+              <h2 className="section-tech-title" id="projects-title">启动全域征程</h2>
             </div>
+            <p>灵魂的欲望，是命运的先知</p>
           </div>
 
-          <div className="archive-orbit" aria-hidden="true">
-            <span className="archive-orbit-ring" />
-            <span className="archive-orbit-star archive-orbit-star-one" />
-            <span className="archive-orbit-star archive-orbit-star-two" />
-            <span className="archive-orbit-number">
-              {gameCountLabel}
-              <small>典藏游戏</small>
-            </span>
-          </div>
-        </section>
+          <div className="project-groups">
+            {GAME_GROUPS.map((group, groupIndex) => {
+              const games = GAME_CATALOG.filter((game) => game.group === group.id);
 
-        <section className="archive-collection" aria-labelledby="collection-title">
-          <div className="archive-collection-head">
-            <h2 id="collection-title">
-              <span aria-hidden="true">M</span>
-              魔法游戏典藏
-            </h2>
-            <p>点击任一典藏卡片 · 开始你的数学冒险 →</p>
+              return (
+                <article className={`project-group project-group-${group.tone}`} key={group.id}>
+                  <div className="project-group-head">
+                    <span className="project-group-index">0{groupIndex + 1}</span>
+                    <span className="project-group-sigil" aria-hidden="true">
+                      <i />
+                      <i />
+                    </span>
+                    <span className="project-group-count">{String(games.length).padStart(2, "0")} GAMES</span>
+                  </div>
+                  <div className="project-group-copy">
+                    <p>{group.english}</p>
+                    <h3>{group.title}</h3>
+                    <span>{group.description}</span>
+                  </div>
+                  <ol className="project-list">
+                    {games.map((game) => (
+                      <li key={game.id}>
+                        <Link href={game.href}>
+                          <strong>{game.title}</strong>
+                          <em aria-hidden="true">↗</em>
+                        </Link>
+                      </li>
+                    ))}
+                  </ol>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="featured-section" id="featured" aria-labelledby="featured-title">
+        <div className="studio-frame">
+          <div className="section-heading section-heading-light">
+            <div>
+              <h2 className="section-tech-title" id="featured-title">精选项目档案</h2>
+            </div>
+            <p>
+              规则、叙事与视觉共同构成体验。
+              <br />
+              点击项目，进入可以亲手验证的数学世界。
+            </p>
           </div>
 
-          <div className="archive-game-grid">
-            {GAME_CATALOG.map((game) => (
+          <div className="featured-grid">
+            {featuredGames.map((game, index) => (
               <Link
-                className={`archive-game-card archive-accent-${game.accent}`}
+                className={`featured-card featured-card-${game.id} ${index === 0 ? "featured-card-lead" : ""}`}
                 href={game.href}
                 key={game.id}
-                aria-label={`进入${game.title}`}
               >
-                <span className="archive-sigil" aria-hidden="true" />
-                <span className="archive-card-inner">
-                  <span className="archive-card-index">
-                    {game.number}
-                    <small aria-hidden="true">✦</small>
-                  </span>
-                  <span className="archive-card-copy">
-                    <span className="archive-card-type">{game.category}</span>
-                    <strong>{game.title}</strong>
-                    <span className="archive-card-description">{game.description}</span>
-                  </span>
-                  <span className="archive-card-arrow" aria-hidden="true">→</span>
+                <Image
+                  src={game.cover ?? "/og.png"}
+                  alt={`${game.title}游戏画面`}
+                  fill
+                  unoptimized
+                  sizes={index === 0 ? "(max-width: 1100px) 100vw, 66vw" : "(max-width: 1100px) 100vw, 34vw"}
+                />
+                <span className="featured-card-shade" aria-hidden="true" />
+                <span className="featured-card-copy">
+                  <small>{game.category}</small>
+                  <strong>{game.title}</strong>
+                  <span>{game.description}</span>
                 </span>
+                <span className="featured-card-arrow" aria-hidden="true">↗</span>
               </Link>
             ))}
           </div>
-        </section>
 
-        <footer className="archive-footer">
-          <span><strong>MATHEMATICS IS MAGIC</strong> · 规则会说话，数字有回声</span>
-          <span>魔法学院藏书阁 · MM / {gameCountLabel}</span>
-        </footer>
-      </div>
+          <div className="featured-footer">
+            <p>全部 {gameCountLabel} 个项目已开放体验</p>
+            <a href="#projects">查看完整项目索引 <span aria-hidden="true">↑</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section className="about-section" id="about" aria-labelledby="about-title">
+        <div className="studio-frame about-layout">
+          <h2 id="about-title">
+            数学不是答案，
+            <br />
+            而是<span>改变局势的方法。</span>
+          </h2>
+          <div className="about-copy">
+            <p>
+              每个项目都从一条清晰规则开始，通过反馈、选择与对抗，
+              让抽象概念成为可以观察、试错和掌握的游戏体验。
+            </p>
+            <dl>
+              <div><dt>RULE</dt><dd>规则可读</dd></div>
+              <div><dt>PLAY</dt><dd>策略可变</dd></div>
+              <div><dt>FEEDBACK</dt><dd>结果可见</dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section className="contact-section" id="contact" aria-labelledby="contact-title">
+        <div className="contact-aura" aria-hidden="true" />
+        <div className="studio-frame contact-layout">
+          <div className="contact-topline">
+            <span>AVAILABLE FOR CREATIVE COLLABORATION</span>
+          </div>
+          <div className="contact-main">
+            <div className="contact-copy">
+              <p className="section-kicker">CONTACT</p>
+              <h2 id="contact-title">
+                下一场数学魔法，
+                <br />
+                从一个<span>好规则</span>开始。
+              </h2>
+              <p>游戏概念、教育体验、互动装置与数字产品合作。</p>
+              <Link className="contact-action" href="/contact">
+                <span>发起合作邮件</span>
+                <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
+
+            <Link className="contact-rule-card" href="/rules" aria-label="打开九个游戏的规则详解">
+              <div className="contact-rule-card-topline">
+                <span>RULE ARCHIVE</span>
+                <span>09 GAMES</span>
+              </div>
+              <div>
+                <small>魔法数学 · 玩法档案</small>
+                <h3>游戏规则详解</h3>
+                <p>九套规则、核心目标与关键策略，集中收录在同一个档案中。</p>
+              </div>
+              <ul aria-label="规则档案包含的游戏">
+                {GAME_CATALOG.map((game) => (
+                  <li key={game.id}>{game.title}</li>
+                ))}
+              </ul>
+              <div className="contact-rule-card-action">
+                <span>进入完整规则档案</span>
+                <b aria-hidden="true">↗</b>
+              </div>
+            </Link>
+          </div>
+          <footer className="contact-footer">
+            <Link href="#top">魔法数学 · MAGIC MATH STUDIO</Link>
+            <span>GAME DESIGN / MATHEMATICS / INTERACTION</span>
+            <span>© 2026</span>
+          </footer>
+        </div>
+      </section>
     </main>
   );
 }

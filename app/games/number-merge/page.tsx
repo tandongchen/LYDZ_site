@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useRef, useState } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type NumberTile = {
   id: number;
@@ -136,9 +137,7 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true">
-            <span>✦</span>
-          </span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="header-tag">数学思维小游戏</span>
@@ -293,38 +292,6 @@ export default function Home() {
           </div>
         </div>
 
-        <aside className="rules-card">
-          <div className="rules-title-row">
-            <span className="rules-icon" aria-hidden="true">?</span>
-            <h2>怎么玩</h2>
-          </div>
-          <ol>
-            <li>
-              <span>1</span>
-              <div><strong>选两个数</strong><p>先点一个，再点另一个。</p></div>
-            </li>
-            <li>
-              <span>2</span>
-              <div><strong>合成新数</strong><p>把它们相加，然后减 1。</p></div>
-            </li>
-            <li>
-              <span>3</span>
-              <div><strong>继续挑战</strong><p>重复操作，直到只剩一个数。</p></div>
-            </li>
-          </ol>
-
-          <div className="example-box">
-            <span>举个例子</span>
-            <div className="example-equation">
-              <b>2</b><i>＋</i><b>4</b><i>－ 1 ＝</i><b className="answer">5</b>
-            </div>
-          </div>
-
-          <div className="think-note">
-            <span aria-hidden="true">✦</span>
-            <p><strong>想一想</strong>换一种合并顺序，最后的数字会变吗？</p>
-          </div>
-        </aside>
       </section>
 
       <footer>

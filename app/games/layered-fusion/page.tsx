@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent, PointerEvent } from "react";
+import { MagicMathLogo } from "../../components/magic-math-logo";
 
 type GameStatus = "playing" | "success";
 
@@ -687,7 +688,7 @@ export default function Home() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="魔法数学首页">
-          <span className="brand-mark magic-hat" aria-hidden="true"><span>✦</span></span>
+          <MagicMathLogo />
           <span>魔法数学</span>
         </a>
         <span className="header-tag">数学思维小游戏</span>
@@ -715,7 +716,7 @@ export default function Home() {
           <div className="setup-heading">
             <span className="section-kicker">01 · SET THE PIECES</span>
             <h2>先选择图形个数</h2>
-            <p>3—5 块均可挑战。图形越多、黑白缺口越丰富，反推消融步骤越烧脑。</p>
+            <p>3-5 块均可挑战。图形越多、黑白缺口越丰富，反推消融步骤越烧脑。</p>
           </div>
           <div className="setup-controls">
             <fieldset className="size-picker">
@@ -805,19 +806,6 @@ export default function Home() {
       </section>
 
       <section className="lower-grid">
-        <article className="rules-card">
-          <div className="card-heading">
-            <span className="card-number">04</span>
-            <div><small>GAME RULES</small><h2>怎么玩？</h2></div>
-          </div>
-          <ol>
-            <li><span>一</span><p><strong>选择数量</strong>选择 3—5 块图形，系统从分级题库生成一题必定可解的目标。</p></li>
-            <li><span>二</span><p><strong>移动图形</strong>按住答题区中的黑色图形，把它拖到新的位置。</p></li>
-            <li><span>三</span><p><strong>观察消融</strong>同一区域叠两层变白，叠三层又恢复黑色。</p></li>
-            <li><span>四</span><p><strong>完成匹配</strong>最终黑白轮廓与目标形状一致即可，整体位置不限。</p></li>
-          </ol>
-        </article>
-
         <article className="history-card parity-card">
           <div className="card-heading">
             <span className="card-number">∿</span>
@@ -845,4 +833,3 @@ export default function Home() {
     </main>
   );
 }
-
