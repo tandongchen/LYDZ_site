@@ -24,6 +24,8 @@ test("server-renders the magic mathematics studio and all game links", async () 
   assert.match(html, /变成.*可玩的世界/s);
   assert.match(html, /class="hero-video"/);
   assert.match(html, /data-shadow="MAGIC MATH"/);
+  assert.match(html, /<h1[^>]*aria-label="MAGIC MATH"/);
+  assert.match(html, /hero-particle-text/);
   assert.match(html, /magic-math-logo/);
   assert.match(html, /magic-wand-cursor/);
   assert.doesNotMatch(html, /brand-hat-crown/);
@@ -54,6 +56,30 @@ test("server-renders the magic mathematics studio and all game links", async () 
     assert.match(html, new RegExp(title));
     assert.match(html, new RegExp(`href="${href}"`));
   }
+});
+
+test("builds the particle wordmark with interaction and motion safeguards", async () => {
+  const source = await readFile(new URL("../app/components/particle-text.tsx", import.meta.url), "utf8");
+  assert.match(source, /ResizeObserver/);
+  assert.match(source, /IntersectionObserver/);
+  assert.match(source, /prefers-reduced-motion: reduce/);
+  assert.match(source, /pointerRepel/);
+  assert.match(source, /window\.addEventListener\("pointermove"/);
+  assert.match(source, /event\.clientX - rect\.left/);
+  assert.match(source, /cancelAnimationFrame/);
+});
+
+test("uses shuffle titles for every homepage section after the hero", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../app/components/shuffle-title.tsx", import.meta.url), "utf8");
+
+  assert.equal((page.match(/<ShuffleTitle/g) ?? []).length, 4);
+  assert.match(source, /ScrollTrigger\.create/);
+  assert.match(source, /mouseenter/);
+  assert.match(source, /prefers-reduced-motion: reduce/);
+  assert.match(source, /data-shuffle-direction/);
+  assert.match(source, /getStep\(strip, "y"\)/);
+  assert.match(source, /timelineRef\.current\?\.kill/);
 });
 
 test("keeps the magic wand cursor above the global search overlay", async () => {
