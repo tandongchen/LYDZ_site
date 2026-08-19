@@ -80,6 +80,10 @@ test("uses shuffle titles for every homepage section after the hero", async () =
   assert.match(source, /data-shuffle-direction/);
   assert.match(source, /getStep\(strip, "y"\)/);
   assert.match(source, /timelineRef\.current\?\.kill/);
+  assert.match(source, /import\("gsap"\)/);
+  assert.match(source, /import\("gsap\/ScrollTrigger"\)/);
+  assert.doesNotMatch(source, /^import .* from "(?:@gsap\/react|gsap)/m);
+  assert.doesNotMatch(source, /^gsap\.registerPlugin/m);
 });
 
 test("keeps the magic wand cursor above the global search overlay", async () => {

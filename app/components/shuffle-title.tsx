@@ -1,12 +1,7 @@
 "use client";
 
-import { useMemo, useRef, type CSSProperties } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import styles from "./shuffle-title.module.css";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type ShuffleDirection = "right" | "down";
 type ShuffleTag = "h2" | "h3" | "p" | "span";
@@ -35,6 +30,10 @@ type Glyph = {
   kind: "glyph" | "line-break" | "space";
   punctuation: boolean;
   sequence: string[];
+};
+
+type KillableAnimation = {
+  kill: () => void;
 };
 
 const DEFAULT_CHARSET = "M2×÷∑π01?";
@@ -106,7 +105,7 @@ export function ShuffleTitle({
   triggerOnce = true,
 }: ShuffleTitleProps) {
   const rootRef = useRef<HTMLElement | null>(null);
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const timelineRef = useRef<KillableAnimation | null>(null);
   const playingRef = useRef(false);
   const rolls = Math.max(1, Math.floor(shuffleTimes));
   const charset = scrambleCharset || DEFAULT_CHARSET;
@@ -115,31 +114,47 @@ export function ShuffleTitle({
     [accentText, charset, rolls, text],
   );
 
-  useGSAP(
-    () => {
-      const root = rootRef.current;
-      if (!root) return;
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
 
-      const strips = gsap.utils.toArray<HTMLElement>("[data-shuffle-strip]", root);
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const strips = Array.from(root.querySelectorAll<HTMLElement>("[data-shuffle-strip]"));
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let disposed = false;
+    let scrollTrigger: KillableAnimation | null = null;
+    let removeHoverListener = () => {};
 
-      const getStep = (strip: HTMLElement, axis: "x" | "y") => {
-        const glyph = strip.querySelector<HTMLElement>("[data-shuffle-glyph]");
-        if (!glyph) return 0;
+    const clearStripStyles = () => {
+      strips.forEach((strip) => {
+        strip.style.removeProperty("filter");
+        strip.style.removeProperty("opacity");
+        strip.style.removeProperty("transform");
+      });
+    };
 
-        const glyphRect = glyph.getBoundingClientRect();
-        const stripStyle = window.getComputedStyle(strip);
-        const gap = Number.parseFloat(axis === "x" ? stripStyle.columnGap : stripStyle.rowGap) || 0;
-        return (axis === "x" ? glyphRect.width : glyphRect.height) + gap;
-      };
+    if (reduceMotion) {
+      clearStripStyles();
+      return;
+    }
 
-      if (reduceMotion) {
-        gsap.set(strips, { clearProps: "all" });
-        return;
-      }
+    const getStep = (strip: HTMLElement, axis: "x" | "y") => {
+      const glyph = strip.querySelector<HTMLElement>("[data-shuffle-glyph]");
+      if (!glyph) return 0;
 
-      let disposed = false;
-      let scrollTrigger: ScrollTrigger | null = null;
+      const glyphRect = glyph.getBoundingClientRect();
+      const stripStyle = window.getComputedStyle(strip);
+      const gap = Number.parseFloat(axis === "x" ? stripStyle.columnGap : stripStyle.rowGap) || 0;
+      return (axis === "x" ? glyphRect.width : glyphRect.height) + gap;
+    };
+
+    const initializeAnimation = async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
+
+      if (disposed) return;
+      gsap.registerPlugin(ScrollTrigger);
 
       const play = () => {
         if (disposed || playingRef.current || !strips.length) return;
@@ -147,16 +162,12 @@ export function ShuffleTitle({
         timelineRef.current?.kill();
         playingRef.current = true;
 
-        gsap.set(strips, {
-          x: direction === "right"
-            ? (_, strip) => -(getStep(strip, "x") * rolls)
-            : 0,
-          y: direction === "down"
-            ? (_, strip) => -(getStep(strip, "y") * rolls)
-            : 0,
-          opacity: 0.24,
-          filter: "blur(2.4px)",
-          force3D: true,
+        strips.forEach((strip) => {
+          const x = direction === "right" ? -(getStep(strip, "x") * rolls) : 0;
+          const y = direction === "down" ? -(getStep(strip, "y") * rolls) : 0;
+          strip.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+          strip.style.opacity = "0.24";
+          strip.style.filter = "blur(2.4px)";
         });
 
         const odd = strips.filter((_, index) => index % 2 === 1);
@@ -165,11 +176,11 @@ export function ShuffleTitle({
         const timeline = gsap.timeline({
           onComplete: () => {
             playingRef.current = false;
-            gsap.set(strips, { clearProps: "transform,filter,opacity" });
+            clearStripStyles();
             onShuffleComplete?.();
           },
         });
-        const tweenVars: gsap.TweenVars = {
+        const tweenVars = {
           x: 0,
           y: 0,
           opacity: 1,
@@ -185,39 +196,35 @@ export function ShuffleTitle({
         timelineRef.current = timeline;
       };
 
-      const prepare = () => {
-        if (disposed) return;
-        scrollTrigger = ScrollTrigger.create({
-          trigger: root,
-          start: "top 88%",
-          once: triggerOnce,
-          onEnter: play,
-        });
-        if (triggerOnHover) root.addEventListener("mouseenter", play);
-      };
-
       if ("fonts" in document) {
-        void document.fonts.ready.then(prepare);
-      } else {
-        prepare();
+        await document.fonts.ready;
       }
+      if (disposed) return;
 
-      return () => {
-        disposed = true;
-        scrollTrigger?.kill();
-        timelineRef.current?.kill();
-        timelineRef.current = null;
-        playingRef.current = false;
-        root.removeEventListener("mouseenter", play);
-        gsap.set(strips, { clearProps: "all" });
-      };
-    },
-    {
-      scope: rootRef,
-      dependencies: [direction, duration, rolls, stagger, text, triggerOnHover, triggerOnce],
-      revertOnUpdate: true,
-    },
-  );
+      scrollTrigger = ScrollTrigger.create({
+        trigger: root,
+        start: "top 88%",
+        once: triggerOnce,
+        onEnter: play,
+      });
+      if (triggerOnHover) {
+        root.addEventListener("mouseenter", play);
+        removeHoverListener = () => root.removeEventListener("mouseenter", play);
+      }
+    };
+
+    void initializeAnimation();
+
+    return () => {
+      disposed = true;
+      scrollTrigger?.kill();
+      timelineRef.current?.kill();
+      timelineRef.current = null;
+      playingRef.current = false;
+      removeHoverListener();
+      clearStripStyles();
+    };
+  }, [direction, duration, onShuffleComplete, rolls, stagger, text, triggerOnHover, triggerOnce]);
 
   const classes = `${styles.shuffleTitle} ${className}`.trim();
 
