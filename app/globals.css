@@ -295,7 +295,7 @@ a {
 }
 
 .hero-copy h1 span,
-.contact-main h2 span {
+.contact-main h2 [data-shuffle-accent="true"] {
   position: relative;
   display: inline-block;
   color: #accaff;
@@ -916,11 +916,22 @@ a {
   letter-spacing: -0.045em;
 }
 
-.about-layout h2 span {
+.about-layout h2 [data-shuffle-accent="true"] {
   color: transparent;
   background: linear-gradient(105deg, var(--studio-red), var(--studio-blue));
   background-clip: text;
   -webkit-background-clip: text;
+}
+
+.shuffle-section-title {
+  text-shadow:
+    0 10px 34px rgba(3, 10, 28, 0.28),
+    0 0 24px rgba(91, 140, 255, 0.09);
+}
+
+.shuffle-section-title:focus-visible {
+  outline: 2px solid rgba(111, 157, 255, 0.72);
+  outline-offset: 8px;
 }
 
 .about-copy {
@@ -4386,5 +4397,77 @@ a {
 
   .featured-card::before {
     display: none;
+  }
+}
+
+/* ParticleText turns the hero wordmark into a red-white-blue field of mathematical points. */
+.hero-title-lockup h1.hero-particle-heading {
+  display: block;
+  width: 100%;
+  height: clamp(126px, 12vw, 216px);
+  overflow: visible;
+  background: none;
+  filter: none;
+}
+
+.hero-particle-heading::before {
+  top: 50%;
+  left: 4%;
+  color: rgba(3, 8, 23, 0.76);
+  filter: blur(0.7px);
+  transform: translate(0.075em, -39%);
+  opacity: 0.68;
+}
+
+.hero-particle-heading::after {
+  right: 3.2%;
+  bottom: 5px;
+  left: 3.2%;
+}
+
+.hero-particle-text {
+  z-index: 1;
+  cursor: inherit;
+  contain: layout paint;
+}
+
+.hero-title-lockup .hero-particle-mark {
+  position: absolute;
+  z-index: 3;
+  top: 7%;
+  right: 2.7%;
+  width: 0.28em;
+  margin: 0;
+  color: rgba(229, 238, 255, 0.84);
+  background: rgba(7, 17, 43, 0.54);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(75, 128, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (max-width: 980px) {
+  .hero-title-lockup h1.hero-particle-heading {
+    height: clamp(104px, 17vw, 166px);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-title-lockup h1.hero-particle-heading {
+    height: clamp(76px, 21vw, 108px);
+  }
+
+  .hero-title-lockup .hero-particle-mark {
+    top: 4%;
+    right: 1.5%;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero-title-lockup .hero-particle-mark {
+    background: #0b142a;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }

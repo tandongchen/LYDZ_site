@@ -1,0 +1,82 @@
+.shuffleTitle {
+  position: relative;
+  text-wrap: balance;
+}
+
+.frame {
+  display: inline-block;
+  width: 1em;
+  height: 1.1em;
+  overflow: hidden;
+  vertical-align: -0.11em;
+}
+
+.frame[data-shuffle-punctuation="true"] {
+  width: 0.62em;
+}
+
+.strip {
+  display: inline-flex;
+  width: max-content;
+  height: 1.1em;
+  column-gap: 1px;
+  will-change: transform, opacity, filter;
+}
+
+.strip[data-shuffle-direction="down"] {
+  flex-direction: column;
+  width: 100%;
+  height: max-content;
+  row-gap: 1px;
+  column-gap: 0;
+}
+
+.glyph {
+  display: inline-flex;
+  flex: 0 0 1em;
+  width: 1em;
+  height: 1.1em;
+  align-items: center;
+  justify-content: center;
+  color: #edf4ff;
+  line-height: 1;
+  text-align: center;
+  -webkit-text-fill-color: #edf4ff;
+}
+
+.strip[data-shuffle-direction="down"] .glyph {
+  flex-basis: 1.1em;
+  width: 100%;
+}
+
+.frame[data-shuffle-punctuation="true"] .glyph {
+  flex-basis: 0.62em;
+  width: 0.62em;
+}
+
+.frame[data-shuffle-punctuation="true"] .strip[data-shuffle-direction="down"] .glyph {
+  flex-basis: 1.1em;
+  width: 100%;
+}
+
+.frame[data-shuffle-accent="true"] .glyph {
+  color: transparent;
+  background: linear-gradient(108deg, #ff647e 4%, #f3f7ff 48%, #6f9dff 92%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.space {
+  display: inline-block;
+  width: 0.34em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strip {
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    will-change: auto;
+  }
+}

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MagicGalaxyPortal } from "./components/magic-galaxy-portal";
+import { ParticleText } from "./components/particle-text";
+import { ShuffleTitle } from "./components/shuffle-title";
 import { StudioNav } from "./components/studio-nav";
 import { GAME_CATALOG, GAME_GROUPS, gameCountLabel } from "./games/catalog";
 
@@ -31,8 +33,32 @@ export default function Home() {
 
           <div className="hero-title-lockup">
             <p className="hero-title-cn">魔法数学</p>
-            <h1 id="hero-title" data-shadow="MAGIC MATH">
-              MAGIC MATH<sup>®</sup>
+              <h1
+                className="hero-particle-heading"
+                id="hero-title"
+                data-shadow="MAGIC MATH"
+                aria-label="MAGIC MATH"
+              >
+              <ParticleText
+                className="hero-particle-text"
+                text="MAGIC MATH"
+                particleSize={2.15}
+                density={4}
+                color="#ff5c76"
+                highlightColor="#5f91ff"
+                scatter={260}
+                gatherDuration={1500}
+                stagger={380}
+                pointerRepel={58}
+                repelRadius={150}
+                idleDrift={0.55}
+                trigger="hover"
+                fontSize="clamp(86px, 10.7vw, 190px)"
+                fontWeight={900}
+                fontFamily='"Agency FB", "Arial Narrow", "Arial Black", "Trebuchet MS", sans-serif'
+                glow
+              />
+              <sup className="hero-particle-mark" aria-hidden="true">®</sup>
             </h1>
             <p className="hero-title-tagline">把数学规则变成可玩的世界</p>
           </div>
@@ -65,7 +91,12 @@ export default function Home() {
           <div className="section-heading">
             <div>
               <p className="section-kicker section-kicker-dark">GAME UNIVERSE</p>
-              <h2 className="section-tech-title" id="projects-title">启动全域征程</h2>
+              <ShuffleTitle
+                accentText="全域征程"
+                className="section-tech-title shuffle-section-title"
+                id="projects-title"
+                text="启动全域征程"
+              />
             </div>
             <p>灵魂的欲望，是命运的先知</p>
           </div>
@@ -110,7 +141,12 @@ export default function Home() {
         <div className="studio-frame">
           <div className="section-heading section-heading-light">
             <div>
-              <h2 className="section-tech-title" id="featured-title">精选项目档案</h2>
+              <ShuffleTitle
+                accentText="项目档案"
+                className="section-tech-title shuffle-section-title"
+                id="featured-title"
+                text="精选项目档案"
+              />
             </div>
             <p>
               规则、叙事与视觉共同构成体验。
@@ -153,11 +189,13 @@ export default function Home() {
 
       <section className="about-section" id="about" aria-labelledby="about-title">
         <div className="studio-frame about-layout">
-          <h2 id="about-title">
-            数学不是答案，
-            <br />
-            而是<span>改变局势的方法。</span>
-          </h2>
+          <ShuffleTitle
+            accentText="改变局势的方法。"
+            className="shuffle-section-title"
+            direction="down"
+            id="about-title"
+            text={"数学不是答案，\n而是改变局势的方法。"}
+          />
           <div className="about-copy">
             <p>
               每个项目都从一条清晰规则开始，通过反馈、选择与对抗，
@@ -181,11 +219,13 @@ export default function Home() {
           <div className="contact-main">
             <div className="contact-copy">
               <p className="section-kicker">CONTACT</p>
-              <h2 id="contact-title">
-                下一场数学魔法，
-                <br />
-                从一个<span>好规则</span>开始。
-              </h2>
+              <ShuffleTitle
+                accentText="好规则"
+                className="shuffle-section-title"
+                direction="down"
+                id="contact-title"
+                text={"下一场数学魔法，\n从一个好规则开始。"}
+              />
               <p>游戏概念、教育体验、互动装置与数字产品合作。</p>
               <Link className="contact-action" href="/contact">
                 <span>发起合作邮件</span>
