@@ -172,6 +172,7 @@ test("server-renders every game route", async () => {
     assert.match(html, /返回魔法数学/, pathname);
     assert.match(html, /magic-math-logo/, pathname);
     assert.match(html, new RegExp(`game-route-${gameId}`), pathname);
+    assert.match(html, /data-game-theme="dark"/, pathname);
     assert.doesNotMatch(html, /rules-(?:card|section)/, pathname);
   }
 });
@@ -181,6 +182,9 @@ test("shares the red-blue game theme and removes standalone rule narration", asy
   assert.match(styles, /--red:\s*#ef4058/);
   assert.match(styles, /--blue:\s*#246cff/);
   assert.match(styles, /backdrop-filter:\s*blur/);
+  assert.match(styles, /\.game-route-scope\[data-game-theme="dark"\]\[data-game-theme="dark"\]/);
+  assert.match(styles, /--muted:\s*#b9c7df/);
+  assert.match(styles, /--ink-surface:\s*#071429/);
 
   const routes = [
     "number-merge",
@@ -226,6 +230,7 @@ test("keeps every game stylesheet inside its route namespace", async () => {
     assert.match(layout, new RegExp(`gameId="${route}"`), route);
     assert.match(styles, new RegExp(`\\.${scope}(?:[\\s,.:[#]|$)`), route);
     assert.doesNotMatch(styles, /^(?::root|html|body|\.hero-title-lockup)\b/m, route);
+    assert.doesNotMatch(styles, /background:\s*var\(--ink\);/, route);
   }
 });
 

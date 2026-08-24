@@ -25,7 +25,7 @@
 .game-route-number-bomb .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; font-size: 18px; font-weight: 900; letter-spacing: .05em; }
 .game-route-number-bomb .brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
 .game-route-number-bomb .magic-hat::before { content: ""; position: absolute; top: 1px; left: 10px; width: 0; height: 0; border-left: 13px solid transparent; border-right: 13px solid transparent; border-bottom: 31px solid var(--ink); transform: skewX(-10deg) rotate(-10deg); transform-origin: bottom center; }
-.game-route-number-bomb .magic-hat::after { content: ""; position: absolute; left: 2px; bottom: 3px; width: 41px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 4px 0 var(--gold); transform: rotate(-5deg); }
+.game-route-number-bomb .magic-hat::after { content: ""; position: absolute; left: 2px; bottom: 3px; width: 41px; height: 10px; border-radius: 50%; background: var(--ink-surface, var(--ink)); box-shadow: 0 4px 0 var(--gold); transform: rotate(-5deg); }
 .game-route-number-bomb .magic-hat span { position: absolute; z-index: 1; top: 15px; left: 20px; color: var(--red); font-size: 10px; transform: rotate(-10deg); }
 .game-route-number-bomb .issue-tag { padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,250,241,.7); color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
 
@@ -43,8 +43,8 @@
 .game-route-number-bomb .hero-description { width: min(650px, calc(100% - 340px)); margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
 
 .game-route-number-bomb .hero-bomb { position: absolute; right: 4%; top: 50%; width: 260px; height: 300px; transform: translateY(-52%) rotate(4deg); }
-.game-route-number-bomb .bomb-body { position: absolute; left: 28px; bottom: 17px; display: grid; width: 218px; aspect-ratio: 1; place-items: center; border-radius: 48% 52% 47% 53%; background: var(--ink); box-shadow: inset -20px -20px 0 var(--ink-deep), inset 13px 12px 0 rgba(255,255,255,.05); }
-.game-route-number-bomb .bomb-body::before { content: ""; position: absolute; width: 58px; height: 30px; top: -19px; border-radius: 9px 9px 3px 3px; background: var(--ink); }
+.game-route-number-bomb .bomb-body { position: absolute; left: 28px; bottom: 17px; display: grid; width: 218px; aspect-ratio: 1; place-items: center; border-radius: 48% 52% 47% 53%; background: var(--ink-surface, var(--ink)); box-shadow: inset -20px -20px 0 var(--ink-deep), inset 13px 12px 0 rgba(255,255,255,.05); }
+.game-route-number-bomb .bomb-body::before { content: ""; position: absolute; width: 58px; height: 30px; top: -19px; border-radius: 9px 9px 3px 3px; background: var(--ink-surface, var(--ink)); }
 .game-route-number-bomb .bomb-body i { color: var(--gold); font-family: Georgia, serif; font-size: 98px; font-style: normal; font-weight: 900; transform: rotate(-5deg); }
 .game-route-number-bomb .fuse { position: absolute; z-index: 2; left: 142px; top: 18px; width: 84px; height: 92px; border: 9px solid var(--red); border-left-color: transparent; border-bottom-color: transparent; border-radius: 0 70px 0 0; transform: rotate(-17deg); }
 .game-route-number-bomb .spark { position: absolute; z-index: 3; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 7px rgba(232,174,54,.18); }
@@ -78,7 +78,7 @@
 .game-route-number-bomb .team-fields label > span { display: grid; width: 38px; align-self: stretch; place-items: center; color: white; font-family: Georgia, serif; font-size: 11px; font-weight: 900; }
 .game-route-number-bomb .team-fields input { min-width: 0; width: 100%; height: 42px; padding: 0 11px; border: 0; background: transparent; color: var(--ink); font-size: 12px; font-weight: 700; }
 .game-route-number-bomb .team-fields input:focus { outline: 0; }
-.game-route-number-bomb .primary-button { min-height: 48px; padding: 0 19px; border: 0; border-radius: 7px; background: var(--ink); color: white; cursor: pointer; font-size: 12px; font-weight: 850; white-space: nowrap; box-shadow: 0 6px 0 var(--ink-deep); transition: transform .15s ease, box-shadow .15s ease; }
+.game-route-number-bomb .primary-button { min-height: 48px; padding: 0 19px; border: 0; border-radius: 7px; background: var(--ink-surface, var(--ink)); color: white; cursor: pointer; font-size: 12px; font-weight: 850; white-space: nowrap; box-shadow: 0 6px 0 var(--ink-deep); transition: transform .15s ease, box-shadow .15s ease; }
 .game-route-number-bomb .primary-button:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--ink-deep); }
 .game-route-number-bomb .primary-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink-deep); }
 .game-route-number-bomb .primary-button span { margin-left: 8px; color: var(--gold); }
@@ -93,7 +93,7 @@
 .game-route-number-bomb .team-chip small { color: var(--muted); font-size: 8px; }
 .game-route-number-bomb .team-chip strong { font-size: 11px; }
 
-.game-route-number-bomb .range-stage { position: relative; min-height: 220px; padding: 42px 46px 70px; overflow: hidden; border-radius: 12px; background: var(--ink); color: white; }
+.game-route-number-bomb .range-stage { position: relative; min-height: 220px; padding: 42px 46px 70px; overflow: hidden; border-radius: 12px; background: var(--ink-surface, var(--ink)); color: white; }
 .game-route-number-bomb .range-stage::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.1) 1px, transparent 1px); background-size: 16px 16px; }
 .game-route-number-bomb .range-stage::after { content: ""; position: absolute; width: 310px; height: 310px; right: 5%; top: -45%; border: 1px dashed rgba(255,255,255,.14); border-radius: 50%; }
 .game-route-number-bomb .range-copy { position: relative; z-index: 2; }

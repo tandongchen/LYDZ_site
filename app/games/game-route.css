@@ -513,3 +513,261 @@
     background-color: #0b1730 !important;
   }
 }
+
+/*
+ * Production-safe dark theme contract.
+ *
+ * Every game still owns its accent palette, but all readable text and neutral
+ * surfaces come from this higher-specificity layer. This prevents route CSS
+ * chunk order from changing the theme between Vite development and the
+ * Cloudflare production build. The repeated data attribute is an intentional
+ * specificity guard against later route-level variable declarations.
+ */
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] {
+  --ink: #f2f6ff;
+  --muted: #b9c7df;
+  --paper: #050a17;
+  --white: #0f1d37;
+  --cream: #0b1931;
+  --line: rgba(145, 178, 239, 0.28);
+  --ink-surface: #071429;
+  --surface-raised: #0e1d38;
+  --surface-interactive: #11213f;
+  --text-subtle: #98abc9;
+  color: var(--ink);
+  color-scheme: dark;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :where(.hero-lead, .game-name, .shell-heading h2, .shell-heading h3) {
+  color: var(--ink);
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .hero-lead em {
+  color: #ff8094 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.game-name, .hero h1) > span:nth-child(odd) {
+  color: #ff8094 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.game-name, .hero h1) > span:nth-child(even) {
+  color: #8fb4ff !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :where(.hero-description, .field-label, .mode-picker legend, .count-picker legend, .first-player-picker legend) {
+  color: var(--muted) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(
+  .mode-picker button,
+  .player-fields label,
+  .setup-note,
+  .setup-brief,
+  .pile-field > div,
+  .player-pick,
+  .turn-prompt,
+  .confirm-bar,
+  .target-field,
+  .range-field,
+  .turn-instruction,
+  .choice-count,
+  .equation-strip,
+  .number-board,
+  .tile-field,
+  .team-zone,
+  .action-row button
+) {
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+  background:
+    linear-gradient(145deg, rgba(239, 64, 88, 0.035), rgba(36, 108, 255, 0.055)),
+    var(--surface-interactive) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.045) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(
+  .mode-picker button.selected,
+  .player-pick.selected,
+  .difficulty-picker button.selected,
+  .size-picker button.selected
+) {
+  color: #fff !important;
+  border-color: rgba(255, 113, 137, 0.62) !important;
+  background: linear-gradient(125deg, rgba(239, 64, 88, 0.2), rgba(36, 108, 255, 0.2)), #0c1933 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 8px 24px rgba(4, 9, 24, 0.24) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.setup-note, .setup-brief, .turn-prompt, .confirm-bar, .turn-instruction) :where(p, small, label) {
+  color: var(--muted) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.result-banner, .strategy-note) :where(p, small) {
+  color: var(--muted) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .result-mark {
+  color: #dce7ff !important;
+  border: 1px solid rgba(143, 180, 255, 0.34) !important;
+  background: var(--surface-interactive) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .parity-label {
+  padding: 5px 8px;
+  color: #f2f6ff !important;
+  border: 1px solid rgba(255, 128, 148, 0.34);
+  border-radius: 4px;
+  background: rgba(5, 14, 32, 0.86);
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.new-game-button, .setup-note .primary-button, .setup-brief .primary-button) {
+  color: #fff !important;
+  border-color: rgba(91, 132, 255, 0.48) !important;
+  background: linear-gradient(112deg, #246cff 0%, #655ddd 48%, #ef4058 100%) !important;
+  box-shadow: 0 12px 30px rgba(36, 108, 255, 0.22) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .action-row .skill-action {
+  color: var(--ink) !important;
+  border-color: rgba(255, 128, 148, 0.38) !important;
+  background: linear-gradient(135deg, rgba(239, 64, 88, 0.13), rgba(36, 108, 255, 0.14)), #0d1b35 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .action-row > button:not(.skill-action) > span {
+  color: #fff !important;
+  background: #a92343 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .team-zone.p2 .action-row > button:not(.skill-action) > span {
+  background: #174ca7 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .action-row .skill-action > span {
+  color: #071429 !important;
+  background: #a9c4fa !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.card-heading small, .pile-action, .round-label, .range-arrow) {
+  color: #8fb4ff !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.mode-picker span, .red-suit) {
+  color: #ff8094 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .swap-button {
+  color: #8fb4ff !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.turn-badge.player-a, .final-penalty-score, .defense-ready-chip) {
+  color: #ff8ba0 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .turn-badge.player-b {
+  color: #8eb4ff !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.score-a .player-avatar, .mini-avatar.player-a, .team-zone.p1 .team-badge) {
+  background: #a92343 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.score-b .player-avatar, .mini-avatar.player-b, .team-zone.p2 .team-badge) {
+  background: #174ca7 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.player-pick.player-a span, .turn-avatar.player-a) {
+  color: #fff !important;
+  background: #a92343 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.player-pick.player-b span, .turn-avatar.player-b) {
+  color: #fff !important;
+  background: #174ca7 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .team-chip > span {
+  color: #fff !important;
+  background: color-mix(in srgb, var(--team-color) 66%, #071429) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .team-fields label > span {
+  color: #fff !important;
+  background: color-mix(in srgb, var(--team-color) 66%, #071429) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.turn-prompt > span, .battle-progress strong) {
+  color: #a9c4fa !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .score-a strong {
+  color: #ff8ba0 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .score-b strong {
+  color: #8fb4ff !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.number-board small, .live-message small) {
+  color: #ff8ba0 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.site-footer, footer) :where(p, small, span) {
+  color: var(--text-subtle) !important;
+}
+
+/* Horse race keeps cards light, while the course and live status panels stay dark. */
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(
+  .course-board,
+  .draw-stage,
+  .race-log,
+  .winner-panel,
+  .card-placeholder
+) {
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+  background:
+    linear-gradient(145deg, rgba(239, 64, 88, 0.035), rgba(36, 108, 255, 0.055)),
+    var(--surface-raised) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .course-board :is(.axis-label, .gate-marker small, .lane-meta small) {
+  color: var(--text-subtle) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .course-board .lane-meta strong,
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.draw-stage, .race-log, .winner-panel) :where(h2, h3, strong) {
+  color: var(--ink) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.draw-stage, .race-log, .winner-panel) :where(p, small) {
+  color: var(--muted) !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.playing-card:not(.card-back), .horse-token) {
+  color: #111a2a;
+  border-color: #f7f9ff;
+  background: #eef3ff;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] :is(.playing-card:not(.card-back), .horse-token).red-card,
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .horse-token.red-horse {
+  color: #b9243d;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .card-placeholder {
+  color: #8fb4ff !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] .form-error {
+  color: #ff8ba0 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] input::placeholder,
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] textarea::placeholder {
+  color: #8294b3 !important;
+}
+
+.game-route-scope[data-game-theme="dark"][data-game-theme="dark"] button:disabled {
+  opacity: 0.58;
+}

@@ -28,7 +28,7 @@
 .game-route-layered-fusion .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; font-size: 18px; font-weight: 900; letter-spacing: .05em; }
 .game-route-layered-fusion .brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
 .game-route-layered-fusion .magic-hat::before { content: ""; position: absolute; top: 1px; left: 10px; width: 0; height: 0; border-left: 13px solid transparent; border-right: 13px solid transparent; border-bottom: 31px solid var(--ink); transform: skewX(-10deg) rotate(-10deg); transform-origin: bottom center; }
-.game-route-layered-fusion .magic-hat::after { content: ""; position: absolute; left: 2px; bottom: 3px; width: 41px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 4px 0 var(--yellow); transform: rotate(-5deg); }
+.game-route-layered-fusion .magic-hat::after { content: ""; position: absolute; left: 2px; bottom: 3px; width: 41px; height: 10px; border-radius: 50%; background: var(--ink-surface, var(--ink)); box-shadow: 0 4px 0 var(--yellow); transform: rotate(-5deg); }
 .game-route-layered-fusion .magic-hat span { position: absolute; z-index: 1; top: 15px; left: 20px; color: var(--coral); font-size: 10px; transform: rotate(-10deg); }
 .game-route-layered-fusion .header-tag { padding: 8px 13px; border: 1px solid rgba(24,49,83,.2); border-radius: 999px; background: rgba(255,253,248,.7); color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
 
@@ -68,14 +68,14 @@
 .game-route-layered-fusion .size-picker strong, .game-route-layered-fusion .size-picker span { display: block; }
 .game-route-layered-fusion .size-picker strong { font-family: Georgia, serif; font-size: 15px; }
 .game-route-layered-fusion .size-picker span { margin-top: 2px; color: var(--muted); font-size: 9px; font-weight: 800; }
-.game-route-layered-fusion .new-game-button { height: 56px; padding: 0 22px; border: 0; border-radius: 7px; background: var(--ink); color: white; cursor: pointer; font-size: 12px; font-weight: 850; white-space: nowrap; box-shadow: 0 7px 0 var(--ink-deep); transition: transform 150ms ease, box-shadow 150ms ease; }
+.game-route-layered-fusion .new-game-button { height: 56px; padding: 0 22px; border: 0; border-radius: 7px; background: var(--ink-surface, var(--ink)); color: white; cursor: pointer; font-size: 12px; font-weight: 850; white-space: nowrap; box-shadow: 0 7px 0 var(--ink-deep); transition: transform 150ms ease, box-shadow 150ms ease; }
 .game-route-layered-fusion .new-game-button:hover { transform: translateY(-2px); box-shadow: 0 9px 0 var(--ink-deep); }
 .game-route-layered-fusion .new-game-button:active { transform: translateY(4px); box-shadow: 0 3px 0 var(--ink-deep); }
 .game-route-layered-fusion .new-game-button span { margin-left: 8px; color: var(--yellow); }
 .game-route-layered-fusion .game-divider { height: 1px; margin: 30px 0 24px; background: var(--line); }
 
 .game-route-layered-fusion .status-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 13px; }
-.game-route-layered-fusion .status-orb { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--yellow); font-family: Georgia, serif; font-size: 20px; font-weight: 900; box-shadow: 0 6px 0 rgba(23,52,76,.16); }
+.game-route-layered-fusion .status-orb { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--yellow); font-family: Georgia, serif; font-size: 20px; font-weight: 900; box-shadow: 0 6px 0 rgba(23,52,76,.16); }
 .game-route-layered-fusion .status-playing { animation: game-route-layered-fusion-pulse 850ms ease-in-out infinite alternate; }
 .game-route-layered-fusion .status-success { background: var(--teal); color: white; }
 @keyframes game-route-layered-fusion-pulse { to { transform: scale(1.08); box-shadow: 0 8px 0 rgba(23,52,76,.13),0 0 0 8px rgba(38,158,148,.1); } }
@@ -94,12 +94,12 @@
 .game-route-layered-fusion .result-success .result-mark { color: var(--teal-dark); }
 .game-route-layered-fusion .result-actions { display: flex; gap: 7px; }
 .game-route-layered-fusion .result-actions button { padding: 9px 12px; border: 1px solid var(--ink); border-radius: 6px; background: transparent; cursor: pointer; color: var(--ink); font-size: 10px; font-weight: 850; }
-.game-route-layered-fusion .result-actions button:last-child { background: var(--ink); color: white; }
+.game-route-layered-fusion .result-actions button:last-child { background: var(--ink-surface, var(--ink)); color: white; }
 
 .game-route-layered-fusion .target-zone, .game-route-layered-fusion .answer-zone { padding-top: 6px; }
 .game-route-layered-fusion .answer-zone { margin-top: 34px; padding-top: 30px; border-top: 1px solid var(--line); }
 .game-route-layered-fusion .zone-heading { width: min(100%,820px); margin: 0 auto 14px; display: flex; align-items: center; gap: 13px; }
-.game-route-layered-fusion .zone-heading > span:first-child { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; align-content: center; border-radius: 50%; background: var(--ink); color: white; line-height: 1; }
+.game-route-layered-fusion .zone-heading > span:first-child { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; align-content: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: white; line-height: 1; }
 .game-route-layered-fusion .zone-heading b { color: var(--yellow); font-family: Georgia,serif; font-size: 14px; }
 .game-route-layered-fusion .zone-heading small { margin-top: 3px; font-size: 6px; letter-spacing: .12em; }
 .game-route-layered-fusion .zone-heading h2 { margin: 0; font-family: "STKaiti", "KaiTi", serif; font-size: 22px; }
@@ -108,7 +108,7 @@
 .game-route-layered-fusion .target-frame { width: min(100%,560px); margin: 0 auto; padding: 14px; border: 1px solid #cfd8d8; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 5px rgba(23,52,76,.035); overflow: hidden; }
 .game-route-layered-fusion .answer-frame { width: min(100%,820px); margin: 0 auto; padding: 18px; border: 1px solid #bfcaca; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 6px rgba(23,52,76,.035); overflow: hidden; }
 .game-route-layered-fusion .fusion-stage { position: relative; width: 100%; aspect-ratio: 5 / 3; overflow: hidden; isolation: isolate; border-radius: inherit; background-color: #fff; background-image: radial-gradient(circle, rgba(23,52,76,.32) 1.4px, transparent 1.7px); background-size: calc(100% / 35) calc(100% / 21); background-position: center; }
-.game-route-layered-fusion .stage-axis { position: absolute; z-index: 0; pointer-events: none; opacity: .06; background: var(--ink); }
+.game-route-layered-fusion .stage-axis { position: absolute; z-index: 0; pointer-events: none; opacity: .06; background: var(--ink-surface, var(--ink)); }
 .game-route-layered-fusion .axis-x { left: 0; right: 0; top: 50%; height: 1px; }
 .game-route-layered-fusion .axis-y { top: 0; bottom: 0; left: 50%; width: 1px; }
 .game-route-layered-fusion .target-silhouette { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
@@ -127,7 +127,7 @@
 .game-route-layered-fusion .lower-grid { width: min(1180px, calc(100% - 40px)); margin: 28px auto 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 .game-route-layered-fusion .rules-card, .game-route-layered-fusion .history-card { min-height: 365px; padding: 30px; border-radius: 11px; }
 .game-route-layered-fusion .card-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
-.game-route-layered-fusion .card-number { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--yellow); font-family: Georgia,serif; font-size: 12px; font-weight: 900; }
+.game-route-layered-fusion .card-number { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--yellow); font-family: Georgia,serif; font-size: 12px; font-weight: 900; }
 .game-route-layered-fusion .card-heading h2 { margin-bottom: 0; }
 .game-route-layered-fusion .rules-card ol { margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 22px; list-style: none; }
 .game-route-layered-fusion .rules-card li { display: flex; gap: 11px; align-items: flex-start; }

@@ -64,7 +64,7 @@
   width: 41px;
   height: 10px;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   box-shadow: 0 4px 0 var(--gold);
   transform: rotate(-5deg);
 }
@@ -100,8 +100,8 @@
 .game-route-chu-han .hero-banner::after { content: ""; position: absolute; bottom: -42px; left: -8px; border-style: solid; border-width: 42px 66px 0; border-color: currentColor transparent transparent; color: inherit; filter: brightness(.72); }
 .game-route-chu-han .chu-banner { left: 80px; background: var(--chu); transform: rotate(-7deg); }
 .game-route-chu-han .han-banner { right: 25px; top: 92px; background: var(--han); transform: rotate(6deg); }
-.game-route-chu-han .river-stroke { position: absolute; left: 212px; top: 15px; width: 11px; height: 350px; border-radius: 60%; background: var(--ink); transform: rotate(11deg); opacity: .86; }
-.game-route-chu-han .spear { position: absolute; width: 290px; height: 4px; background: var(--ink); transform-origin: right center; }
+.game-route-chu-han .river-stroke { position: absolute; left: 212px; top: 15px; width: 11px; height: 350px; border-radius: 60%; background: var(--ink-surface, var(--ink)); transform: rotate(11deg); opacity: .86; }
+.game-route-chu-han .spear { position: absolute; width: 290px; height: 4px; background: var(--ink-surface, var(--ink)); transform-origin: right center; }
 .game-route-chu-han .spear::before { content: ""; position: absolute; left: -26px; top: -9px; border-width: 11px 27px 11px 0; border-style: solid; border-color: transparent var(--ink) transparent transparent; }
 .game-route-chu-han .spear-one { right: 8px; bottom: 35px; transform: rotate(-16deg); }
 .game-route-chu-han .spear-two { right: 80px; top: 5px; transform: rotate(205deg); }
@@ -124,7 +124,7 @@
   padding: 0 18px;
   border: 1px solid var(--ink);
   border-radius: 4px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   font-size: 11px;
   font-weight: 900;
@@ -160,14 +160,14 @@
 .game-route-chu-han .difficulty-picker > button { display: grid; min-height: 82px; padding: 12px 15px; place-items: center; border: 1px solid var(--line); border-radius: 7px; background: white; text-align: center; cursor: pointer; transition: .18s ease; }
 .game-route-chu-han .difficulty-picker > button.selected { border-color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); transform: translateY(-2px); }
 .game-route-chu-han .difficulty-picker strong { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; font-size: 23px; font-weight: 900; letter-spacing: .12em; }
-.game-route-chu-han .setup-brief { display: flex; flex-direction: column; min-height: 270px; padding: 28px; border-radius: 10px; background: var(--ink); color: white; }
+.game-route-chu-han .setup-brief { display: flex; flex-direction: column; min-height: 270px; padding: 28px; border-radius: 10px; background: var(--ink-surface, var(--ink)); color: white; }
 .game-route-chu-han .setup-brief .section-kicker { color: var(--gold); }
 .game-route-chu-han .setup-brief h3 { margin: 12px 0; font-family: "ZCOOL XiaoWei", serif; font-size: 30px; font-weight: 400; }
 .game-route-chu-han .setup-brief p { margin: 0 0 24px; color: rgba(255,255,255,.65); font-size: 10px; line-height: 1.8; }
 .game-route-chu-han .setup-brief .primary-button { width: 100%; margin-top: auto; background: var(--gold); color: var(--ink); }
 
 .game-route-chu-han .rps-stage { min-height: 310px; display: grid; grid-template-columns: 1.15fr .85fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.game-route-chu-han .rps-result { display: grid; grid-template-columns: 1fr 45px 1fr; align-items: center; padding: 36px; background: var(--ink); color: white; }
+.game-route-chu-han .rps-result { display: grid; grid-template-columns: 1fr 45px 1fr; align-items: center; padding: 36px; background: var(--ink-surface, var(--ink)); color: white; }
 .game-route-chu-han .rps-result > div { display: grid; justify-items: center; }
 .game-route-chu-han .rps-result small { color: rgba(255,255,255,.55); font-size: 9px; }
 .game-route-chu-han .rps-result strong { display: grid; width: 110px; height: 110px; margin: 12px 0; place-items: center; border: 2px solid white; border-radius: 50%; font-size: 56px; }
@@ -231,7 +231,7 @@
 .game-route-chu-han .troop-slot.selectable { cursor: pointer; }
 .game-route-chu-han .troop-slot.selectable:hover .poker-card { transform: translateY(-5px); }
 .game-route-chu-han .troop-slot.swap-selected .poker-card { box-shadow: 0 0 0 4px var(--gold), 0 6px 0 rgba(0,0,0,.22); transform: translateY(-8px); }
-.game-route-chu-han .formation-tag { position: absolute; left: 50%; bottom: 3px; z-index: 6; padding: 3px 6px; border-radius: 999px; background: var(--ink); color: white; font-size: 7px; white-space: nowrap; transform: translateX(-50%); }
+.game-route-chu-han .formation-tag { position: absolute; left: 50%; bottom: 3px; z-index: 6; padding: 3px 6px; border-radius: 999px; background: var(--ink-surface, var(--ink)); color: white; font-size: 7px; white-space: nowrap; transform: translateX(-50%); }
 .game-route-chu-han .ai-troops.advanced { transform: translateY(12px); }
 .game-route-chu-han .player-troops.advanced { transform: translateY(-12px); }
 .game-route-chu-han .front-line { position: relative; display: grid; height: 88px; place-items: center; }

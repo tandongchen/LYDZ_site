@@ -51,7 +51,7 @@
 .game-route-arrow-maze .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; font-size: 18px; font-weight: 900; letter-spacing: .05em; }
 .game-route-arrow-maze .brand-mark { position: relative; width: 45px; height: 42px; flex: 0 0 auto; }
 .game-route-arrow-maze .magic-hat::before { content: ""; position: absolute; top: 1px; left: 10px; width: 0; height: 0; border-left: 13px solid transparent; border-right: 13px solid transparent; border-bottom: 31px solid var(--ink); transform: skewX(-10deg) rotate(-10deg); transform-origin: bottom center; }
-.game-route-arrow-maze .magic-hat::after { content: ""; position: absolute; left: 2px; bottom: 3px; width: 41px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 4px 0 var(--yellow); transform: rotate(-5deg); }
+.game-route-arrow-maze .magic-hat::after { content: ""; position: absolute; left: 2px; bottom: 3px; width: 41px; height: 10px; border-radius: 50%; background: var(--ink-surface, var(--ink)); box-shadow: 0 4px 0 var(--yellow); transform: rotate(-5deg); }
 .game-route-arrow-maze .magic-hat span { position: absolute; z-index: 1; top: 15px; left: 20px; color: var(--coral); font-size: 10px; transform: rotate(-10deg); }
 .game-route-arrow-maze .header-tag { padding: 8px 13px; border: 1px solid rgba(24,49,83,.2); border-radius: 999px; background: rgba(255,253,248,.7); color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
 
@@ -69,7 +69,7 @@
 .game-route-arrow-maze .hero-description { max-width: 650px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
 .game-route-arrow-maze .hero-art { position: absolute; right: -10px; top: 70px; width: min(360px, 34vw); aspect-ratio: 1; border: 1px solid rgba(23,52,76,.14); border-radius: 50%; background: rgba(255,253,248,.48); opacity: .35; }
 .game-route-arrow-maze .hero-art::before { content: ""; position: absolute; inset: 11%; border: 1px dashed rgba(23,52,76,.28); border-radius: 50%; }
-.game-route-arrow-maze .hero-art::after { content: ""; position: absolute; inset: 35%; border-radius: 50%; background: var(--ink); box-shadow: 0 12px 0 var(--yellow); }
+.game-route-arrow-maze .hero-art::after { content: ""; position: absolute; inset: 35%; border-radius: 50%; background: var(--ink-surface, var(--ink)); box-shadow: 0 12px 0 var(--yellow); }
 .game-route-arrow-maze .hero-number { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; color: white; font-family: Georgia, serif; font-size: 42px; font-weight: 900; letter-spacing: .12em; transform: translateX(3px); }
 .game-route-arrow-maze .art-arrow { position: absolute; z-index: 3; display: grid; width: 52px; height: 52px; place-items: center; border: 2px solid currentColor; border-radius: 10px; background: var(--cream); color: var(--coral); font-family: Arial, sans-serif; font-size: 32px; font-weight: 900; box-shadow: 0 7px 0 rgba(23,52,76,.12); }
 .game-route-arrow-maze .art-a { left: 4%; top: 29%; transform: rotate(-9deg); }
@@ -94,7 +94,7 @@
 .game-route-arrow-maze .size-picker strong, .game-route-arrow-maze .size-picker span { display: block; }
 .game-route-arrow-maze .size-picker strong { font-family: Georgia, serif; font-size: 15px; }
 .game-route-arrow-maze .size-picker span { margin-top: 2px; color: var(--muted); font-size: 9px; font-weight: 800; }
-.game-route-arrow-maze .new-game-button { height: 56px; padding: 0 22px; border: 0; border-radius: 7px; background: var(--ink); color: white; cursor: pointer; font-size: 12px; font-weight: 850; white-space: nowrap; box-shadow: 0 7px 0 var(--ink-deep); transition: transform 150ms ease, box-shadow 150ms ease; }
+.game-route-arrow-maze .new-game-button { height: 56px; padding: 0 22px; border: 0; border-radius: 7px; background: var(--ink-surface, var(--ink)); color: white; cursor: pointer; font-size: 12px; font-weight: 850; white-space: nowrap; box-shadow: 0 7px 0 var(--ink-deep); transition: transform 150ms ease, box-shadow 150ms ease; }
 .game-route-arrow-maze .new-game-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 9px 0 var(--ink-deep); }
 .game-route-arrow-maze .new-game-button:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 3px 0 var(--ink-deep); }
 .game-route-arrow-maze .new-game-button:disabled { cursor: default; opacity: .5; }
@@ -102,7 +102,7 @@
 .game-route-arrow-maze .game-divider { height: 1px; margin: 30px 0 24px; background: var(--line); }
 
 .game-route-arrow-maze .status-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 13px; }
-.game-route-arrow-maze .status-orb { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--yellow); font-family: Georgia, serif; font-size: 20px; font-weight: 900; box-shadow: 0 6px 0 rgba(23,52,76,.16); }
+.game-route-arrow-maze .status-orb { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--yellow); font-family: Georgia, serif; font-size: 20px; font-weight: 900; box-shadow: 0 6px 0 rgba(23,52,76,.16); }
 .game-route-arrow-maze .status-running { background: var(--teal); color: white; animation: game-route-arrow-maze-pulse 850ms ease-in-out infinite alternate; }
 .game-route-arrow-maze .status-success { background: var(--teal); color: white; }
 .game-route-arrow-maze .status-failed { background: var(--coral); color: white; }
@@ -126,7 +126,7 @@
 .game-route-arrow-maze .result-running { border-color: var(--teal); background: var(--soft-blue); }
 .game-route-arrow-maze .result-actions { display: flex; gap: 7px; }
 .game-route-arrow-maze .result-actions button { padding: 9px 12px; border: 1px solid var(--ink); border-radius: 6px; background: transparent; cursor: pointer; color: var(--ink); font-size: 10px; font-weight: 850; }
-.game-route-arrow-maze .result-actions button:last-child { background: var(--ink); color: white; }
+.game-route-arrow-maze .result-actions button:last-child { background: var(--ink-surface, var(--ink)); color: white; }
 
 .game-route-arrow-maze .board-frame { width: min(100%, 760px); margin: 0 auto; padding: 18px 22px 22px; border: 1px solid #cfd8d8; border-radius: 12px; background: linear-gradient(145deg, #e9f2f0, #f6f4ed); box-shadow: inset 0 0 0 5px rgba(255,255,255,.6); }
 .game-route-arrow-maze .column-labels { margin: 0 0 7px 28px; display: grid; grid-template-columns: repeat(var(--board-size), minmax(0, 1fr)); gap: 6px; }
@@ -142,7 +142,7 @@
 .game-route-arrow-maze .arrow-cell.is-removed { opacity: 0; transform: scale(.35) rotate(8deg); pointer-events: none; box-shadow: none; }
 .game-route-arrow-maze .cell-coordinate { position: absolute; left: 5px; top: 4px; color: rgba(255,255,255,.5); font-family: Georgia, serif; font-size: clamp(6px, 1vw, 9px); font-weight: 800; }
 .game-route-arrow-maze .arrow-origin { position: relative; width: 76%; aspect-ratio: 1; filter: drop-shadow(0 2px 0 rgba(0,0,0,.2)); }
-.game-route-arrow-maze .arrow-origin::after { content: ""; position: absolute; z-index: 2; left: 50%; top: 50%; width: 6px; height: 6px; border: 2px solid white; border-radius: 50%; background: var(--ink); transform: translate(-50%,-50%); }
+.game-route-arrow-maze .arrow-origin::after { content: ""; position: absolute; z-index: 2; left: 50%; top: 50%; width: 6px; height: 6px; border: 2px solid white; border-radius: 50%; background: var(--ink-surface, var(--ink)); transform: translate(-50%,-50%); }
 .game-route-arrow-maze .cell-arrow { position: absolute; left: 50%; top: 50%; width: 42%; height: 3px; border-radius: 999px; background: white; transform: translateY(-50%) rotate(var(--arrow-angle)); transform-origin: 0 50%; }
 .game-route-arrow-maze .cell-arrow::after { content: ""; position: absolute; right: -1px; top: 50%; width: 8px; height: 8px; border-top: 3px solid white; border-right: 3px solid white; transform: translateY(-50%) rotate(45deg); }
 .game-route-arrow-maze .chain-effects { position: absolute; z-index: 8; inset: 0; pointer-events: none; }
@@ -162,13 +162,13 @@
 .game-route-arrow-maze .board-footnote span { display: flex; align-items: center; gap: 5px; }
 .game-route-arrow-maze .board-footnote p { margin: 0 0 0 auto; font-family: "STKaiti", "KaiTi", serif; font-size: 13px; }
 .game-route-arrow-maze .dot { width: 7px; height: 7px; border-radius: 50%; }
-.game-route-arrow-maze .dot-live { background: var(--ink); }
+.game-route-arrow-maze .dot-live { background: var(--ink-surface, var(--ink)); }
 .game-route-arrow-maze .dot-chain { background: var(--coral); }
 
 .game-route-arrow-maze .lower-grid { width: min(1180px, calc(100% - 40px)); margin: 28px auto 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 .game-route-arrow-maze .rules-card, .game-route-arrow-maze .history-card { min-height: 365px; padding: 30px; border-radius: 11px; }
 .game-route-arrow-maze .card-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
-.game-route-arrow-maze .card-number { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--yellow); font-family: Georgia, serif; font-size: 12px; font-weight: 900; }
+.game-route-arrow-maze .card-number { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--yellow); font-family: Georgia, serif; font-size: 12px; font-weight: 900; }
 .game-route-arrow-maze .card-heading h2 { margin-bottom: 0; }
 .game-route-arrow-maze .rules-card ol { margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 22px; list-style: none; }
 .game-route-arrow-maze .rules-card li { display: flex; gap: 11px; align-items: flex-start; }
