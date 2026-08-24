@@ -60,7 +60,7 @@
   width: 41px;
   height: 10px;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   box-shadow: 0 4px 0 var(--gold);
   transform: rotate(-5deg);
 }
@@ -119,7 +119,7 @@
   padding: 0 18px;
   border: 1px solid var(--ink);
   border-radius: 4px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   font-size: 11px;
   font-weight: 900;
@@ -225,7 +225,7 @@
 }
 .game-route-world-cup .football-pitch > .top-goal { top: 1px; border-bottom-color: rgba(255,255,255,.92); }
 .game-route-world-cup .football-pitch > .bottom-goal { bottom: 1px; border-top-color: rgba(255,255,255,.92); }
-.game-route-world-cup .scoreboard { display: flex; align-items: center; gap: 13px; padding: 8px 15px; border: 2px solid rgba(255,255,255,.5); border-radius: 3px; background: var(--ink); color: white; box-shadow: 0 6px 0 rgba(0,0,0,.18); }
+.game-route-world-cup .scoreboard { display: flex; align-items: center; gap: 13px; padding: 8px 15px; border: 2px solid rgba(255,255,255,.5); border-radius: 3px; background: var(--ink-surface, var(--ink)); color: white; box-shadow: 0 6px 0 rgba(0,0,0,.18); }
 .game-route-world-cup .scoreboard span { color: var(--gold); font-family: Georgia, serif; font-size: 8px; font-weight: 900; }
 .game-route-world-cup .scoreboard strong { font-family: Georgia, serif; font-size: 20px; }
 .game-route-world-cup .scoreboard i { margin: 0 7px; color: rgba(255,255,255,.45); font-style: normal; }
@@ -353,7 +353,7 @@
 .game-route-world-cup .allocation-grid small { color: var(--muted); font-size: 8px; }
 .game-route-world-cup .allocation-grid button { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; min-height: 32px; padding: 0 9px; border: 1px solid var(--line); border-radius: 4px; background: white; font-size: 9px; text-align: left; cursor: pointer; }
 .game-route-world-cup .allocation-grid button:disabled { opacity: .42; cursor: not-allowed; }
-.game-route-world-cup .allocation-grid button span { display: grid; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: var(--ink); color: white; }
+.game-route-world-cup .allocation-grid button span { display: grid; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: white; }
 
 .game-route-world-cup .pitch-status { position: absolute; z-index: 4; top: 50%; left: 50%; display: grid; width: min(410px, calc(100% - 70px)); min-height: 130px; padding: 20px 25px; place-items: center; border: 1px solid rgba(255,255,255,.48); background: rgba(23,32,38,.9); color: white; text-align: center; transform: translate(-50%, -50%); box-shadow: 0 13px 35px rgba(0,0,0,.22); }
 .game-route-world-cup .pitch-status > span { color: var(--gold); font-family: Georgia, serif; font-size: 9px; font-weight: 900; letter-spacing: .18em; }
@@ -368,7 +368,7 @@
 .game-route-world-cup .halftime-abilities small { color: var(--muted); font-size: 8px; }
 .game-route-world-cup .halftime-abilities b { font-family: Georgia, serif; font-size: 23px; }
 .game-route-world-cup .halftime-abilities span { color: var(--red-dark); font-weight: 900; }
-.game-route-world-cup .cup-mark { display: grid; width: 62px; height: 62px; margin: 10px auto; place-items: center; border: 4px solid var(--gold); border-radius: 50%; background: var(--ink); color: var(--gold); font-size: 30px; }
+.game-route-world-cup .cup-mark { display: grid; width: 62px; height: 62px; margin: 10px auto; place-items: center; border: 4px solid var(--gold); border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--gold); font-size: 30px; }
 .game-route-world-cup .final-panel h3 { margin-bottom: 5px; }
 .game-route-world-cup .final-score { display: block; font-family: Georgia, serif; font-size: 32px; }
 .game-route-world-cup .final-score i { color: var(--gold); font-style: normal; }
@@ -386,7 +386,7 @@
 .game-route-world-cup .log-list { display: grid; max-height: 410px; overflow-y: auto; border-top: 1px solid var(--line); scrollbar-width: thin; }
 .game-route-world-cup .log-list > p { margin: 0; padding: 18px 2px; color: var(--muted); font-size: 10px; }
 .game-route-world-cup .log-list article { min-width: 0; display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 12px; padding: 12px 3px; border-bottom: 1px solid rgba(206,196,176,.68); }
-.game-route-world-cup .log-list article > span { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: var(--ink); color: white; font-family: Georgia, serif; font-size: 11px; }
+.game-route-world-cup .log-list article > span { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: white; font-family: Georgia, serif; font-size: 11px; }
 .game-route-world-cup .log-list article.log-p1 > span { background: var(--red); }
 .game-route-world-cup .log-list article.log-p2 > span { background: var(--blue); }
 .game-route-world-cup .log-list article.log-goal > span { background: var(--gold); color: var(--ink); }
@@ -398,9 +398,9 @@
 .game-route-world-cup .rules-section { width: min(1160px, calc(100% - 40px)); margin: 0 auto 70px; padding: 35px 38px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,250,240,.76); }
 .game-route-world-cup .rules-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
 .game-route-world-cup .rules-heading > p { max-width: 390px; margin: 0; color: var(--muted); font-size: 9px; line-height: 1.7; text-align: right; }
-.game-route-world-cup .formula-board { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin-bottom: 28px; border: 1px solid var(--ink); background: var(--ink); }
+.game-route-world-cup .formula-board { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin-bottom: 28px; border: 1px solid var(--ink); background: var(--ink-surface, var(--ink)); }
 .game-route-world-cup .formula-board article { display: flex; gap: 13px; padding: 18px; background: var(--cream); }
-.game-route-world-cup .formula-board article > span { display: grid; width: 35px; height: 35px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--ink); color: white; }
+.game-route-world-cup .formula-board article > span { display: grid; width: 35px; height: 35px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: white; }
 .game-route-world-cup .formula-board small, .game-route-world-cup .formula-board strong, .game-route-world-cup .formula-board p { display: block; }
 .game-route-world-cup .formula-board small { color: var(--red-dark); font-size: 7px; font-weight: 900; letter-spacing: .1em; }
 .game-route-world-cup .formula-board strong { margin: 3px 0; font-family: Georgia, "Noto Sans SC", sans-serif; font-size: 13px; }
@@ -414,22 +414,22 @@
 .game-route-world-cup .skill-manual > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 17px; }
 .game-route-world-cup .skill-manual h3 { margin: 5px 0 0; font-family: "ZCOOL XiaoWei", serif; font-size: 26px; font-weight: 400; }
 .game-route-world-cup .skill-manual > header p { max-width: 530px; margin: 0; color: var(--muted); font-size: 8px; line-height: 1.75; text-align: right; }
-.game-route-world-cup .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; border: 1px solid var(--ink); background: var(--ink); }
+.game-route-world-cup .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; border: 1px solid var(--ink); background: var(--ink-surface, var(--ink)); }
 .game-route-world-cup .skill-grid article { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 11px; min-height: 102px; padding: 15px; background: var(--cream); }
-.game-route-world-cup .skill-grid article > b { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--gold); font-family: Georgia, serif; font-size: 8px; }
+.game-route-world-cup .skill-grid article > b { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--gold); font-family: Georgia, serif; font-size: 8px; }
 .game-route-world-cup .skill-grid small, .game-route-world-cup .skill-grid strong { display: block; }
 .game-route-world-cup .skill-grid small { color: var(--muted); font-size: 7px; letter-spacing: .1em; }
 .game-route-world-cup .skill-grid strong { margin: 2px 0 4px; color: var(--red-dark); font-size: 10px; }
 .game-route-world-cup .skill-grid p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.65; }
 .game-route-world-cup .team-catalog { display: grid; gap: 20px; margin-top: 27px; }
 .game-route-world-cup .team-tier { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: rgba(255,250,240,.65); }
-.game-route-world-cup .team-tier > header { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: var(--ink); color: white; }
+.game-route-world-cup .team-tier > header { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: var(--ink-surface, var(--ink)); color: white; }
 .game-route-world-cup .team-tier > header strong { color: var(--gold); font-family: "ZCOOL XiaoWei", serif; font-size: 16px; font-weight: 400; }
 .game-route-world-cup .team-tier > header span { color: rgba(255,255,255,.7); font-size: 8px; letter-spacing: .12em; }
 .game-route-world-cup .team-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); }
 .game-route-world-cup .team-table > div { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; padding: 13px; }
 .game-route-world-cup .team-table > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.game-route-world-cup .team-table b { grid-row: 1 / 3; display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: var(--ink); color: var(--gold); font-family: Georgia, serif; font-size: 7px; }
+.game-route-world-cup .team-table b { grid-row: 1 / 3; display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: var(--gold); font-family: Georgia, serif; font-size: 7px; }
 .game-route-world-cup .team-table strong { font-size: 9px; }
 .game-route-world-cup .team-table span { color: var(--muted); font-size: 7px; }
 .game-route-world-cup .site-footer { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 24px 0 30px; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); color: var(--muted); }

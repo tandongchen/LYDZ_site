@@ -8,7 +8,7 @@ type GameLayoutShellProps = Readonly<{
 
 export function GameLayoutShell({ children, gameId }: GameLayoutShellProps) {
   return (
-    <div className={`game-route-scope game-route-${gameId}`}>
+    <div className={`game-route-scope game-route-${gameId}`} data-game-theme="dark">
       <Link className="game-home-link" href="/">
         <MagicMathLogo />
         <span>返回魔法数学</span>

@@ -94,7 +94,7 @@
   width: 41px;
   height: 10px;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   box-shadow: 0 4px 0 var(--yellow);
   transform: rotate(-5deg);
 }
@@ -344,7 +344,7 @@
   min-height: 58px;
   padding: 0 22px;
   border-radius: 7px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   box-shadow: 4px 4px 0 var(--yellow);
 }
@@ -520,20 +520,20 @@
 .game-route-number-claim .confirm-button.player-b { background: var(--teal); }
 .game-route-number-claim .confirm-button:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--ink); }
 .game-route-number-claim .confirm-button span { margin-left: 8px; font-size: 17px; }
-.game-route-number-claim .replay-button { background: var(--ink); }
+.game-route-number-claim .replay-button { background: var(--ink-surface, var(--ink)); }
 
 .game-route-number-claim .rules-card { position: sticky; top: 24px; padding: 27px; border-radius: 11px; }
 .game-route-number-claim .rules-title-row { display: flex; align-items: center; gap: 11px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
 .game-route-number-claim .rules-title-row small { color: var(--teal-dark); font-family: Georgia, serif; font-size: 8px; font-weight: 800; letter-spacing: 0.16em; }
 .game-route-number-claim .rules-title-row h2 { margin: 2px 0 0; font-family: "STKaiti", "KaiTi", serif; font-size: 24px; }
-.game-route-number-claim .rules-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 50%; background: var(--ink); color: white; font-family: Georgia, serif; font-weight: 900; }
+.game-route-number-claim .rules-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 50%; background: var(--ink-surface, var(--ink)); color: white; font-family: Georgia, serif; font-weight: 900; }
 .game-route-number-claim .rules-card ol { margin: 22px 0; padding: 0; display: grid; gap: 17px; list-style: none; }
 .game-route-number-claim .rules-card li { display: grid; grid-template-columns: 29px 1fr; gap: 11px; align-items: start; }
 .game-route-number-claim .rules-card li > span { width: 25px; height: 25px; display: grid; place-items: center; border: 1px solid var(--ink); border-radius: 50%; color: var(--coral); font-family: Georgia, serif; font-size: 12px; font-weight: 850; }
 .game-route-number-claim .rules-card li strong { display: block; margin-bottom: 3px; font-size: 12px; }
 .game-route-number-claim .rules-card li p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
 
-.game-route-number-claim .legend-box { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 11px 8px; border-radius: 7px; background: var(--ink); color: white; font-size: 10px; font-weight: 750; }
+.game-route-number-claim .legend-box { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 11px 8px; border-radius: 7px; background: var(--ink-surface, var(--ink)); color: white; font-size: 10px; font-weight: 750; }
 .game-route-number-claim .legend-box > span { grid-column: 1 / -1; color: #b8c5d6; font-size: 9px; letter-spacing: 0.14em; }
 .game-route-number-claim .legend-box div { display: flex; align-items: center; gap: 7px; }
 .game-route-number-claim .legend-box i { width: 15px; height: 15px; border-radius: 4px; }

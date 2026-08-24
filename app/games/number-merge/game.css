@@ -104,7 +104,7 @@
   width: 41px;
   height: 10px;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   box-shadow: 0 4px 0 var(--yellow);
   transform: rotate(-5deg);
 }
@@ -530,7 +530,7 @@
 
 .game-route-number-merge .number-tile.selected {
   border-color: var(--ink);
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   transform: translateY(-5px) rotate(2deg);
   box-shadow: 5px 8px 0 var(--yellow);
@@ -684,7 +684,7 @@
 .game-route-number-merge .example-box {
   padding: 18px;
   border-radius: 7px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
 }
 

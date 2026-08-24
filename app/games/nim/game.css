@@ -134,7 +134,7 @@
   width: 41px;
   height: 10px;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   box-shadow: 0 4px 0 var(--yellow);
   transform: rotate(-5deg);
 }
@@ -267,7 +267,7 @@
 }
 
 .game-route-nim .hero-art::before { inset: 10%; border: 1px dashed rgba(23, 52, 76, 0.25); }
-.game-route-nim .hero-art::after { inset: 35%; background: var(--ink); box-shadow: 0 12px 0 var(--yellow); }
+.game-route-nim .hero-art::after { inset: 35%; background: var(--ink-surface, var(--ink)); box-shadow: 0 12px 0 var(--yellow); }
 
 .game-route-nim .hero-number {
   position: absolute;
@@ -429,7 +429,7 @@
   padding: 0 23px;
   border: 0;
   border-radius: 7px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   cursor: pointer;
   font-size: 13px;
@@ -526,7 +526,7 @@
   padding: 11px 17px;
   border: 0;
   border-radius: 6px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   cursor: pointer;
   font-size: 12px;
@@ -699,7 +699,7 @@
   padding: 0 18px;
   border: 0;
   border-radius: 6px;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: white;
   cursor: pointer;
   font-size: 12px;
@@ -727,7 +727,7 @@
   height: 44px;
   place-items: center;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--ink-surface, var(--ink));
   color: var(--yellow);
   font-family: Georgia, serif;
   font-size: 12px;
